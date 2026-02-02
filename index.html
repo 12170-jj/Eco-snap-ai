@@ -1,76 +1,100 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eco-Snap AI</title>
+  <meta charset="UTF-8">
+  <title>Eco-Snap AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<style>
-body {
-  font-family: sans-serif;
-  background: #eaf7e9;
-  text-align: center;
-  padding: 20px;
-}
-.card {
-  background: white;
-  padding: 20px;
-  border-radius: 16px;
-  max-width: 400px;
-  margin: auto;
-}
-button {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 15px;
-  width: 100%;
-  font-size: 18px;
-  border-radius: 10px;
-  margin-top: 10px;
-}
-.result {
-  margin-top: 15px;
-  font-size: 18px;
-  font-weight: bold;
-}
-</style>
+  <!-- TensorFlow + Teachable Machine -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #e8f5e9;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #2e7d32;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      max-width: 400px;
+      margin: auto;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+    button {
+      background: #43a047;
+      color: white;
+      border: none;
+      padding: 12px;
+      width: 100%;
+      border-radius: 8px;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:disabled {
+      background: #aaa;
+    }
+    #result {
+      margin-top: 15px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    img {
+      max-width: 100%;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+  </style>
 </head>
 
 <body>
+  <h1>🌱 Eco-Snap AI</h1>
+  <p>อัปโหลดรูปขยะเพื่อให้ AI จำแนกประเภท</p>
 
-<h1>🌱 Eco-Snap AI</h1>
-<p>ถ่ายหรืออัปโหลดรูปขยะเพื่อวิเคราะห์ประเภท</p>
+  <div class="card">
+    <input type="file" id="imageUpload" accept="image/*">
+    <img id="preview" />
+    <button onclick="predict()" id="btn" disabled>วิเคราะห์ขยะ</button>
+    <div id="result"></div>
+  </div>
 
-<div class="card">
-  <input type="file" id="imageInput" accept="image/*" capture="environment">
-  <button onclick="analyze()">วิเคราะห์ขยะ</button>
-  <div class="result" id="result"></div>
-</div>
+  <script>
+    const URL = "https://teachablemachine.withgoogle.com/models/8zP7s7u0R/"; 
+    // โมเดลตัวอย่าง (เปลี่ยนได้ภายหลัง)
 
-<script>
-function analyze() {
-  const input = document.getElementById("imageInput");
-  const result = document.getElementById("result");
+    let model;
 
-  if (input.files.length === 0) {
-    result.innerHTML = "❗ กรุณาเลือกรูปก่อน";
-    return;
-  }
+    async function loadModel() {
+      model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+      console.log("โหลด AI แล้ว");
+    }
 
-  const fileName = input.files[0].name.toLowerCase();
+    loadModel();
 
-  if (fileName.includes("plastic")) {
-    result.innerHTML = "♻️ ขยะพลาสติก";
-  } else if (fileName.includes("can")) {
-    result.innerHTML = "🥫 ขยะโลหะ";
-  } else if (fileName.includes("paper")) {
-    result.innerHTML = "📄 ขยะกระดาษ";
-  } else {
-    result.innerHTML = "🗑️ ขยะทั่วไป (ต้องคัดแยกเพิ่มเติม)";
-  }
-}
-</script>
+    const upload = document.getElementById("imageUpload");
+    const preview = document.getElementById("preview");
+    const btn = document.getElementById("btn");
 
+    upload.onchange = () => {
+      const file = upload.files[0];
+      preview.src = URL.createObjectURL(file);
+      btn.disabled = false;
+    };
+
+    async function predict() {
+      const prediction = await model.predict(preview);
+      prediction.sort((a, b) => b.probability - a.probability);
+
+      document.getElementById("result").innerHTML =
+        "ผลลัพธ์: " + prediction[0].className +
+        "<br>ความมั่นใจ: " + (prediction[0].probability * 100).toFixed(2) + "%";
+    }
+  </script>
 </body>
 </html>

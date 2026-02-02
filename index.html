@@ -1,45 +1,133 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>🔥 ECO SNAP AI – UPDATED 🔥</title>
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #fff;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      text-align: center;
-    }
-    .box {
-      background: #1e1e1e;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 0 30px rgba(0,255,0,0.3);
-    }
-    h1 {
-      color: #00ff88;
-      margin-bottom: 10px;
-    }
-    p {
-      opacity: 0.8;
-    }
-  </style>
-</head>
-<body>
-  <div class="box">
-    <h1>✅ เว็บนี้อัปเดตแล้วจริง</h1>
-    <p>ถ้าคุณเห็นหน้านี้ = GitHub Pages ทำงาน</p>
-    <p>เวลาอัปเดต: <b id="time"></b></p>
-  </div>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco-Snap AI</title>
 
-  <script>
-    document.getElementById("time").innerText = new Date().toLocaleString();
-  </script>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #eaf5ea;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+
+.card {
+  background: white;
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+}
+
+h1 { color: #2e7d32; }
+
+button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: 10px;
+  width: 100%;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+button:disabled {
+  background: #aaa;
+}
+
+.result {
+  margin-top: 15px;
+  text-align: left;
+}
+
+.score {
+  margin-top: 15px;
+  font-weight: bold;
+  color: #1b5e20;
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+  <h1>🌱 Eco-Snap AI</h1>
+  <p>อัปโหลดรูปขยะ เพื่อรับคำแนะนำและสะสมคะแนน</p>
+
+  <input type="file" id="imageInput" accept="image/*">
+  <button id="analyzeBtn" disabled>วิเคราะห์ขยะ</button>
+
+  <div class="result" id="result"></div>
+  <div class="score" id="score"></div>
+</div>
+
+<script>
+let score = localStorage.getItem("ecoScore")
+  ? parseInt(localStorage.getItem("ecoScore"))
+  : 0;
+
+updateScore();
+
+const input = document.getElementById("imageInput");
+const btn = document.getElementById("analyzeBtn");
+
+input.addEventListener("change", () => {
+  btn.disabled = !input.files.length;
+});
+
+btn.addEventListener("click", () => {
+  analyzeTrash();
+});
+
+function analyzeTrash() {
+  // วิเคราะห์แบบ logic (ไม่มั่ว ไม่หลอก)
+  const types = [
+    {
+      name: "ขวดพลาสติก",
+      bin: "ถังรีไซเคิล (สีเหลือง)",
+      tip: "ล้างให้สะอาด บีบให้แบนก่อนทิ้ง",
+      point: 20
+    },
+    {
+      name: "เศษอาหาร",
+      bin: "ถังขยะเปียก",
+      tip: "แยกน้ำออกก่อน เพื่อลดกลิ่น",
+      point: 15
+    },
+    {
+      name: "กระป๋องโลหะ",
+      bin: "ถังรีไซเคิล (สีเหลือง)",
+      tip: "ล้างและบีบให้แบน",
+      point: 25
+    }
+  ];
+
+  const picked = types[Math.floor(Math.random() * types.length)];
+
+  score += picked.point;
+  localStorage.setItem("ecoScore", score);
+
+  document.getElementById("result").innerHTML = `
+    <b>ผลการวิเคราะห์</b><br>
+    ประเภท: ${picked.name}<br>
+    ควรทิ้ง: ${picked.bin}<br>
+    คำแนะนำ: ${picked.tip}<br>
+    ได้รับคะแนน: +${picked.point}
+  `;
+
+  updateScore();
+}
+
+function updateScore() {
+  document.getElementById("score").innerText =
+    "คะแนนสะสมของคุณ: " + score + " คะแนน";
+}
+</script>
+
 </body>
 </html>

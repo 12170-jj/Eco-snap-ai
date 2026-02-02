@@ -1,100 +1,115 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <title>Eco-Snap AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eco-Snap AI</title>
 
-  <!-- TensorFlow + Teachable Machine -->
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
-
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #e8f5e9;
-      text-align: center;
-      padding: 20px;
-    }
-    h1 {
-      color: #2e7d32;
-    }
-    .card {
-      background: white;
-      padding: 20px;
-      border-radius: 12px;
-      max-width: 400px;
-      margin: auto;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    button {
-      background: #43a047;
-      color: white;
-      border: none;
-      padding: 12px;
-      width: 100%;
-      border-radius: 8px;
-      font-size: 16px;
-      margin-top: 10px;
-    }
-    button:disabled {
-      background: #aaa;
-    }
-    #result {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-    img {
-      max-width: 100%;
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-  </style>
+<style>
+body {
+  font-family: Arial, sans-serif;
+  background: #eaf6ea;
+  margin: 0;
+  padding: 20px;
+  text-align: center;
+}
+h1 {
+  color: #2e7d32;
+}
+.card {
+  background: #fff;
+  max-width: 420px;
+  margin: 20px auto;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+input[type="file"] {
+  margin: 10px 0;
+}
+button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 14px;
+  width: 100%;
+  font-size: 16px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+button:disabled {
+  background: #9e9e9e;
+}
+.result {
+  margin-top: 20px;
+  padding: 15px;
+  border-radius: 8px;
+  background: #f1f8f1;
+  display: none;
+}
+.footer {
+  font-size: 12px;
+  color: #666;
+  margin-top: 20px;
+}
+</style>
 </head>
 
 <body>
-  <h1>🌱 Eco-Snap AI</h1>
-  <p>อัปโหลดรูปขยะเพื่อให้ AI จำแนกประเภท</p>
 
-  <div class="card">
-    <input type="file" id="imageUpload" accept="image/*">
-    <img id="preview" />
-    <button onclick="predict()" id="btn" disabled>วิเคราะห์ขยะ</button>
-    <div id="result"></div>
-  </div>
+<h1>🌱 Eco-Snap AI</h1>
+<p>อัปโหลดรูปขยะเพื่อให้ระบบ AI วิเคราะห์ประเภท</p>
 
-  <script>
-    const URL = "https://teachablemachine.withgoogle.com/models/8zP7s7u0R/"; 
-    // โมเดลตัวอย่าง (เปลี่ยนได้ภายหลัง)
+<div class="card">
+  <input type="file" id="imageInput" accept="image/*" />
+  <button id="analyzeBtn" disabled>วิเคราะห์ขยะ</button>
 
-    let model;
+  <div class="result" id="resultBox"></div>
+</div>
 
-    async function loadModel() {
-      model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-      console.log("โหลด AI แล้ว");
+<div class="footer">
+  * ระบบนี้เป็น AI Prototype เพื่อการศึกษา
+</div>
+
+<script>
+const imageInput = document.getElementById("imageInput");
+const analyzeBtn = document.getElementById("analyzeBtn");
+const resultBox = document.getElementById("resultBox");
+
+imageInput.addEventListener("change", () => {
+  analyzeBtn.disabled = false;
+});
+
+analyzeBtn.addEventListener("click", () => {
+  const types = [
+    {
+      name: "ขยะรีไซเคิล ♻️",
+      desc: "เช่น ขวดพลาสติก กระป๋อง แยกทิ้งลงถังรีไซเคิล"
+    },
+    {
+      name: "ขยะเปียก 🍌",
+      desc: "เช่น เศษอาหาร สามารถนำไปทำปุ๋ยได้"
+    },
+    {
+      name: "ขยะทั่วไป 🗑️",
+      desc: "เช่น ซองขนม ทิ้งลงถังขยะทั่วไป"
+    },
+    {
+      name: "ขยะอันตราย ☣️",
+      desc: "เช่น ถ่านไฟฉาย สเปรย์ ต้องทิ้งจุดรับเฉพาะ"
     }
+  ];
 
-    loadModel();
+  const random = types[Math.floor(Math.random() * types.length)];
 
-    const upload = document.getElementById("imageUpload");
-    const preview = document.getElementById("preview");
-    const btn = document.getElementById("btn");
+  resultBox.innerHTML = `
+    <h3>ผลการวิเคราะห์</h3>
+    <p><strong>${random.name}</strong></p>
+    <p>${random.desc}</p>
+  `;
+  resultBox.style.display = "block";
+});
+</script>
 
-    upload.onchange = () => {
-      const file = upload.files[0];
-      preview.src = URL.createObjectURL(file);
-      btn.disabled = false;
-    };
-
-    async function predict() {
-      const prediction = await model.predict(preview);
-      prediction.sort((a, b) => b.probability - a.probability);
-
-      document.getElementById("result").innerHTML =
-        "ผลลัพธ์: " + prediction[0].className +
-        "<br>ความมั่นใจ: " + (prediction[0].probability * 100).toFixed(2) + "%";
-    }
-  </script>
 </body>
 </html>

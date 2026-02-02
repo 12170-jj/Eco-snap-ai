@@ -1,76 +1,76 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Eco-Snap AI</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #e8f5e9;
-      margin: 0;
-      padding: 20px;
-      text-align: center;
-    }
-    h1 {
-      color: #2e7d32;
-    }
-    .card {
-      background: #ffffff;
-      border-radius: 16px;
-      padding: 20px;
-      margin-top: 20px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    }
-    button {
-      background: #43a047;
-      color: white;
-      border: none;
-      padding: 14px 20px;
-      font-size: 16px;
-      border-radius: 12px;
-      margin-top: 10px;
-      width: 100%;
-    }
-    input {
-      margin-top: 10px;
-      width: 100%;
-    }
-    #result {
-      margin-top: 15px;
-      font-size: 18px;
-      font-weight: bold;
-    }
-  </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco-Snap AI</title>
+
+<style>
+body {
+  font-family: sans-serif;
+  background: #eaf7e9;
+  text-align: center;
+  padding: 20px;
+}
+.card {
+  background: white;
+  padding: 20px;
+  border-radius: 16px;
+  max-width: 400px;
+  margin: auto;
+}
+button {
+  background: #4caf50;
+  color: white;
+  border: none;
+  padding: 15px;
+  width: 100%;
+  font-size: 18px;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+.result {
+  margin-top: 15px;
+  font-size: 18px;
+  font-weight: bold;
+}
+</style>
 </head>
+
 <body>
 
-  <h1>🌱 Eco-Snap AI</h1>
-  <p>ถ่ายหรืออัปโหลดรูปขยะ เพื่อวิเคราะห์ประเภท</p>
+<h1>🌱 Eco-Snap AI</h1>
+<p>ถ่ายหรืออัปโหลดรูปขยะเพื่อวิเคราะห์ประเภท</p>
 
-  <div class="card">
-    <input type="file" accept="image/*" id="imageInput">
-    <button onclick="analyze()">วิเคราะห์ขยะ</button>
-    <div id="result"></div>
-  </div>
+<div class="card">
+  <input type="file" id="imageInput" accept="image/*" capture="environment">
+  <button onclick="analyze()">วิเคราะห์ขยะ</button>
+  <div class="result" id="result"></div>
+</div>
 
-  <script>
-    function analyze() {
-      const input = document.getElementById("imageInput");
-      const result = document.getElementById("result");
+<script>
+function analyze() {
+  const input = document.getElementById("imageInput");
+  const result = document.getElementById("result");
 
-      if (input.files.length === 0) {
-        result.innerHTML = "❌ กรุณาเลือกรูปก่อน";
-        return;
-      }
+  if (input.files.length === 0) {
+    result.innerHTML = "❗ กรุณาเลือกรูปก่อน";
+    return;
+  }
 
-      // เวอร์ชันพื้นฐาน (ยังไม่ใช้ AI จริง)
-      const types = ["♻️ พลาสติก (PET)", "🥫 อะลูมิเนียม", "📄 กระดาษ"];
-      const random = types[Math.floor(Math.random() * types.length)];
+  const fileName = input.files[0].name.toLowerCase();
 
-      result.innerHTML = "ผลการวิเคราะห์: " + random + "<br>+10 Eco-Score 🌟";
-    }
-  </script>
+  if (fileName.includes("plastic")) {
+    result.innerHTML = "♻️ ขยะพลาสติก";
+  } else if (fileName.includes("can")) {
+    result.innerHTML = "🥫 ขยะโลหะ";
+  } else if (fileName.includes("paper")) {
+    result.innerHTML = "📄 ขยะกระดาษ";
+  } else {
+    result.innerHTML = "🗑️ ขยะทั่วไป (ต้องคัดแยกเพิ่มเติม)";
+  }
+}
+</script>
 
 </body>
 </html>

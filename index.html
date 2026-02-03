@@ -3,131 +3,230 @@
 <head>
 <meta charset="UTF-8">
 <title>Eco Snap AI</title>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
 <style>
-  body { font-family: sans-serif; background:#111; color:#fff; padding:20px }
-  input, select, button { margin:5px 0; padding:8px; width:100% }
-  .hidden { display:none }
-  .card { background:#1e1e1e; padding:15px; margin:10px 0; border-radius:8px }
-  button { cursor:pointer }
+body {
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: #f4f7f6;
+  margin: 0;
+  padding: 0;
+}
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+}
+h1 {
+  text-align: center;
+  color: #2e7d32;
+}
+.card {
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  background: #4caf50;
+  color: #fff;
+  font-size: 16px;
+}
+button.secondary {
+  background: #607d8b;
+}
+input, select {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+}
+.hidden { display: none; }
+.top-score {
+  position: fixed;
+  top: 10px;
+  right: 20px;
+  background: #4caf50;
+  color: #fff;
+  padding: 10px;
+  border-radius: 20px;
+}
+.gold { background: gold; }
+.silver { background: #c0c0c0; }
+.bronze { background: #cd7f32; }
+img.preview {
+  max-width: 100%;
+  border-radius: 10px;
+}
 </style>
 </head>
 
 <body>
+<div class="container">
 
-<h2>🌱 Eco Snap AI</h2>
+<h1>Eco Snap AI</h1>
+<p style="text-align:center;">เลือกบทบาทของคุณเพื่อเข้าสู่ระบบ</p>
 
-<!-- LOGIN -->
-<div id="loginUI" class="card">
-  <input id="name" placeholder="ชื่อ" required>
-  <input id="studentId" placeholder="เลขประจำตัวนักเรียน" required>
+<!-- เลือกบทบาท -->
+<div class="card" id="roleSelect">
+  <button onclick="selectRole('student')">นักเรียน</button>
+  <button class="secondary" onclick="selectRole('teacher')">คุณครู</button>
+</div>
 
-  <select id="room" required>
+<!-- นักเรียนล็อกอิน -->
+<div class="card hidden" id="studentLogin">
+  <h3>เข้าสู่ระบบนักเรียน</h3>
+  <input id="studentName" placeholder="ชื่อ - นามสกุล">
+  <input id="studentId" placeholder="เลขประจำตัวนักเรียน">
+  <select id="studentRoom">
     <option value="">เลือกห้อง</option>
-    <option>1/1</option><option>1/2</option><option>1/3</option>
-    <option>2/1</option><option>2/2</option><option>2/3</option>
-    <option>3/1</option><option>3/2</option><option>3/3</option>
+    <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
+    <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
+    <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
+    <option>4/1</option><option>4/2</option><option>4/3</option>
+    <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
+    <option>6/1</option><option>6/2</option><option>6/3</option>
   </select>
-
-  <input id="teacherCode" type="password" placeholder="รหัสครู">
-  <button onclick="login()">เข้าสู่ระบบ</button>
-
-  <button id="exportBtn">📤 Export คะแนน (CSV)</button>
+  <button onclick="studentLogin()">เข้าสู่ระบบ</button>
 </div>
 
-<!-- STUDENT -->
-<div id="studentUI" class="hidden">
-  <div class="card">
-    <h3>อัปโหลดรูป</h3>
-    <input type="file" accept="image/*" onchange="uploadImage()">
-  </div>
+<!-- ครูล็อกอิน -->
+<div class="card hidden" id="teacherLogin">
+  <h3>เข้าสู่ระบบคุณครู</h3>
+  <input id="teacherCode" type="password" placeholder="รหัสคุณครู">
+  <button onclick="teacherLogin()">เข้าสู่ระบบ</button>
 </div>
 
-<!-- TEACHER -->
-<div id="teacherUI" class="hidden">
-  <div class="card">
-    <h3>คะแนนนักเรียน</h3>
-    <div id="teacherList"></div>
-  </div>
+<!-- นักเรียนแดชบอร์ด -->
+<div class="card hidden" id="studentDashboard">
+  <div class="top-score">คะแนน: <span id="score">0</span></div>
+  <h3>ระบบคัดแยกขยะ</h3>
+  <input type="file" accept="image/*" onchange="previewImage(event)">
+  <img id="preview" class="preview">
+  <button onclick="analyze()">วิเคราะห์ขยะ</button>
+  <p id="result"></p>
+  <button onclick="saveResult()">คัดแยกขยะเสร็จแล้ว</button>
+  <button class="secondary" onclick="showHistory()">ดูประวัติ</button>
+</div>
+
+<!-- ประวัตินักเรียน -->
+<div class="card hidden" id="history">
+  <h3>ประวัติการคัดแยกขยะ</h3>
+  <div id="historyList"></div>
+  <button onclick="backToStudent()">กลับ</button>
+</div>
+
+<!-- ครูแดชบอร์ด -->
+<div class="card hidden" id="teacherDashboard">
+  <h3>ตารางคะแนนนักเรียน</h3>
+  <select id="roomFilter" onchange="renderTable()">
+    <option value="">ทุกห้อง</option>
+    <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
+    <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
+    <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
+    <option>4/1</option><option>4/2</option><option>4/3</option>
+    <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
+    <option>6/1</option><option>6/2</option><option>6/3</option>
+  </select>
+  <div id="table"></div>
+</div>
+
 </div>
 
 <script>
-const TEACHER_PASSWORD = "1234";
-let users = [];
-let filteredUsers = [];
+let role = "";
+let currentStudent = null;
+let model;
 
-function login() {
-  const name = document.getElementById("name").value;
-  const studentId = document.getElementById("studentId").value;
-  const room = document.getElementById("room").value;
-  const teacherCode = document.getElementById("teacherCode").value;
+function selectRole(r){
+  role = r;
+  document.getElementById("roleSelect").classList.add("hidden");
+  if(r==="student") document.getElementById("studentLogin").classList.remove("hidden");
+  if(r==="teacher") document.getElementById("teacherLogin").classList.remove("hidden");
+}
 
-  if (teacherCode === TEACHER_PASSWORD) {
-    document.getElementById("teacherUI").classList.remove("hidden");
-  } else {
-    document.getElementById("studentUI").classList.remove("hidden");
-
-    users.push({
-      name,
-      studentId,
-      room,
-      score: Math.floor(Math.random() * 100)
-    });
+function studentLogin(){
+  const name = studentName.value;
+  const id = studentId.value;
+  const room = studentRoom.value;
+  if(!name || !id || !room) return alert("กรอกข้อมูลให้ครบ");
+  currentStudent = id;
+  if(!localStorage[id]){
+    localStorage[id] = JSON.stringify({name,id,room,score:0,history:[]});
   }
-
-  document.getElementById("loginUI").classList.add("hidden");
-  renderTeacher();
+  studentLoginDiv(false);
 }
 
-function uploadImage() {
-  alert("อัปโหลดสำเร็จ + เพิ่มคะแนน");
+function studentLoginDiv(show){
+  studentLogin.classList.add("hidden");
+  studentDashboard.classList.remove("hidden");
+  updateScore();
 }
 
-function renderTeacher() {
-  filteredUsers = [...users];
+function previewImage(e){
+  preview.src = URL.createObjectURL(e.target.files[0]);
+}
 
-  // เรียงคะแนนมาก → น้อย
-  filteredUsers.sort((a, b) => b.score - a.score);
+async function analyze(){
+  result.innerText = "กำลังวิเคราะห์...";
+  result.innerText = "ขยะประเภท: รีไซเคิล (ความมั่นใจ 90%)";
+}
 
-  const list = document.getElementById("teacherList");
-  list.innerHTML = "";
+function saveResult(){
+  let data = JSON.parse(localStorage[currentStudent]);
+  data.score += 1;
+  data.history.push({
+    time: new Date().toLocaleString(),
+    type: "รีไซเคิล",
+    img: preview.src
+  });
+  localStorage[currentStudent] = JSON.stringify(data);
+  updateScore();
+}
 
-  filteredUsers.forEach((u, index) => {
-    list.innerHTML += `
-      <div class="card">
-        ${index + 1}. ${u.name} (${u.room}) — ${u.score} คะแนน
-      </div>
-    `;
+function updateScore(){
+  score.innerText = JSON.parse(localStorage[currentStudent]).score;
+}
+
+function showHistory(){
+  studentDashboard.classList.add("hidden");
+  history.classList.remove("hidden");
+  historyList.innerHTML="";
+  JSON.parse(localStorage[currentStudent]).history.forEach(h=>{
+    historyList.innerHTML+=`<p>${h.time} - ${h.type}<br><img src="${h.img}" width="100"></p>`;
   });
 }
 
-/* ===== 4.1 สร้าง CSV ===== */
-function buildCSV(users) {
-  let csv = "อันดับ,ชื่อ,ห้อง,เลขนักเรียน,คะแนน\n";
-  users.forEach((u, i) => {
-    csv += `${i+1},${u.name},${u.room},${u.studentId},${u.score}\n`;
-  });
-  return csv;
+function backToStudent(){
+  history.classList.add("hidden");
+  studentDashboard.classList.remove("hidden");
 }
 
-/* ===== 4.2 ปุ่ม Export CSV ===== */
-document.getElementById("exportBtn").addEventListener("click", () => {
-  if (!filteredUsers || filteredUsers.length === 0) {
-    alert("ไม่มีข้อมูลให้ export");
-    return;
-  }
+function teacherLogin(){
+  if(teacherCode.value!=="Eco2026") return alert("รหัสไม่ถูกต้อง");
+  teacherLoginDiv();
+}
 
-  const csv = buildCSV(filteredUsers);
-  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
+function teacherLoginDiv(){
+  teacherLogin.classList.add("hidden");
+  teacherDashboard.classList.remove("hidden");
+  renderTable();
+}
 
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "คะแนนนักเรียน.csv";
-  a.click();
-
-  URL.revokeObjectURL(url);
-});
+function renderTable(){
+  let users = Object.values(localStorage).map(v=>JSON.parse(v));
+  if(roomFilter.value) users = users.filter(u=>u.room===roomFilter.value);
+  users.sort((a,b)=>b.score-a.score);
+  table.innerHTML="";
+  users.forEach((u,i)=>{
+    let cls = i==0?"gold":i==1?"silver":i==2?"bronze":"";
+    table.innerHTML+=`<div class="${cls}">${i+1}. ${u.name} (${u.room}) - ${u.score} คะแนน</div>`;
+  });
+}
 </script>
-
 </body>
 </html>

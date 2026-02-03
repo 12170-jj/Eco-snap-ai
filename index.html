@@ -12,17 +12,45 @@ body{
   background:#0f5132;
   color:white;
 }
+header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:12px 16px;
+}
+.badge{
+  background:#1aff8c;
+  color:#000;
+  padding:6px 12px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:14px;
+}
 .container{
   max-width:420px;
   margin:auto;
-  padding:20px;
+  padding:16px;
 }
-h1{text-align:center;}
 .card{
   background:#145c3a;
   border-radius:16px;
   padding:16px;
   margin-bottom:16px;
+}
+#imageBox{
+  width:100%;
+  height:240px;
+  background:#0b3d26;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+#imageBox img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
 }
 button{
   width:100%;
@@ -32,72 +60,141 @@ button{
   background:#1aff8c;
   font-size:16px;
   font-weight:bold;
+  margin-top:10px;
 }
-#preview{
-  width:100%;
-  height:220px;
-  background:#0b3d26;
-  border-radius:12px;
-  display:flex;
+.small-btn{
+  background:none;
+  border:1px solid #1aff8c;
+  color:#1aff8c;
+  padding:6px 12px;
+  border-radius:20px;
+  font-size:14px;
+}
+.modal{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.6);
+  display:none;
   align-items:center;
   justify-content:center;
-  margin-bottom:10px;
 }
-#preview img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
+.modal-content{
+  background:#145c3a;
+  width:90%;
+  max-width:400px;
+  border-radius:16px;
+  padding:16px;
+}
+.history-item{
+  background:#0b3d26;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:8px;
 }
 </style>
 </head>
 
 <body>
+
+<header>
+  <div>🌱 Eco Snap AI</div>
+  <div class="badge">⭐ <span id="score">0</span></div>
+</header>
+
 <div class="container">
 
-<h1>🌱 Eco Snap AI</h1>
-<p style="text-align:center;">ถ่ายรูป → วิเคราะห์ → ได้คะแนน</p>
-
 <div class="card">
-  <div id="preview">ยังไม่ได้เลือกรูป</div>
+  <div id="imageBox">ยังไม่ได้เลือกรูป</div>
   <input type="file" id="file" accept="image/*">
 </div>
 
 <div class="card">
   <button onclick="analyze()">🧠 วิเคราะห์</button>
+  <button onclick="finish()" style="background:#00d26a;">✅ แยกขยะเสร็จแล้ว</button>
 </div>
 
 <div class="card">
-  <b>ผลลัพธ์</b>
+  <b>ผลการวิเคราะห์</b>
   <div id="result">ยังไม่ได้วิเคราะห์</div>
 </div>
 
-<div class="card">
-  <b>⭐ คะแนน</b>
-  <div id="score">0</div>
+<div style="display:flex; gap:10px;">
+  <button class="small-btn" onclick="openHistory()">📜 ประวัติ</button>
+  <button class="small-btn">⚙️ ตั้งค่า</button>
 </div>
 
+</div>
+
+<!-- HISTORY MODAL -->
+<div class="modal" id="historyModal">
+  <div class="modal-content">
+    <h3>📜 ประวัติการแยกขยะ</h3>
+    <div id="historyList"></div>
+    <button onclick="closeHistory()">ปิด</button>
+  </div>
 </div>
 
 <script>
 let score = 0;
+let currentType = "";
+let history = {
+  recycle: [],
+  organic: [],
+  general: []
+};
+
 const fileInput = document.getElementById("file");
-const preview = document.getElementById("preview");
+const imageBox = document.getElementById("imageBox");
 
 fileInput.onchange = () => {
   const file = fileInput.files[0];
   if(!file) return;
-  preview.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+  imageBox.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
 };
 
 function analyze(){
   if(!fileInput.files[0]){
-    alert("เลือกรูปก่อน");
+    alert("กรุณาเลือกรูปก่อน");
     return;
   }
-  document.getElementById("result").innerText =
-    "ขยะรีไซเคิลได้ (+10 คะแนน)";
+  // จำลองผล (แทน AI)
+  const types = ["recycle","organic","general"];
+  currentType = types[Math.floor(Math.random()*3)];
+  const text = {
+    recycle:"ขยะรีไซเคิล",
+    organic:"ขยะเปียก",
+    general:"ขยะทั่วไป"
+  };
+  document.getElementById("result").innerText = text[currentType];
+}
+
+function finish(){
+  if(!currentType){
+    alert("ต้องวิเคราะห์ก่อน");
+    return;
+  }
   score += 10;
   document.getElementById("score").innerText = score;
+  history[currentType].push(fileInput.files[0].name);
+  document.getElementById("result").innerText = "บันทึกแล้ว ✔️";
+  fileInput.value = "";
+  imageBox.innerText = "ยังไม่ได้เลือกรูป";
+  currentType = "";
+}
+
+function openHistory(){
+  const list = document.getElementById("historyList");
+  list.innerHTML = "";
+  for(let type in history){
+    list.innerHTML += `
+      <div class="history-item">
+        <b>${type}</b> : ${history[type].length} ชิ้น
+      </div>`;
+  }
+  document.getElementById("historyModal").style.display="flex";
+}
+function closeHistory(){
+  document.getElementById("historyModal").style.display="none";
 }
 </script>
 

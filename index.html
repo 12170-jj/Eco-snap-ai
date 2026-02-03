@@ -5,9 +5,92 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eco Snap AI</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<script>
+const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+let model;
+let lastResult = null;
 
+async function loadModel(){
+  if(!model){
+    model = await tmImage.load(
+      URL + "model.json",
+      URL + "metadata.json"
+    );
+  }
+}
+
+imageInput.onchange = () => {
+  const file = imageInput.files[0];
+  if(!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.classList.remove("hidden");
+    result.innerHTML = "";
+    lastResult = null;   // 🔒 รีเซ็ตผลเก่า
+  };
+  reader.readAsDataURL(file);
+};
+
+async function analyze(){
+  if(!preview.src){
+    alert("กรุณาเลือกรูปก่อน");
+    return;
+  }
+
+  result.style.display = "block";
+  result.innerHTML = "⏳ กำลังวิเคราะห์...";
+
+  await loadModel();
+
+  // 🔒 รอให้รูป render จริง
+  await new Promise(r => setTimeout(r, 200));
+
+  const predictions = await model.predict(preview);
+  predictions.sort((a,b)=>b.probability - a.probability);
+
+  lastResult = {
+    type: predictions[0].className,
+    prob: (predictions[0].probability * 100).toFixed(2)
+  };
+
+  result.innerHTML = `
+    <b>ผลการวิเคราะห์</b><br>
+    ประเภท: ${lastResult.type}<br>
+    ความมั่นใจ: ${lastResult.prob}%
+  `;
+}
+
+function saveResult(){
+  if(!lastResult){
+    alert("กรุณาวิเคราะห์ก่อน");
+    return;
+  }
+
+  // +1 คะแนน
+  currentUser.score++;
+
+  currentUser.history.push({
+    img: preview.src,
+    type: lastResult.type,
+    prob: lastResult.prob,
+    time: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("currentUser", JSON.stringify(currentUser));
+  saveGlobal();
+  renderHistory();
+  document.getElementById("score").innerText = currentUser.score;
+
+  // 🔄 รีเซ็ตทุกอย่าง
+  imageInput.value = "";
+  preview.src = "";
+  preview.classList.add("hidden");
+  result.innerHTML = "";
+  lastResult = null;
+}
+</script>
 <style>
 *{box-sizing:border-box}
 body{

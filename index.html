@@ -8,10 +8,36 @@
 <script>
 const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
 let model;
-let lastResult = null;
 
-async function loadModel(){
-  if(!model){
+// ===== STATE =====
+let currentPrediction = null;
+let score = 0;
+let history = [];
+
+// ===== ELEMENT =====
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+const placeholder = document.getElementById("placeholder");
+const resultBox = document.getElementById("result");
+const scoreBox = document.getElementById("score"); // ⭐ มุมขวาบน
+
+// ===== LOAD IMAGE =====
+imageInput.onchange = () => {
+  const file = imageInput.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.style.display = "block";
+    placeholder.style.display = "none";
+  };
+  reader.readAsDataURL(file);
+};
+
+// ===== LOAD MODEL =====
+async function loadModel() {
+  if (!model) {
     model = await tmImage.load(
       URL + "model.json",
       URL + "metadata.json"
@@ -19,76 +45,66 @@ async function loadModel(){
   }
 }
 
-imageInput.onchange = () => {
-  const file = imageInput.files[0];
-  if(!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    preview.src = reader.result;
-    preview.classList.remove("hidden");
-    result.innerHTML = "";
-    lastResult = null;   // 🔒 รีเซ็ตผลเก่า
-  };
-  reader.readAsDataURL(file);
-};
-
-async function analyze(){
-  if(!preview.src){
+// ===== ANALYZE =====
+async function analyze() {
+  if (!imageInput.files.length) {
     alert("กรุณาเลือกรูปก่อน");
     return;
   }
 
-  result.style.display = "block";
-  result.innerHTML = "⏳ กำลังวิเคราะห์...";
+  resultBox.style.display = "block";
+  resultBox.innerHTML = "⏳ กำลังวิเคราะห์...";
 
   await loadModel();
-
-  // 🔒 รอให้รูป render จริง
-  await new Promise(r => setTimeout(r, 200));
-
   const predictions = await model.predict(preview);
-  predictions.sort((a,b)=>b.probability - a.probability);
+  predictions.sort((a, b) => b.probability - a.probability);
 
-  lastResult = {
-    type: predictions[0].className,
-    prob: (predictions[0].probability * 100).toFixed(2)
+  currentPrediction = {
+    className: predictions[0].className,
+    probability: predictions[0].probability
   };
 
-  result.innerHTML = `
+  resultBox.innerHTML = `
     <b>ผลการวิเคราะห์</b><br>
-    ประเภท: ${lastResult.type}<br>
-    ความมั่นใจ: ${lastResult.prob}%
+    ประเภท: ${currentPrediction.className}<br>
+    ความมั่นใจ: ${(currentPrediction.probability * 100).toFixed(1)}%
   `;
 }
 
-function saveResult(){
-  if(!lastResult){
+// ===== CONFIRM SORT =====
+function confirmSort() {
+  if (!currentPrediction) {
     alert("กรุณาวิเคราะห์ก่อน");
     return;
   }
 
-  // +1 คะแนน
-  currentUser.score++;
-
-  currentUser.history.push({
-    img: preview.src,
-    type: lastResult.type,
-    prob: lastResult.prob,
-    time: new Date().toLocaleString()
+  // 1️⃣ บันทึกประวัติ
+  history.push({
+    image: preview.src,
+    type: currentPrediction.className,
+    confidence: currentPrediction.probability,
+    time: new Date().toLocaleString("th-TH")
   });
 
-  localStorage.setItem("currentUser", JSON.stringify(currentUser));
-  saveGlobal();
-  renderHistory();
-  document.getElementById("score").innerText = currentUser.score;
+  // 2️⃣ เพิ่มคะแนน
+  score++;
+  if (scoreBox) scoreBox.innerText = score;
 
-  // 🔄 รีเซ็ตทุกอย่าง
-  imageInput.value = "";
+  // 3️⃣ รีเซ็ต UI
   preview.src = "";
-  preview.classList.add("hidden");
-  result.innerHTML = "";
-  lastResult = null;
+  preview.style.display = "none";
+  placeholder.style.display = "block";
+  imageInput.value = "";
+  resultBox.style.display = "none";
+  resultBox.innerHTML = "";
+
+  // 4️⃣ รีเซ็ต STATE (จุดที่เคยพัง)
+  currentPrediction = null;
+}
+
+// ===== HISTORY (ใช้ต่อกับหน้าแสดงประวัติ) =====
+function getHistory() {
+  return history;
 }
 </script>
 <style>

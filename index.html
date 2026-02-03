@@ -1,99 +1,131 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Eco Snap AI</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eco-Snap AI</title>
 
 <style>
-body {
+*{
+  box-sizing:border-box;
+  font-family: "Segoe UI", sans-serif;
+}
+body{
   margin:0;
-  font-family:sans-serif;
-  background:linear-gradient(#0f3d2e,#1e7f5c);
-  color:white;
+  background:linear-gradient(180deg,#0f5132,#198754);
+  color:#fff;
+}
+header{
+  padding:20px;
   text-align:center;
 }
+header h1{
+  margin:0;
+  font-size:1.8rem;
+}
+header p{
+  opacity:0.9;
+}
+
+.container{
+  padding:16px;
+  max-width:420px;
+  margin:auto;
+}
+
 .card{
-  background:#134e3a;
-  margin:15px;
-  padding:20px;
+  background:#ffffff;
+  color:#0f5132;
   border-radius:20px;
+  padding:16px;
+  margin-bottom:16px;
+  box-shadow:0 6px 16px rgba(0,0,0,0.2);
 }
+
+.camera-box{
+  width:100%;
+  aspect-ratio:1/1;
+  border:4px dashed #198754;
+  border-radius:16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:1.1rem;
+  background:#e9f7ef;
+}
+
 button{
-  background:#1eff9c;
+  width:100%;
+  padding:14px;
+  font-size:1.1rem;
   border:none;
-  padding:15px 25px;
-  border-radius:30px;
-  font-size:18px;
+  border-radius:14px;
+  background:#198754;
+  color:white;
+  cursor:pointer;
 }
-img{max-width:90%;border-radius:15px;margin-top:10px}
+button:active{
+  transform:scale(0.97);
+}
+
+.score{
+  font-size:2.2rem;
+  font-weight:bold;
+  text-align:center;
+}
+
+.history-item{
+  background:#e9f7ef;
+  padding:10px;
+  border-radius:10px;
+  margin-bottom:8px;
+  font-size:0.95rem;
+}
+.footer{
+  text-align:center;
+  font-size:0.8rem;
+  opacity:0.8;
+  margin:20px 0;
+}
 </style>
 </head>
 
 <body>
 
-<h1>🌱 Eco Snap AI</h1>
-<p>ถ่ายรูปขยะ → วิเคราะห์ → ได้คะแนน</p>
+<header>
+  <h1>🌱 Eco-Snap AI</h1>
+  <p>แยกขยะด้วยหัวใจสีเขียว</p>
+</header>
 
-<div class="card">
-📸 <b>ถ่ายภาพขยะ</b><br><br>
-<input type="file" accept="image/*" capture="environment" id="imageInput">
-<img id="preview">
+<div class="container">
+
+  <div class="card">
+    <h3>📷 กล้องสแกนขยะ</h3>
+    <div class="camera-box">
+      พื้นที่กล้อง (กำลังพัฒนา)
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>🧠 วิเคราะห์ขยะ</h3>
+    <button>วิเคราะห์ขยะ</button>
+  </div>
+
+  <div class="card">
+    <h3>⭐ Eco-Score</h3>
+    <div class="score">0</div>
+  </div>
+
+  <div class="card">
+    <h3>📜 ประวัติการวิเคราะห์</h3>
+    <div class="history-item">ยังไม่มีข้อมูล</div>
+  </div>
+
 </div>
 
-<div class="card">
-🧠 <b>ผลการวิเคราะห์</b>
-<div id="result">ยังไม่ได้วิเคราะห์</div>
+<div class="footer">
+  Eco-Snap AI © Project Prototype
 </div>
-
-<div class="card">
-⭐ <b>คะแนนสะสม</b>
-<div id="score">0</div>
-</div>
-
-<div class="card">
-📜 <b>ประวัติ</b>
-<ul id="history"></ul>
-</div>
-
-<script>
-const URL = "ใส่ลิงก์โมเดลของคุณตรงนี้/"; // 👈 แก้แค่ตรงนี้
-
-let model;
-let score = 0;
-
-async function loadModel(){
-  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-}
-loadModel();
-
-document.getElementById("imageInput").addEventListener("change", async (e)=>{
-  const file = e.target.files[0];
-  if(!file) return;
-
-  const img = document.getElementById("preview");
-  img.src = URL.createObjectURL(file);
-
-  img.onload = async ()=>{
-    const prediction = await model.predict(img);
-    prediction.sort((a,b)=>b.probability-a.probability);
-
-    const best = prediction[0];
-    document.getElementById("result").innerText =
-      best.className + " (" + (best.probability*100).toFixed(1) + "%)";
-
-    score += 10;
-    document.getElementById("score").innerText = score;
-
-    const li = document.createElement("li");
-    li.innerText = best.className;
-    document.getElementById("history").appendChild(li);
-  }
-});
-</script>
 
 </body>
 </html>

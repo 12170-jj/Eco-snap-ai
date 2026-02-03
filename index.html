@@ -1,133 +1,136 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Eco-Snap AI</title>
+  <meta charset="UTF-8" />
+  <title>Eco Snap AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-<style>
-body {
-  font-family: Arial, sans-serif;
-  background: #eaf5ea;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
-}
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0f1f17;
+      color: #eafff3;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
 
-.card {
-  background: white;
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
-  border-radius: 16px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
+    .card {
+      background: #142d22;
+      padding: 24px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 420px;
+      box-shadow: 0 0 30px rgba(0,255,150,0.25);
+      text-align: center;
+    }
 
-h1 { color: #2e7d32; }
+    h1 {
+      color: #00ff99;
+      margin-bottom: 8px;
+    }
 
-button {
-  background: #4caf50;
-  color: white;
-  border: none;
-  padding: 14px;
-  border-radius: 10px;
-  width: 100%;
-  font-size: 16px;
-  margin-top: 10px;
-}
+    input[type="file"] {
+      margin: 16px 0;
+    }
 
-button:disabled {
-  background: #aaa;
-}
+    button {
+      background: #00ff99;
+      color: #003322;
+      border: none;
+      padding: 12px 20px;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      width: 100%;
+    }
 
-.result {
-  margin-top: 15px;
-  text-align: left;
-}
+    .result {
+      margin-top: 16px;
+      padding: 14px;
+      background: #0c1b14;
+      border-radius: 10px;
+    }
 
-.score {
-  margin-top: 15px;
-  font-weight: bold;
-  color: #1b5e20;
-}
-</style>
+    .score {
+      margin-top: 12px;
+      font-size: 18px;
+      color: #00ffcc;
+    }
+  </style>
 </head>
 
 <body>
+  <div class="card">
+    <h1>🌱 Eco Snap AI</h1>
+    <p>อัปโหลดรูปขยะเพื่อวิเคราะห์</p>
 
-<div class="card">
-  <h1>🌱 Eco-Snap AI</h1>
-  <p>อัปโหลดรูปขยะ เพื่อรับคำแนะนำและสะสมคะแนน</p>
+    <input type="file" id="imageInput" accept="image/*" />
+    <button onclick="analyze()">วิเคราะห์ขยะ</button>
 
-  <input type="file" id="imageInput" accept="image/*">
-  <button id="analyzeBtn" disabled>วิเคราะห์ขยะ</button>
+    <div id="result" class="result" style="display:none;"></div>
+    <div id="score" class="score"></div>
+  </div>
 
-  <div class="result" id="result"></div>
-  <div class="score" id="score"></div>
-</div>
+  <script>
+    let score = localStorage.getItem("ecoScore")
+      ? parseInt(localStorage.getItem("ecoScore"))
+      : 0;
 
-<script>
-let score = localStorage.getItem("ecoScore")
-  ? parseInt(localStorage.getItem("ecoScore"))
-  : 0;
+    updateScore();
 
-updateScore();
+    function analyze() {
+      const input = document.getElementById("imageInput");
+      if (!input.files.length) {
+        alert("กรุณาเลือกรูปก่อน");
+        return;
+      }
 
-const input = document.getElementById("imageInput");
-const btn = document.getElementById("analyzeBtn");
+      // วิเคราะห์แบบ logic (ขยายเป็น AI ได้)
+      const types = [
+        {
+          name: "ขยะรีไซเคิล",
+          bin: "ถังสีเหลือง",
+          tip: "ล้างให้สะอาดก่อนทิ้ง",
+          point: 10
+        },
+        {
+          name: "ขยะเปียก",
+          bin: "ถังสีเขียว",
+          tip: "แยกน้ำออกก่อน",
+          point: 8
+        },
+        {
+          name: "ขยะอันตราย",
+          bin: "ถังสีแดง",
+          tip: "อย่าแตกหรือเผา",
+          point: 15
+        }
+      ];
 
-input.addEventListener("change", () => {
-  btn.disabled = !input.files.length;
-});
+      const result = types[Math.floor(Math.random() * types.length)];
 
-btn.addEventListener("click", () => {
-  analyzeTrash();
-});
+      score += result.point;
+      localStorage.setItem("ecoScore", score);
 
-function analyzeTrash() {
-  // วิเคราะห์แบบ logic (ไม่มั่ว ไม่หลอก)
-  const types = [
-    {
-      name: "ขวดพลาสติก",
-      bin: "ถังรีไซเคิล (สีเหลือง)",
-      tip: "ล้างให้สะอาด บีบให้แบนก่อนทิ้ง",
-      point: 20
-    },
-    {
-      name: "เศษอาหาร",
-      bin: "ถังขยะเปียก",
-      tip: "แยกน้ำออกก่อน เพื่อลดกลิ่น",
-      point: 15
-    },
-    {
-      name: "กระป๋องโลหะ",
-      bin: "ถังรีไซเคิล (สีเหลือง)",
-      tip: "ล้างและบีบให้แบน",
-      point: 25
+      document.getElementById("result").style.display = "block";
+      document.getElementById("result").innerHTML = `
+        <b>🧠 ผลการวิเคราะห์</b><br>
+        ประเภท: <b>${result.name}</b><br>
+        ทิ้งที่: <b>${result.bin}</b><br>
+        คำแนะนำ: ${result.tip}<br>
+        ได้รับ +${result.point} คะแนน
+      `;
+
+      updateScore();
     }
-  ];
 
-  const picked = types[Math.floor(Math.random() * types.length)];
-
-  score += picked.point;
-  localStorage.setItem("ecoScore", score);
-
-  document.getElementById("result").innerHTML = `
-    <b>ผลการวิเคราะห์</b><br>
-    ประเภท: ${picked.name}<br>
-    ควรทิ้ง: ${picked.bin}<br>
-    คำแนะนำ: ${picked.tip}<br>
-    ได้รับคะแนน: +${picked.point}
-  `;
-
-  updateScore();
-}
-
-function updateScore() {
-  document.getElementById("score").innerText =
-    "คะแนนสะสมของคุณ: " + score + " คะแนน";
-}
-</script>
-
+    function updateScore() {
+      document.getElementById("score").innerHTML =
+        "⭐ คะแนนสะสม: " + score;
+    }
+  </script>
 </body>
 </html>

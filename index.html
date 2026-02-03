@@ -66,9 +66,9 @@ button{
   background:#00d26a;
 }
 .result{
-  background:white;      /* <<< พื้นขาว */
-  color:black;
-  padding:12px;
+  background:#ffffff;   /* <<< พื้นหลังขาวตามที่สั่ง */
+  color:#000;
+  padding:14px;
   border-radius:12px;
   text-align:center;
   font-weight:bold;
@@ -117,7 +117,7 @@ button{
 <div class="container">
 
 <div class="card">
-  <div class="image-box" id="preview">เลือกรูปขยะ</div>
+  <div class="image-box" id="preview">ถ่ายหรืออัปโหลดรูปขยะ</div>
   <input type="file" id="file" accept="image/*">
 </div>
 
@@ -137,9 +137,10 @@ button{
 
 </div>
 
-<div class="modal" id="history">
+<!-- ประวัติ -->
+<div class="modal" id="historyModal">
   <div class="modal-content">
-    <h3>📜 ประวัติ</h3>
+    <h3>📜 ประวัติการแยกขยะ</h3>
     <div id="historyList"></div>
     <button onclick="closeHistory()">ปิด</button>
   </div>
@@ -147,7 +148,7 @@ button{
 
 <script>
 let score = 0;
-let current = "";
+let currentResult = "";
 let history = [];
 
 file.onchange = () => {
@@ -157,29 +158,38 @@ file.onchange = () => {
 };
 
 function analyze(){
-  if(!file.files[0]) return alert("เลือกรูปก่อน");
+  if(!file.files[0]){
+    alert("กรุณาเลือกรูปก่อน");
+    return;
+  }
+  // จำลองผล (รอ AI จริง)
   const types = ["ขยะรีไซเคิล","ขยะเปียก","ขยะทั่วไป"];
-  current = types[Math.floor(Math.random()*types.length)];
-  result.innerText = current;
+  currentResult = types[Math.floor(Math.random()*types.length)];
+  result.innerText = currentResult;
 }
 
 function finish(){
-  if(!current) return alert("ยังไม่ได้วิเคราะห์");
+  if(!currentResult){
+    alert("ยังไม่ได้วิเคราะห์");
+    return;
+  }
   score += 10;
   document.getElementById("score").innerText = score;
-  history.push(current);
+  history.push(currentResult);
   result.innerText = "บันทึกเรียบร้อย ✔️";
-  preview.innerText = "เลือกรูปขยะ";
+  preview.innerText = "ถ่ายหรืออัปโหลดรูปขยะ";
   file.value = "";
-  current = "";
+  currentResult = "";
 }
 
 function openHistory(){
-  historyList.innerHTML = history.map((h,i)=>`<div class="history-item">${i+1}. ${h}</div>`).join("");
-  history.style.display="flex";
+  historyList.innerHTML = history.map((h,i)=>
+    `<div class="history-item">${i+1}. ${h}</div>`
+  ).join("");
+  historyModal.style.display="flex";
 }
 function closeHistory(){
-  history.style.display="none";
+  historyModal.style.display="none";
 }
 </script>
 

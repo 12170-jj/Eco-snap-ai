@@ -5,325 +5,175 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eco Snap AI</title>
 
-<script>
-const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model;
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
 
-// ===== STATE =====
-let currentPrediction = null;
-let score = 0;
-let history = [];
-
-// ===== ELEMENT =====
-const imageInput = document.getElementById("imageInput");
-const preview = document.getElementById("preview");
-const placeholder = document.getElementById("placeholder");
-const resultBox = document.getElementById("result");
-const scoreBox = document.getElementById("score"); // ⭐ มุมขวาบน
-
-// ===== LOAD IMAGE =====
-imageInput.onchange = () => {
-  const file = imageInput.files[0];
-  if (!file) return;
-
-  const reader = new FileReader();
-  reader.onload = () => {
-    preview.src = reader.result;
-    preview.style.display = "block";
-    placeholder.style.display = "none";
-  };
-  reader.readAsDataURL(file);
-};
-
-// ===== LOAD MODEL =====
-async function loadModel() {
-  if (!model) {
-    model = await tmImage.load(
-      URL + "model.json",
-      URL + "metadata.json"
-    );
-  }
-}
-
-// ===== ANALYZE =====
-async function analyze() {
-  if (!imageInput.files.length) {
-    alert("กรุณาเลือกรูปก่อน");
-    return;
-  }
-
-  resultBox.style.display = "block";
-  resultBox.innerHTML = "⏳ กำลังวิเคราะห์...";
-
-  await loadModel();
-  const predictions = await model.predict(preview);
-  predictions.sort((a, b) => b.probability - a.probability);
-
-  currentPrediction = {
-    className: predictions[0].className,
-    probability: predictions[0].probability
-  };
-
-  resultBox.innerHTML = `
-    <b>ผลการวิเคราะห์</b><br>
-    ประเภท: ${currentPrediction.className}<br>
-    ความมั่นใจ: ${(currentPrediction.probability * 100).toFixed(1)}%
-  `;
-}
-
-// ===== CONFIRM SORT =====
-function confirmSort() {
-  if (!currentPrediction) {
-    alert("กรุณาวิเคราะห์ก่อน");
-    return;
-  }
-
-  // 1️⃣ บันทึกประวัติ
-  history.push({
-    image: preview.src,
-    type: currentPrediction.className,
-    confidence: currentPrediction.probability,
-    time: new Date().toLocaleString("th-TH")
-  });
-
-  // 2️⃣ เพิ่มคะแนน
-  score++;
-  if (scoreBox) scoreBox.innerText = score;
-
-  // 3️⃣ รีเซ็ต UI
-  preview.src = "";
-  preview.style.display = "none";
-  placeholder.style.display = "block";
-  imageInput.value = "";
-  resultBox.style.display = "none";
-  resultBox.innerHTML = "";
-
-  // 4️⃣ รีเซ็ต STATE (จุดที่เคยพัง)
-  currentPrediction = null;
-}
-
-// ===== HISTORY (ใช้ต่อกับหน้าแสดงประวัติ) =====
-function getHistory() {
-  return history;
-}
-</script>
 <style>
-*{box-sizing:border-box}
 body{
   margin:0;
   font-family:sans-serif;
-  background:linear-gradient(#b7f5d0,#6fdc9c);
+  background:linear-gradient(#b9fbc0,#7ae582);
 }
-.hidden{display:none}
-.page{min-height:100vh;padding:20px}
-.card{
-  background:#fff;
-  border-radius:20px;
-  padding:20px;
-  margin:10px auto;
+.container{
   max-width:420px;
+  margin:auto;
+  padding:15px;
+}
+.card{
+  background:#eafff1;
+  border-radius:20px;
+  padding:15px;
+  margin-bottom:15px;
+}
+.image-box{
+  height:260px;
+  background:#d0f4de;
+  border-radius:15px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  overflow:hidden;
+}
+.image-box img{
+  max-width:100%;
+  max-height:100%;
 }
 button{
   width:100%;
-  padding:15px;
+  padding:14px;
   border:none;
   border-radius:30px;
   font-size:18px;
   margin-top:10px;
 }
-.green{background:#00c853;color:#fff}
-.light{background:#e8fff1}
-.gold{background:gold}
-input,select{
-  width:100%;
-  padding:12px;
-  border-radius:10px;
-  border:1px solid #ccc;
+.analyze{background:#2dc653;color:#fff;}
+.done{background:#00b4d8;color:#fff;}
+.result{
+  background:#fff;
+  border-radius:15px;
+  padding:10px;
   margin-top:10px;
 }
-.topbar{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
+.history-item{
+  background:#fff;
+  border-radius:15px;
+  padding:10px;
+  margin-top:10px;
 }
-img{max-width:100%;border-radius:10px}
+.score{
+  position:fixed;
+  top:15px;
+  right:20px;
+  font-size:22px;
+}
 </style>
 </head>
 
 <body>
+<div class="score">⭐ <span id="score">0</span></div>
 
-<!-- หน้าเลือกบทบาท -->
-<div id="rolePage" class="page">
-  <h1 style="text-align:center">🌱 Eco Snap AI</h1>
-  <p style="text-align:center">เลือกบทบาทเพื่อเข้าสู่ระบบ</p>
-  <div class="card">
-    <button class="green" onclick="chooseRole('student')">👩‍🎓 นักเรียน</button>
-    <button class="green" onclick="chooseRole('teacher')">👨‍🏫 ครู</button>
+<div class="container">
+
+<h2>🌱 Eco Snap AI</h2>
+
+<div class="card">
+  <input type="file" id="imageInput" accept="image/*">
+  <div class="image-box">
+    <span id="placeholder">ยังไม่ได้เลือกรูป</span>
+    <img id="preview" style="display:none">
   </div>
 </div>
 
-<!-- นักเรียนล็อกอิน -->
-<div id="studentLogin" class="page hidden">
-  <div class="card">
-    <h3>เข้าสู่ระบบนักเรียน</h3>
-    <input id="sName" placeholder="ชื่อ - นามสกุล">
-    <input id="sId" placeholder="รหัสนักเรียน">
-    <select id="sRoom">
-      <option value="">เลือกห้อง</option>
-      <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
-      <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
-      <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
-      <option>4/1</option><option>4/2</option><option>4/3</option>
-      <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
-      <option>6/1</option><option>6/2</option><option>6/3</option>
-    </select>
-    <button class="green" onclick="loginStudent()">เข้าสู่ระบบ</button>
-  </div>
+<div class="card">
+  <button class="analyze" onclick="analyze()">🧠 วิเคราะห์</button>
+  <div id="result" class="result" style="display:none"></div>
+  <button class="done" onclick="confirmSort()">✅ แยกขยะเสร็จแล้ว</button>
 </div>
 
-<!-- หน้านักเรียน -->
-<div id="studentPage" class="page hidden">
-  <div class="topbar">
-    <h3 id="studentTitle"></h3>
-    <b>⭐ <span id="score">0</span></b>
-  </div>
-
-  <div class="card light">
-    <input type="file" accept="image/*" id="imageInput">
-    <img id="preview" class="hidden">
-    <button class="green" onclick="analyze()">🧠 วิเคราะห์</button>
-    <div id="result"></div>
-    <button class="green" onclick="saveResult()">✅ แยกขยะเสร็จแล้ว</button>
-  </div>
-
-  <div class="card">
-    <h4>📜 ประวัติ</h4>
-    <div id="history"></div>
-  </div>
+<div class="card">
+  <h3>📜 ประวัติ</h3>
+  <div id="history"></div>
 </div>
 
-<!-- ครูล็อกอิน -->
-<div id="teacherLogin" class="page hidden">
-  <div class="card">
-    <h3>เข้าสู่ระบบครู</h3>
-    <input id="teacherCode" type="password" placeholder="รหัสครู">
-    <button class="green" onclick="loginTeacher()">เข้าสู่ระบบ</button>
-  </div>
-</div>
-
-<!-- หน้าครู -->
-<div id="teacherPage" class="page hidden">
-  <div class="card">
-    <h3>🏆 ตารางคะแนน</h3>
-    <select id="filterRoom" onchange="renderTeacher()">
-      <option value="">ทุกห้อง</option>
-      <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
-      <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
-      <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
-      <option>4/1</option><option>4/2</option><option>4/3</option>
-      <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
-      <option>6/1</option><option>6/2</option><option>6/3</option>
-    </select>
-    <div id="teacherList"></div>
-  </div>
 </div>
 
 <script>
-const URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model,currentUser,prediction;
+const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+let model;
+let currentPrediction = null;
+let score = 0;
 
-function show(id){
-  document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
-  document.getElementById(id).classList.remove("hidden");
-}
+const imageInput = document.getElementById("imageInput");
+const preview = document.getElementById("preview");
+const placeholder = document.getElementById("placeholder");
+const resultBox = document.getElementById("result");
+const historyBox = document.getElementById("history");
+const scoreBox = document.getElementById("score");
 
-function chooseRole(r){
-  r==="student"?show("studentLogin"):show("teacherLogin");
-}
-
-function loginStudent(){
-  const name=sName.value,id=sId.value,room=sRoom.value;
-  if(!name||!id||!room)return alert("กรอกข้อมูลให้ครบ");
-  currentUser={name,id,room,score:0,history:[]};
-  localStorage.setItem("currentUser",JSON.stringify(currentUser));
-  loadStudent();
-}
-
-function loadStudent(){
-  currentUser=JSON.parse(localStorage.getItem("currentUser"));
-  document.getElementById("studentTitle").innerText=currentUser.name+" ("+currentUser.room+")";
-  document.getElementById("score").innerText=currentUser.score;
-  renderHistory();
-  show("studentPage");
-}
+imageInput.onchange = () => {
+  const file = imageInput.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.style.display="block";
+    placeholder.style.display="none";
+  };
+  reader.readAsDataURL(file);
+};
 
 async function loadModel(){
-  if(!model) model=await tmImage.load(URL+"model.json",URL+"metadata.json");
+  if(!model){
+    model = await tmImage.load(URL+"model.json",URL+"metadata.json");
+  }
 }
 
 async function analyze(){
-  const file=imageInput.files[0];
-  if(!file)return alert("เลือกรูปก่อน");
-  const reader=new FileReader();
-  reader.onload=async()=>{
-    preview.src=reader.result;
-    preview.classList.remove("hidden");
-    await loadModel();
-    prediction=await model.predict(preview);
-    prediction.sort((a,b)=>b.probability-a.probability);
-    result.innerHTML=`${prediction[0].className} (${(prediction[0].probability*100).toFixed(1)}%)`;
-  };
-  reader.readAsDataURL(file);
+  if(!imageInput.files.length){
+    alert("กรุณาเลือกรูป");
+    return;
+  }
+  resultBox.style.display="block";
+  resultBox.innerHTML="⏳ กำลังวิเคราะห์...";
+  await loadModel();
+  const prediction = await model.predict(preview);
+  prediction.sort((a,b)=>b.probability-a.probability);
+  currentPrediction = prediction[0];
+  resultBox.innerHTML = `
+    <b>${currentPrediction.className}</b><br>
+    ความมั่นใจ ${(currentPrediction.probability*100).toFixed(1)}%
+  `;
 }
 
-function saveResult(){
-  if(!prediction)return alert("ยังไม่ได้วิเคราะห์");
-  currentUser.score++;
-  currentUser.history.push({
-    img:preview.src,
-    type:prediction[0].className,
-    prob:(prediction[0].probability*100).toFixed(1),
-    time:new Date().toLocaleString()
-  });
-  localStorage.setItem("currentUser",JSON.stringify(currentUser));
-  saveGlobal();
-  loadStudent();
+function confirmSort(){
+  if(!currentPrediction){
+    alert("กรุณาวิเคราะห์ก่อน");
+    return;
+  }
+
+  score++;
+  scoreBox.innerText = score;
+
+  const item = document.createElement("div");
+  item.className="history-item";
+  item.innerHTML = `
+    <img src="${preview.src}" style="width:100%;border-radius:10px"><br>
+    <b>${currentPrediction.className}</b><br>
+    ${(currentPrediction.probability*100).toFixed(1)}%<br>
+    ⏰ ${new Date().toLocaleString("th-TH")}
+  `;
+  historyBox.prepend(item);
+
+  // RESET ทุกอย่าง (จุดสำคัญ)
   imageInput.value="";
-  preview.classList.add("hidden");
-  result.innerHTML="";
-}
-
-function renderHistory(){
-  history.innerHTML="";
-  currentUser.history.forEach(h=>{
-    history.innerHTML+=`<div><img src="${h.img}"><br>${h.type} ${h.prob}%<br>${h.time}</div><hr>`;
-  });
-}
-
-function saveGlobal(){
-  let all=JSON.parse(localStorage.getItem("allUsers")||"{}");
-  all[currentUser.id]=currentUser;
-  localStorage.setItem("allUsers",JSON.stringify(all));
-}
-
-function loginTeacher(){
-  if(teacherCode.value!=="Eco2026")return alert("รหัสผิด");
-  renderTeacher();
-  show("teacherPage");
-}
-
-function renderTeacher(){
-  let all=Object.values(JSON.parse(localStorage.getItem("allUsers")||"{}"));
-  const r=filterRoom.value;
-  if(r) all=all.filter(u=>u.room===r);
-  all.sort((a,b)=>b.score-a.score);
-  teacherList.innerHTML="";
-  all.forEach((u,i)=>{
-    teacherList.innerHTML+=`<div class="card ${i<3?'gold':''}">
-      ${i+1}. ${u.id} ${u.name} - ${u.score}
-    </div>`;
-  });
+  preview.src="";
+  preview.style.display="none";
+  placeholder.style.display="block";
+  resultBox.style.display="none";
+  resultBox.innerHTML="";
+  currentPrediction = null;
 }
 </script>
+
 </body>
 </html>

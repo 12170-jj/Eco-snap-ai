@@ -18,13 +18,13 @@ header{
   align-items:center;
   padding:12px 16px;
 }
-.badge{
-  background:#1aff8c;
+.score{
+  background:#ffffff;
   color:#000;
   padding:6px 12px;
   border-radius:20px;
-  font-weight:bold;
   font-size:14px;
+  font-weight:bold;
 }
 .container{
   max-width:420px;
@@ -37,7 +37,7 @@ header{
   padding:16px;
   margin-bottom:16px;
 }
-#imageBox{
+.image-box{
   width:100%;
   height:240px;
   background:#0b3d26;
@@ -47,7 +47,7 @@ header{
   justify-content:center;
   overflow:hidden;
 }
-#imageBox img{
+.image-box img{
   width:100%;
   height:100%;
   object-fit:cover;
@@ -62,24 +62,24 @@ button{
   font-weight:bold;
   margin-top:10px;
 }
-.small-btn{
+.finish{
+  background:#00d26a;
+}
+.result{
+  background:white;      /* <<< พื้นขาว */
+  color:black;
+  padding:12px;
+  border-radius:12px;
+  text-align:center;
+  font-weight:bold;
+  margin-top:10px;
+}
+.history-btn{
   background:none;
   border:1px solid #1aff8c;
   color:#1aff8c;
-  padding:6px 14px;
+  padding:8px 16px;
   border-radius:20px;
-  font-size:14px;
-}
-
-/* กล่องผลวิเคราะห์ (พื้นขาว) */
-.result-box{
-  background:white;
-  color:#000;
-  border-radius:12px;
-  padding:12px;
-  margin-top:10px;
-  font-weight:bold;
-  text-align:center;
 }
 
 /* modal */
@@ -111,36 +111,35 @@ button{
 
 <header>
   <div>🌱 Eco Snap AI</div>
-  <div class="badge">⭐ <span id="score">0</span></div>
+  <div class="score">⭐ <span id="score">0</span></div>
 </header>
 
 <div class="container">
 
 <div class="card">
-  <div id="imageBox">ยังไม่ได้เลือกรูป</div>
+  <div class="image-box" id="preview">เลือกรูปขยะ</div>
   <input type="file" id="file" accept="image/*">
 </div>
 
 <div class="card">
   <button onclick="analyze()">🧠 วิเคราะห์</button>
-  <button onclick="finish()" style="background:#00d26a;">✅ แยกขยะเสร็จแล้ว</button>
+  <button class="finish" onclick="finish()">✅ แยกขยะเสร็จแล้ว</button>
 </div>
 
 <div class="card">
   <b>ผลการวิเคราะห์</b>
-  <div id="result" class="result-box">ยังไม่ได้วิเคราะห์</div>
+  <div class="result" id="result">ยังไม่ได้วิเคราะห์</div>
 </div>
 
 <div style="text-align:center;">
-  <button class="small-btn" onclick="openHistory()">📜 ประวัติ</button>
+  <button class="history-btn" onclick="openHistory()">📜 ประวัติ</button>
 </div>
 
 </div>
 
-<!-- HISTORY -->
-<div class="modal" id="historyModal">
+<div class="modal" id="history">
   <div class="modal-content">
-    <h3>📜 ประวัติการแยกขยะ</h3>
+    <h3>📜 ประวัติ</h3>
     <div id="historyList"></div>
     <button onclick="closeHistory()">ปิด</button>
   </div>
@@ -148,54 +147,39 @@ button{
 
 <script>
 let score = 0;
-let currentType = "";
+let current = "";
 let history = [];
 
-const fileInput = document.getElementById("file");
-const imageBox = document.getElementById("imageBox");
-const resultBox = document.getElementById("result");
-
-fileInput.onchange = () => {
-  const file = fileInput.files[0];
-  if(!file) return;
-  imageBox.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+file.onchange = () => {
+  const f = file.files[0];
+  if(!f) return;
+  preview.innerHTML = `<img src="${URL.createObjectURL(f)}">`;
 };
 
 function analyze(){
-  if(!fileInput.files[0]){
-    alert("กรุณาเลือกรูปก่อน");
-    return;
-  }
-  // จำลองผล (รอ AI จริง)
+  if(!file.files[0]) return alert("เลือกรูปก่อน");
   const types = ["ขยะรีไซเคิล","ขยะเปียก","ขยะทั่วไป"];
-  currentType = types[Math.floor(Math.random()*types.length)];
-  resultBox.innerText = currentType;
+  current = types[Math.floor(Math.random()*types.length)];
+  result.innerText = current;
 }
 
 function finish(){
-  if(!currentType){
-    alert("ต้องวิเคราะห์ก่อน");
-    return;
-  }
+  if(!current) return alert("ยังไม่ได้วิเคราะห์");
   score += 10;
   document.getElementById("score").innerText = score;
-  history.push(currentType);
-  resultBox.innerText = "บันทึกเรียบร้อย ✔️";
-  fileInput.value = "";
-  imageBox.innerText = "ยังไม่ได้เลือกรูป";
-  currentType = "";
+  history.push(current);
+  result.innerText = "บันทึกเรียบร้อย ✔️";
+  preview.innerText = "เลือกรูปขยะ";
+  file.value = "";
+  current = "";
 }
 
 function openHistory(){
-  const list = document.getElementById("historyList");
-  list.innerHTML = "";
-  history.forEach((h,i)=>{
-    list.innerHTML += `<div class="history-item">${i+1}. ${h}</div>`;
-  });
-  document.getElementById("historyModal").style.display="flex";
+  historyList.innerHTML = history.map((h,i)=>`<div class="history-item">${i+1}. ${h}</div>`).join("");
+  history.style.display="flex";
 }
 function closeHistory(){
-  document.getElementById("historyModal").style.display="none";
+  history.style.display="none";
 }
 </script>
 

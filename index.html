@@ -136,61 +136,49 @@
 </div>
 
 <script>
-let score = localStorage.getItem("ecoScore") 
-  ? parseInt(localStorage.getItem("ecoScore")) 
-  : 0;
+const URL = "https://teachablemachine.withgoogle.com/models/XXXXXX/";
 
-let history = JSON.parse(localStorage.getItem("ecoHistory") || "[]");
+let model, webcam, maxPredictions;
 
-document.getElementById("score").innerText = score;
-renderHistory();
+async function init() {
+    const modelURL = URL + "model.json";
+    const metadataURL = URL + "metadata.json";
 
-function analyze() {
-  if (!document.getElementById("imageInput").files.length) {
-    alert("กรุณาเลือกรูปก่อนนะ 🌱");
-    return;
-  }
+    model = await tmImage.load(modelURL, metadataURL);
+    maxPredictions = model.getTotalClasses();
 
-  const types = [
-    { name: "ขยะรีไซเคิล", bin: "ถังสีเหลือง", tip: "ล้างให้สะอาดก่อนทิ้ง", point: 10, emoji: "♻️" },
-    { name: "ขยะเปียก", bin: "ถังสีเขียว", tip: "ใส่ถุงมัดปากถุง", point: 8, emoji: "🍌" },
-    { name: "ขยะอันตราย", bin: "จุดรับเฉพาะ", tip: "อย่าทิ้งรวมกับขยะอื่น", point: 15, emoji: "☠️" }
-  ];
+    const flip = true;
+    webcam = new tmImage.Webcam(300, 300, flip);
+    await webcam.setup();
+    await webcam.play();
+    window.requestAnimationFrame(loop);
 
-  const result = types[Math.floor(Math.random() * types.length)];
-
-  score += result.point;
-  localStorage.setItem("ecoScore", score);
-
-  history.unshift({
-    text: `${result.emoji} ${result.name} (+${result.point})`
-  });
-  history = history.slice(0, 5);
-  localStorage.setItem("ecoHistory", JSON.stringify(history));
-
-  document.getElementById("result").innerHTML = `
-    🧠 <b>ผลการวิเคราะห์</b><br>
-    ประเภท: <b>${result.name}</b><br>
-    ทิ้งที่: <b>${result.bin}</b><br>
-    คำแนะนำ: ${result.tip}<br>
-    ⭐ ได้รับ +${result.point} คะแนน
-  `;
-
-  document.getElementById("score").innerText = score;
-  renderHistory();
+    document.getElementById("camera").appendChild(webcam.canvas);
 }
 
-function renderHistory() {
-  const el = document.getElementById("history");
-  el.innerHTML = "";
-  history.forEach(h => {
-    const div = document.createElement("div");
-    div.className = "history-item";
-    div.innerText = h.text;
-    el.appendChild(div);
-  });
+async function loop() {
+    webcam.update();
+    await predict();
+    window.requestAnimationFrame(loop);
+}
+
+async function predict() {
+    const prediction = await model.predict(webcam.canvas);
+    prediction.sort((a,b) => b.probability - a.probability);
+
+    const best = prediction[0];
+
+    document.getElementById("result").innerHTML = `
+      🧠 ประเภท: <b>${best.className}</b><br>
+      📊 ความมั่นใจ: ${(best.probability*100).toFixed(1)}%
+    `;
 }
 </script>
 
 </body>
+  <button onclick="init()">📸 เปิดกล้อง</button>
+
+<div id="camera"></div>
+
+<div id="result">รอการวิเคราะห์...</div>
 </html>

@@ -1,202 +1,151 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eco Snap AI</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+
 <style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#0f5132;
-  color:white;
-}
-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  padding:12px 16px;
-}
-.score{
-  background:#ffffff;
-  color:#000;
-  padding:6px 12px;
-  border-radius:20px;
-  font-size:14px;
-  font-weight:bold;
-}
-.container{
-  max-width:420px;
-  margin:auto;
-  padding:16px;
-}
-.card{
-  background:#145c3a;
-  border-radius:16px;
-  padding:16px;
-  margin-bottom:16px;
-}
-.image-box{
-  width:100%;
-  height:240px;
-  background:#0b3d26;
-  border-radius:12px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  overflow:hidden;
-}
-.image-box img{
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-input[type=file]{
-  margin-top:10px;
-}
-button{
-  width:100%;
-  padding:14px;
-  border:none;
-  border-radius:30px;
-  background:#1aff8c;
-  font-size:16px;
-  font-weight:bold;
-  margin-top:10px;
-}
-.finish{
-  background:#00d26a;
-}
-.result-box{
-  background:#ffffff;   /* ✅ พื้นหลังขาว */
-  color:#000;
-  padding:16px;
-  border-radius:12px;
-  text-align:center;
-  font-weight:bold;
-  margin-top:10px;
-}
-.history-btn{
-  width:100%;
-  background:none;
-  border:1px solid #1aff8c;
-  color:#1aff8c;
-  padding:10px;
-  border-radius:20px;
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: linear-gradient(#0f5132, #198754);
+  color: #fff;
 }
 
-/* modal */
-.modal{
-  position:fixed;
-  inset:0;
-  background:rgba(0,0,0,.6);
-  display:none;
-  align-items:center;
-  justify-content:center;
+.container {
+  max-width: 420px;
+  margin: auto;
+  padding: 20px;
 }
-.modal-content{
-  background:#145c3a;
-  width:90%;
-  max-width:400px;
-  border-radius:16px;
-  padding:16px;
+
+h1 {
+  text-align: center;
 }
-.history-item{
-  background:#0b3d26;
-  padding:10px;
-  border-radius:10px;
-  margin-bottom:8px;
+
+.card {
+  background: #0b3d2e;
+  border-radius: 16px;
+  padding: 16px;
+  margin-bottom: 16px;
+}
+
+#preview {
+  width: 100%;
+  height: 250px;
+  border-radius: 12px;
+  background: #144d3a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#preview img {
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 12px;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border-radius: 30px;
+  border: none;
+  font-size: 16px;
+  margin-top: 10px;
+  cursor: pointer;
+}
+
+.analyze {
+  background: #2dff9b;
+  color: #000;
+}
+
+.done {
+  background: #1ecb6b;
+  color: #000;
+}
+
+.result {
+  background: #fff;
+  color: #000;
+  border-radius: 12px;
+  padding: 14px;
+  font-weight: bold;
+}
+
+.history {
+  font-size: 14px;
 }
 </style>
 </head>
 
 <body>
-
-<header>
-  <div>🌱 Eco Snap AI</div>
-  <div class="score">⭐ <span id="score">0</span></div>
-</header>
-
 <div class="container">
+  <h1>🌱 Eco Snap AI</h1>
 
-<!-- รูป -->
-<div class="card">
-  <div class="image-box" id="preview">ยังไม่ได้เลือกรูป</div>
-  <input type="file" id="file" accept="image/*">
-</div>
+  <div class="card">
+    <div id="preview">ยังไม่ได้เลือกรูป</div>
+    <input type="file" accept="image/*" onchange="loadImage(event)">
+    <button class="analyze" onclick="analyze()">🧠 วิเคราะห์</button>
+    <button class="done" onclick="finish()">✅ แยกขยะเสร็จแล้ว</button>
+  </div>
 
-<!-- ปุ่ม -->
-<div class="card">
-  <button onclick="analyze()">🧠 วิเคราะห์</button>
-  <button class="finish" onclick="finish()">✅ แยกขยะเสร็จแล้ว</button>
-</div>
+  <div class="card result" id="result">
+    ผลการวิเคราะห์จะแสดงที่นี่
+  </div>
 
-<!-- ผล -->
-<div class="card">
-  <b>ผลการวิเคราะห์</b>
-  <div class="result-box" id="result">ยังไม่ได้วิเคราะห์</div>
-</div>
-
-<!-- ประวัติ -->
-<button class="history-btn" onclick="openHistory()">📜 ประวัติ</button>
-
-</div>
-
-<!-- modal ประวัติ -->
-<div class="modal" id="historyModal">
-  <div class="modal-content">
-    <h3>📜 ประวัติ</h3>
-    <div id="historyList"></div>
-    <button onclick="closeHistory()">ปิด</button>
+  <div class="card history" id="history">
+    📜 ประวัติ (ล่าสุด)
   </div>
 </div>
 
 <script>
-let score = 0;
-let currentResult = "";
-let history = [];
+const MODEL_URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
 
-file.onchange = () => {
-  const f = file.files[0];
-  if(!f) return;
-  preview.innerHTML = `<img src="${URL.createObjectURL(f)}">`;
-};
+let model;
+let imageElement;
 
-function analyze(){
-  if(!file.files[0]){
+async function loadModel() {
+  model = await tmImage.load(
+    MODEL_URL + "model.json",
+    MODEL_URL + "metadata.json"
+  );
+}
+loadModel();
+
+function loadImage(event) {
+  const preview = document.getElementById("preview");
+  preview.innerHTML = "";
+  imageElement = document.createElement("img");
+  imageElement.src = URL.createObjectURL(event.target.files[0]);
+  preview.appendChild(imageElement);
+}
+
+async function analyze() {
+  if (!imageElement || !model) {
     alert("กรุณาเลือกรูปก่อน");
     return;
   }
-  const types = ["ขยะรีไซเคิล","ขยะเปียก","ขยะทั่วไป"];
-  currentResult = types[Math.floor(Math.random()*types.length)];
-  result.innerText = currentResult;
+
+  const predictions = await model.predict(imageElement);
+  predictions.sort((a,b)=>b.probability-a.probability);
+
+  const top = predictions[0];
+  document.getElementById("result").innerHTML =
+    `🗑 ประเภทขยะ: <b>${top.className}</b><br>
+     ความมั่นใจ: ${(top.probability*100).toFixed(2)}%`;
+
+  document.getElementById("history").innerHTML +=
+    `<div>- ${top.className}</div>`;
 }
 
-function finish(){
-  if(!currentResult){
-    alert("ยังไม่ได้วิเคราะห์");
-    return;
-  }
-  score += 10;
-  document.getElementById("score").innerText = score;
-  history.push(currentResult);
-  result.innerText = "บันทึกเรียบร้อย ✔️";
-  preview.innerText = "ยังไม่ได้เลือกรูป";
-  file.value = "";
-  currentResult = "";
-}
-
-function openHistory(){
-  historyList.innerHTML = history.map((h,i)=>
-    `<div class="history-item">${i+1}. ${h}</div>`
-  ).join("");
-  historyModal.style.display="flex";
-}
-function closeHistory(){
-  historyModal.style.display="none";
+function finish() {
+  alert("บันทึกการแยกขยะเรียบร้อย 🎉");
 }
 </script>
-
 </body>
 </html>

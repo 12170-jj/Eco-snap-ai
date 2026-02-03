@@ -1,136 +1,196 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <title>Eco Snap AI</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Eco Snap AI</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0f1f17;
-      color: #eafff3;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
+<!-- Google Font -->
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;500;700&display=swap" rel="stylesheet">
 
-    .card {
-      background: #142d22;
-      padding: 24px;
-      border-radius: 16px;
-      width: 100%;
-      max-width: 420px;
-      box-shadow: 0 0 30px rgba(0,255,150,0.25);
-      text-align: center;
-    }
+<style>
+  body {
+    font-family: 'Kanit', sans-serif;
+    background: linear-gradient(135deg, #0f3d2e, #0a2e23);
+    color: #eafff3;
+    margin: 0;
+    padding: 0;
+  }
 
-    h1 {
-      color: #00ff99;
-      margin-bottom: 8px;
-    }
+  .container {
+    max-width: 420px;
+    margin: auto;
+    padding: 20px;
+  }
 
-    input[type="file"] {
-      margin: 16px 0;
-    }
+  h1 {
+    text-align: center;
+    color: #2bff9a;
+    font-size: 2.2em;
+    margin-bottom: 5px;
+  }
 
-    button {
-      background: #00ff99;
-      color: #003322;
-      border: none;
-      padding: 12px 20px;
-      border-radius: 10px;
-      font-size: 16px;
-      cursor: pointer;
-      width: 100%;
-    }
+  .subtitle {
+    text-align: center;
+    opacity: 0.85;
+    margin-bottom: 20px;
+  }
 
-    .result {
-      margin-top: 16px;
-      padding: 14px;
-      background: #0c1b14;
-      border-radius: 10px;
-    }
+  .card {
+    background: rgba(0,0,0,0.35);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 20px;
+    box-shadow: 0 0 20px rgba(0,255,170,0.15);
+  }
 
-    .score {
-      margin-top: 12px;
-      font-size: 18px;
-      color: #00ffcc;
-    }
-  </style>
+  .camera {
+    text-align: center;
+  }
+
+  input[type="file"] {
+    display: none;
+  }
+
+  label.camera-btn {
+    display: inline-block;
+    background: #2bff9a;
+    color: #003b24;
+    padding: 12px 18px;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  .analyze-btn {
+    width: 100%;
+    background: linear-gradient(90deg, #00ffb3, #00e0ff);
+    border: none;
+    padding: 16px;
+    font-size: 1.2em;
+    border-radius: 30px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 10px;
+  }
+
+  .score {
+    text-align: center;
+    font-size: 1.3em;
+    color: gold;
+    margin-top: 10px;
+  }
+
+  .result {
+    margin-top: 10px;
+    font-size: 1.05em;
+    line-height: 1.6;
+  }
+
+  .history-item {
+    background: rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 10px;
+    margin-bottom: 8px;
+    font-size: 0.95em;
+  }
+
+  .cartoon {
+    text-align: center;
+    font-size: 3em;
+    margin-bottom: 10px;
+  }
+</style>
 </head>
 
 <body>
-  <div class="card">
-    <h1>🌱 Eco Snap AI</h1>
-    <p>อัปโหลดรูปขยะเพื่อวิเคราะห์</p>
+<div class="container">
 
-    <input type="file" id="imageInput" accept="image/*" />
-    <button onclick="analyze()">วิเคราะห์ขยะ</button>
+  <h1>🌱 Eco Snap AI</h1>
+  <div class="subtitle">ถ่ายรูปขยะ • วิเคราะห์ • ได้คะแนน</div>
 
-    <div id="result" class="result" style="display:none;"></div>
-    <div id="score" class="score"></div>
+  <!-- คะแนน -->
+  <div class="card score">
+    ⭐ คะแนนสะสม: <span id="score">0</span>
   </div>
 
-  <script>
-    let score = localStorage.getItem("ecoScore")
-      ? parseInt(localStorage.getItem("ecoScore"))
-      : 0;
+  <!-- กล้อง -->
+  <div class="card camera">
+    <div class="cartoon">🧸📷</div>
+    <label class="camera-btn">
+      📸 เปิดกล้อง / เลือกรูป
+      <input type="file" accept="image/*" capture="environment" id="imageInput">
+    </label>
+    <button class="analyze-btn" onclick="analyze()">🔍 วิเคราะห์ขยะ</button>
 
-    updateScore();
+    <div class="result" id="result"></div>
+  </div>
 
-    function analyze() {
-      const input = document.getElementById("imageInput");
-      if (!input.files.length) {
-        alert("กรุณาเลือกรูปก่อน");
-        return;
-      }
+  <!-- ประวัติ -->
+  <div class="card">
+    <h3>🗂 ประวัติการวิเคราะห์</h3>
+    <div id="history"></div>
+  </div>
 
-      // วิเคราะห์แบบ logic (ขยายเป็น AI ได้)
-      const types = [
-        {
-          name: "ขยะรีไซเคิล",
-          bin: "ถังสีเหลือง",
-          tip: "ล้างให้สะอาดก่อนทิ้ง",
-          point: 10
-        },
-        {
-          name: "ขยะเปียก",
-          bin: "ถังสีเขียว",
-          tip: "แยกน้ำออกก่อน",
-          point: 8
-        },
-        {
-          name: "ขยะอันตราย",
-          bin: "ถังสีแดง",
-          tip: "อย่าแตกหรือเผา",
-          point: 15
-        }
-      ];
+</div>
 
-      const result = types[Math.floor(Math.random() * types.length)];
+<script>
+let score = localStorage.getItem("ecoScore") 
+  ? parseInt(localStorage.getItem("ecoScore")) 
+  : 0;
 
-      score += result.point;
-      localStorage.setItem("ecoScore", score);
+let history = JSON.parse(localStorage.getItem("ecoHistory") || "[]");
 
-      document.getElementById("result").style.display = "block";
-      document.getElementById("result").innerHTML = `
-        <b>🧠 ผลการวิเคราะห์</b><br>
-        ประเภท: <b>${result.name}</b><br>
-        ทิ้งที่: <b>${result.bin}</b><br>
-        คำแนะนำ: ${result.tip}<br>
-        ได้รับ +${result.point} คะแนน
-      `;
+document.getElementById("score").innerText = score;
+renderHistory();
 
-      updateScore();
-    }
+function analyze() {
+  if (!document.getElementById("imageInput").files.length) {
+    alert("กรุณาเลือกรูปก่อนนะ 🌱");
+    return;
+  }
 
-    function updateScore() {
-      document.getElementById("score").innerHTML =
-        "⭐ คะแนนสะสม: " + score;
-    }
-  </script>
+  const types = [
+    { name: "ขยะรีไซเคิล", bin: "ถังสีเหลือง", tip: "ล้างให้สะอาดก่อนทิ้ง", point: 10, emoji: "♻️" },
+    { name: "ขยะเปียก", bin: "ถังสีเขียว", tip: "ใส่ถุงมัดปากถุง", point: 8, emoji: "🍌" },
+    { name: "ขยะอันตราย", bin: "จุดรับเฉพาะ", tip: "อย่าทิ้งรวมกับขยะอื่น", point: 15, emoji: "☠️" }
+  ];
+
+  const result = types[Math.floor(Math.random() * types.length)];
+
+  score += result.point;
+  localStorage.setItem("ecoScore", score);
+
+  history.unshift({
+    text: `${result.emoji} ${result.name} (+${result.point})`
+  });
+  history = history.slice(0, 5);
+  localStorage.setItem("ecoHistory", JSON.stringify(history));
+
+  document.getElementById("result").innerHTML = `
+    🧠 <b>ผลการวิเคราะห์</b><br>
+    ประเภท: <b>${result.name}</b><br>
+    ทิ้งที่: <b>${result.bin}</b><br>
+    คำแนะนำ: ${result.tip}<br>
+    ⭐ ได้รับ +${result.point} คะแนน
+  `;
+
+  document.getElementById("score").innerText = score;
+  renderHistory();
+}
+
+function renderHistory() {
+  const el = document.getElementById("history");
+  el.innerHTML = "";
+  history.forEach(h => {
+    const div = document.createElement("div");
+    div.className = "history-item";
+    div.innerText = h.text;
+    el.appendChild(div);
+  });
+}
+</script>
+
 </body>
 </html>

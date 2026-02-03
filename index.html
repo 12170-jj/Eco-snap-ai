@@ -66,10 +66,23 @@ button{
   background:none;
   border:1px solid #1aff8c;
   color:#1aff8c;
-  padding:6px 12px;
+  padding:6px 14px;
   border-radius:20px;
   font-size:14px;
 }
+
+/* กล่องผลวิเคราะห์ (พื้นขาว) */
+.result-box{
+  background:white;
+  color:#000;
+  border-radius:12px;
+  padding:12px;
+  margin-top:10px;
+  font-weight:bold;
+  text-align:center;
+}
+
+/* modal */
 .modal{
   position:fixed;
   inset:0;
@@ -115,17 +128,16 @@ button{
 
 <div class="card">
   <b>ผลการวิเคราะห์</b>
-  <div id="result">ยังไม่ได้วิเคราะห์</div>
+  <div id="result" class="result-box">ยังไม่ได้วิเคราะห์</div>
 </div>
 
-<div style="display:flex; gap:10px;">
+<div style="text-align:center;">
   <button class="small-btn" onclick="openHistory()">📜 ประวัติ</button>
-  <button class="small-btn">⚙️ ตั้งค่า</button>
 </div>
 
 </div>
 
-<!-- HISTORY MODAL -->
+<!-- HISTORY -->
 <div class="modal" id="historyModal">
   <div class="modal-content">
     <h3>📜 ประวัติการแยกขยะ</h3>
@@ -137,14 +149,11 @@ button{
 <script>
 let score = 0;
 let currentType = "";
-let history = {
-  recycle: [],
-  organic: [],
-  general: []
-};
+let history = [];
 
 const fileInput = document.getElementById("file");
 const imageBox = document.getElementById("imageBox");
+const resultBox = document.getElementById("result");
 
 fileInput.onchange = () => {
   const file = fileInput.files[0];
@@ -157,15 +166,10 @@ function analyze(){
     alert("กรุณาเลือกรูปก่อน");
     return;
   }
-  // จำลองผล (แทน AI)
-  const types = ["recycle","organic","general"];
-  currentType = types[Math.floor(Math.random()*3)];
-  const text = {
-    recycle:"ขยะรีไซเคิล",
-    organic:"ขยะเปียก",
-    general:"ขยะทั่วไป"
-  };
-  document.getElementById("result").innerText = text[currentType];
+  // จำลองผล (รอ AI จริง)
+  const types = ["ขยะรีไซเคิล","ขยะเปียก","ขยะทั่วไป"];
+  currentType = types[Math.floor(Math.random()*types.length)];
+  resultBox.innerText = currentType;
 }
 
 function finish(){
@@ -175,8 +179,8 @@ function finish(){
   }
   score += 10;
   document.getElementById("score").innerText = score;
-  history[currentType].push(fileInput.files[0].name);
-  document.getElementById("result").innerText = "บันทึกแล้ว ✔️";
+  history.push(currentType);
+  resultBox.innerText = "บันทึกเรียบร้อย ✔️";
   fileInput.value = "";
   imageBox.innerText = "ยังไม่ได้เลือกรูป";
   currentType = "";
@@ -185,12 +189,9 @@ function finish(){
 function openHistory(){
   const list = document.getElementById("historyList");
   list.innerHTML = "";
-  for(let type in history){
-    list.innerHTML += `
-      <div class="history-item">
-        <b>${type}</b> : ${history[type].length} ชิ้น
-      </div>`;
-  }
+  history.forEach((h,i)=>{
+    list.innerHTML += `<div class="history-item">${i+1}. ${h}</div>`;
+  });
   document.getElementById("historyModal").style.display="flex";
 }
 function closeHistory(){

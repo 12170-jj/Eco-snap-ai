@@ -8,80 +8,45 @@
 <style>
 body{
   margin:0;
-  font-family: system-ui, sans-serif;
-  background: linear-gradient(135deg,#0f5132,#198754);
+  font-family:sans-serif;
+  background:#0f5132;
   color:white;
 }
-
 .container{
   max-width:420px;
   margin:auto;
   padding:20px;
 }
-
-h1{
-  text-align:center;
-  margin-bottom:5px;
-}
-
-.subtitle{
-  text-align:center;
-  opacity:.9;
-  margin-bottom:20px;
-}
-
+h1{text-align:center;}
 .card{
   background:#145c3a;
-  border-radius:18px;
-  padding:18px;
+  border-radius:16px;
+  padding:16px;
   margin-bottom:16px;
 }
-
-.button{
+button{
   width:100%;
   padding:14px;
   border:none;
   border-radius:30px;
   background:#1aff8c;
-  color:#003d1f;
   font-size:16px;
   font-weight:bold;
-  cursor:pointer;
 }
-
-.button:active{
-  transform:scale(.97);
-}
-
-.camera-box{
+#preview{
   width:100%;
   height:220px;
   background:#0b3d26;
-  border-radius:14px;
+  border-radius:12px;
   display:flex;
   align-items:center;
   justify-content:center;
   margin-bottom:10px;
-  overflow:hidden;
 }
-
-.camera-box img{
+#preview img{
   width:100%;
   height:100%;
   object-fit:cover;
-}
-
-.score{
-  font-size:32px;
-  text-align:center;
-}
-
-.history-item{
-  background:#0b3d26;
-  padding:8px;
-  border-radius:10px;
-  margin-bottom:6px;
-  font-size:14px;
 }
 </style>
 </head>
@@ -90,91 +55,49 @@ h1{
 <div class="container">
 
 <h1>🌱 Eco Snap AI</h1>
-<div class="subtitle">ถ่ายรูปขยะ → วิเคราะห์ → ได้คะแนน</div>
+<p style="text-align:center;">ถ่ายรูป → วิเคราะห์ → ได้คะแนน</p>
 
-<!-- กล้อง -->
 <div class="card">
-  <div class="camera-box" id="cameraBox">
-    ยังไม่ได้เลือกรูป
-  </div>
-
-  <button class="button" onclick="uploadImage()">📷 เลือกรูปขยะ</button>
-  <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="onImageSelected(event)">
+  <div id="preview">ยังไม่ได้เลือกรูป</div>
+  <input type="file" id="file" accept="image/*">
 </div>
 
-<!-- วิเคราะห์ -->
 <div class="card">
-  <button class="button" onclick="analyze()">🧠 วิเคราะห์ขยะ</button>
+  <button onclick="analyze()">🧠 วิเคราะห์</button>
 </div>
 
-<!-- ผลลัพธ์ -->
 <div class="card">
-  <b>ผลการวิเคราะห์</b>
+  <b>ผลลัพธ์</b>
   <div id="result">ยังไม่ได้วิเคราะห์</div>
 </div>
 
-<!-- คะแนน -->
 <div class="card">
-  <b>⭐ คะแนนสะสม</b>
-  <div class="score" id="score">0</div>
-</div>
-
-<!-- ประวัติ -->
-<div class="card">
-  <b>📜 ประวัติ</b>
-  <div id="history">ยังไม่มีข้อมูล</div>
+  <b>⭐ คะแนน</b>
+  <div id="score">0</div>
 </div>
 
 </div>
 
 <script>
 let score = 0;
-let selectedImage = null;
+const fileInput = document.getElementById("file");
+const preview = document.getElementById("preview");
 
-function uploadImage(){
-  document.getElementById("fileInput").click();
-}
-
-function onImageSelected(event){
-  const file = event.target.files[0];
+fileInput.onchange = () => {
+  const file = fileInput.files[0];
   if(!file) return;
-
-  selectedImage = URL.createObjectURL(file);
-  document.getElementById("cameraBox").innerHTML =
-    `<img src="${selectedImage}">`;
-
-  document.getElementById("result").innerText =
-    "เลือกรูปแล้ว พร้อมวิเคราะห์";
-}
+  preview.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+};
 
 function analyze(){
-  if(!selectedImage){
-    alert("กรุณาเลือกรูปก่อน");
+  if(!fileInput.files[0]){
+    alert("เลือกรูปก่อน");
     return;
   }
-
-  const results = [
-    "ขวดพลาสติก (รีไซเคิลได้)",
-    "กระป๋องอลูมิเนียม",
-    "กระดาษ",
-    "ขยะทั่วไป"
-  ];
-
-  const result = results[Math.floor(Math.random()*results.length)];
-
   document.getElementById("result").innerText =
-    "ผลการวิเคราะห์: " + result;
-
+    "ขยะรีไซเคิลได้ (+10 คะแนน)";
   score += 10;
   document.getElementById("score").innerText = score;
-
-  const history = document.getElementById("history");
-  if(score === 10) history.innerHTML = "";
-
-  const item = document.createElement("div");
-  item.className = "history-item";
-  item.innerText = "✔ " + result + " (+10 คะแนน)";
-  history.prepend(item);
 }
 </script>
 

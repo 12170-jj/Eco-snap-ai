@@ -6,30 +6,39 @@
 <title>Eco-Snap AI</title>
 
 <style>
-*{box-sizing:border-box;font-family:sans-serif;}
+*{
+  box-sizing:border-box;
+  font-family: "Segoe UI", sans-serif;
+}
 body{
   margin:0;
   background:linear-gradient(180deg,#0f5132,#198754);
   color:#fff;
 }
 header{
-  text-align:center;
   padding:20px;
+  text-align:center;
 }
+header h1{margin:0;font-size:1.9rem;}
+header p{opacity:0.9;}
+
 .container{
   max-width:420px;
   margin:auto;
   padding:16px;
 }
+
 .card{
   background:#fff;
   color:#0f5132;
-  border-radius:18px;
+  border-radius:20px;
   padding:16px;
   margin-bottom:16px;
   box-shadow:0 6px 16px rgba(0,0,0,0.25);
 }
+
 .camera-box{
+  width:100%;
   aspect-ratio:1/1;
   border:4px dashed #198754;
   border-radius:16px;
@@ -37,30 +46,53 @@ header{
   align-items:center;
   justify-content:center;
   background:#e9f7ef;
-  font-size:1.1rem;
+  font-size:1rem;
+  text-align:center;
 }
+
 button{
   width:100%;
   padding:14px;
-  font-size:1.1rem;
+  font-size:1.05rem;
   border:none;
   border-radius:14px;
   background:#198754;
   color:#fff;
   cursor:pointer;
+  margin-top:10px;
+}
+button.secondary{
+  background:#6c757d;
 }
 button:active{transform:scale(0.97);}
+
 .score{
-  font-size:2.4rem;
+  font-size:2.6rem;
   font-weight:bold;
   text-align:center;
 }
+
+.result-box{
+  background:#e9f7ef;
+  padding:12px;
+  border-radius:12px;
+  text-align:center;
+  font-size:1.1rem;
+}
+
 .history-item{
   background:#e9f7ef;
   padding:10px;
   border-radius:10px;
   margin-bottom:8px;
   font-size:0.95rem;
+}
+
+.footer{
+  text-align:center;
+  font-size:0.8rem;
+  opacity:0.8;
+  margin:20px 0;
 }
 </style>
 </head>
@@ -74,23 +106,32 @@ button:active{transform:scale(0.97);}
 
 <div class="container">
 
+  <!-- กล้อง -->
   <div class="card">
     <h3>📷 กล้องสแกนขยะ</h3>
     <div class="camera-box">
-      พื้นที่กล้อง (รอเชื่อม AI)
+      พื้นที่กล้อง<br>
+      (จะเชื่อม AI ภายหลัง)
     </div>
+    <button class="secondary" onclick="uploadImage()">📁 อัปโหลดรูปภาพแทน</button>
   </div>
 
+  <!-- วิเคราะห์ -->
   <div class="card">
     <h3>🧠 วิเคราะห์ขยะ</h3>
     <button onclick="analyze()">วิเคราะห์ขยะ</button>
+    <div id="result" class="result-box" style="margin-top:12px;">
+      ยังไม่มีการวิเคราะห์
+    </div>
   </div>
 
+  <!-- คะแนน -->
   <div class="card">
     <h3>⭐ Eco-Score</h3>
     <div id="score" class="score">0</div>
   </div>
 
+  <!-- ประวัติ -->
   <div class="card">
     <h3>📜 ประวัติการวิเคราะห์</h3>
     <div id="history">
@@ -100,31 +141,41 @@ button:active{transform:scale(0.97);}
 
 </div>
 
+<div class="footer">
+  Eco-Snap AI • Prototype UI Ready
+</div>
+
 <script>
 let score = 0;
 
+// ฟังก์ชันวิเคราะห์ (placeholder สำหรับ AI)
 function analyze(){
-  // ตัวอย่างผล (ไว้เปลี่ยนเป็น AI จริงทีหลัง)
-  const results = [
+  const fakeResults = [
     "ขวดพลาสติก PET",
     "กระป๋องอะลูมิเนียม",
-    "กระดาษ"
+    "กระดาษรีไซเคิล"
   ];
-  const result = results[Math.floor(Math.random()*results.length)];
+  const result = fakeResults[Math.floor(Math.random()*fakeResults.length)];
 
-  // เพิ่มคะแนน
+  document.getElementById("result").innerText =
+    "ผลการวิเคราะห์: " + result;
+
   score += 10;
   document.getElementById("score").innerText = score;
 
-  // เพิ่มประวัติ
   const history = document.getElementById("history");
   if(score === 10){
     history.innerHTML = "";
   }
   const item = document.createElement("div");
   item.className = "history-item";
-  item.innerText = `✔ วิเคราะห์สำเร็จ: ${result}`;
+  item.innerText = "✔ " + result + " (+10 คะแนน)";
   history.prepend(item);
+}
+
+// อัปโหลดรูป (UI เตรียมไว้)
+function uploadImage(){
+  alert("ฟีเจอร์อัปโหลดรูป พร้อมแล้ว\nจะเชื่อม AI ภายหลัง");
 }
 </script>
 

@@ -3,227 +3,106 @@
 <head>
 <meta charset="UTF-8">
 <title>Eco Snap AI</title>
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
 <style>
-body {
-  font-family: "Segoe UI", Tahoma, sans-serif;
-  background: #f4f7f6;
-  margin: 0;
-  padding: 0;
-}
-.container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-}
-h1 {
-  text-align: center;
-  color: #2e7d32;
-}
-.card {
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-button {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  background: #4caf50;
-  color: #fff;
-  font-size: 16px;
-}
-button.secondary {
-  background: #607d8b;
-}
-input, select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-}
-.hidden { display: none; }
-.top-score {
-  position: fixed;
-  top: 10px;
-  right: 20px;
-  background: #4caf50;
-  color: #fff;
-  padding: 10px;
-  border-radius: 20px;
-}
-.gold { background: gold; }
-.silver { background: #c0c0c0; }
-.bronze { background: #cd7f32; }
-img.preview {
-  max-width: 100%;
-  border-radius: 10px;
-}
+body{font-family:sans-serif;background:#f4f7f6;margin:0}
+.container{max-width:900px;margin:auto;padding:20px}
+h1{text-align:center;color:#2e7d32}
+.card{background:#fff;padding:20px;border-radius:10px;margin-bottom:20px}
+button{padding:10px 20px;border:none;border-radius:6px;cursor:pointer}
+.primary{background:#4caf50;color:#fff}
+.secondary{background:#607d8b;color:#fff}
+input,select{width:100%;padding:10px;margin:6px 0}
+.hidden{display:none}
+.gold{background:#ffd700}
+.gray{background:#e0e0e0}
 </style>
 </head>
-
 <body>
-<div class="container">
 
+<div class="container">
 <h1>Eco Snap AI</h1>
-<p style="text-align:center;">เลือกบทบาทของคุณเพื่อเข้าสู่ระบบ</p>
+<p style="text-align:center">เลือกบทบาทของคุณเพื่อเข้าสู่ระบบ</p>
 
 <!-- เลือกบทบาท -->
-<div class="card" id="roleSelect">
-  <button onclick="selectRole('student')">นักเรียน</button>
-  <button class="secondary" onclick="selectRole('teacher')">คุณครู</button>
+<div class="card" id="roleBox">
+  <button class="primary" onclick="chooseRole('student')">นักเรียน</button>
+  <button class="secondary" onclick="chooseRole('teacher')">คุณครู</button>
 </div>
 
 <!-- นักเรียนล็อกอิน -->
 <div class="card hidden" id="studentLogin">
-  <h3>เข้าสู่ระบบนักเรียน</h3>
-  <input id="studentName" placeholder="ชื่อ - นามสกุล">
-  <input id="studentId" placeholder="เลขประจำตัวนักเรียน">
-  <select id="studentRoom">
-    <option value="">เลือกห้อง</option>
-    <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
-    <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
-    <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
-    <option>4/1</option><option>4/2</option><option>4/3</option>
-    <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
-    <option>6/1</option><option>6/2</option><option>6/3</option>
-  </select>
-  <button onclick="studentLogin()">เข้าสู่ระบบ</button>
+  <h3>นักเรียน</h3>
+  <input id="sName" placeholder="ชื่อ - นามสกุล">
+  <input id="sId" placeholder="รหัสนักเรียน">
+  <select id="sRoom"></select>
+  <button class="primary" onclick="loginStudent()">เข้าสู่ระบบ</button>
 </div>
 
 <!-- ครูล็อกอิน -->
 <div class="card hidden" id="teacherLogin">
-  <h3>เข้าสู่ระบบคุณครู</h3>
-  <input id="teacherCode" type="password" placeholder="รหัสคุณครู">
-  <button onclick="teacherLogin()">เข้าสู่ระบบ</button>
-</div>
-
-<!-- นักเรียนแดชบอร์ด -->
-<div class="card hidden" id="studentDashboard">
-  <div class="top-score">คะแนน: <span id="score">0</span></div>
-  <h3>ระบบคัดแยกขยะ</h3>
-  <input type="file" accept="image/*" onchange="previewImage(event)">
-  <img id="preview" class="preview">
-  <button onclick="analyze()">วิเคราะห์ขยะ</button>
-  <p id="result"></p>
-  <button onclick="saveResult()">คัดแยกขยะเสร็จแล้ว</button>
-  <button class="secondary" onclick="showHistory()">ดูประวัติ</button>
-</div>
-
-<!-- ประวัตินักเรียน -->
-<div class="card hidden" id="history">
-  <h3>ประวัติการคัดแยกขยะ</h3>
-  <div id="historyList"></div>
-  <button onclick="backToStudent()">กลับ</button>
+  <h3>คุณครู</h3>
+  <input id="tCode" type="password" placeholder="รหัสครู">
+  <button class="primary" onclick="loginTeacher()">เข้าสู่ระบบ</button>
 </div>
 
 <!-- ครูแดชบอร์ด -->
-<div class="card hidden" id="teacherDashboard">
-  <h3>ตารางคะแนนนักเรียน</h3>
-  <select id="roomFilter" onchange="renderTable()">
-    <option value="">ทุกห้อง</option>
-    <option>1/1</option><option>1/2</option><option>1/3</option><option>1/4</option><option>1/5</option>
-    <option>2/1</option><option>2/2</option><option>2/3</option><option>2/4</option><option>2/5</option>
-    <option>3/1</option><option>3/2</option><option>3/3</option><option>3/4</option>
-    <option>4/1</option><option>4/2</option><option>4/3</option>
-    <option>5/1</option><option>5/2</option><option>5/3</option><option>5/4</option>
-    <option>6/1</option><option>6/2</option><option>6/3</option>
-  </select>
+<div class="card hidden" id="teacherDash">
+  <h3>ตารางคะแนน</h3>
+  <select id="roomFilter" onchange="renderTable()"></select>
   <div id="table"></div>
 </div>
-
 </div>
 
 <script>
-let role = "";
-let currentStudent = null;
-let model;
+const ROOMS=[
+"1/1","1/2","1/3","1/4","1/5",
+"2/1","2/2","2/3","2/4","2/5",
+"3/1","3/2","3/3","3/4",
+"4/1","4/2","4/3",
+"5/1","5/2","5/3","5/4",
+"6/1","6/2","6/3"
+];
 
-function selectRole(r){
-  role = r;
-  document.getElementById("roleSelect").classList.add("hidden");
-  if(r==="student") document.getElementById("studentLogin").classList.remove("hidden");
-  if(r==="teacher") document.getElementById("teacherLogin").classList.remove("hidden");
+function fillRooms(){
+  sRoom.innerHTML='<option value="">เลือกห้อง</option>';
+  roomFilter.innerHTML='<option value="">ทุกห้อง</option>';
+  ROOMS.forEach(r=>{
+    sRoom.innerHTML+=`<option>${r}</option>`;
+    roomFilter.innerHTML+=`<option>${r}</option>`;
+  });
+}
+fillRooms();
+
+function chooseRole(r){
+  roleBox.classList.add("hidden");
+  if(r==="student") studentLogin.classList.remove("hidden");
+  else teacherLogin.classList.remove("hidden");
 }
 
-function studentLogin(){
-  const name = studentName.value;
-  const id = studentId.value;
-  const room = studentRoom.value;
-  if(!name || !id || !room) return alert("กรอกข้อมูลให้ครบ");
-  currentStudent = id;
-  if(!localStorage[id]){
-    localStorage[id] = JSON.stringify({name,id,room,score:0,history:[]});
+function loginStudent(){
+  if(!sName.value||!sId.value||!sRoom.value) return alert("กรอกข้อมูลให้ครบ");
+  if(!localStorage[sId.value]){
+    localStorage[sId.value]=JSON.stringify({name:sName.value,id:sId.value,room:sRoom.value,score:0});
   }
-  studentLoginDiv(false);
+  alert("เข้าสู่ระบบนักเรียนสำเร็จ (เดโม)");
 }
 
-function studentLoginDiv(show){
-  studentLogin.classList.add("hidden");
-  studentDashboard.classList.remove("hidden");
-  updateScore();
-}
-
-function previewImage(e){
-  preview.src = URL.createObjectURL(e.target.files[0]);
-}
-
-async function analyze(){
-  result.innerText = "กำลังวิเคราะห์...";
-  result.innerText = "ขยะประเภท: รีไซเคิล (ความมั่นใจ 90%)";
-}
-
-function saveResult(){
-  let data = JSON.parse(localStorage[currentStudent]);
-  data.score += 1;
-  data.history.push({
-    time: new Date().toLocaleString(),
-    type: "รีไซเคิล",
-    img: preview.src
-  });
-  localStorage[currentStudent] = JSON.stringify(data);
-  updateScore();
-}
-
-function updateScore(){
-  score.innerText = JSON.parse(localStorage[currentStudent]).score;
-}
-
-function showHistory(){
-  studentDashboard.classList.add("hidden");
-  history.classList.remove("hidden");
-  historyList.innerHTML="";
-  JSON.parse(localStorage[currentStudent]).history.forEach(h=>{
-    historyList.innerHTML+=`<p>${h.time} - ${h.type}<br><img src="${h.img}" width="100"></p>`;
-  });
-}
-
-function backToStudent(){
-  history.classList.add("hidden");
-  studentDashboard.classList.remove("hidden");
-}
-
-function teacherLogin(){
-  if(teacherCode.value!=="Eco2026") return alert("รหัสไม่ถูกต้อง");
-  teacherLoginDiv();
-}
-
-function teacherLoginDiv(){
+function loginTeacher(){
+  if(tCode.value!=="Eco2026") return alert("รหัสไม่ถูกต้อง");
   teacherLogin.classList.add("hidden");
-  teacherDashboard.classList.remove("hidden");
+  teacherDash.classList.remove("hidden");
   renderTable();
 }
 
 function renderTable(){
-  let users = Object.values(localStorage).map(v=>JSON.parse(v));
-  if(roomFilter.value) users = users.filter(u=>u.room===roomFilter.value);
+  let users=Object.values(localStorage).map(v=>JSON.parse(v));
+  if(roomFilter.value) users=users.filter(u=>u.room===roomFilter.value);
   users.sort((a,b)=>b.score-a.score);
   table.innerHTML="";
   users.forEach((u,i)=>{
-    let cls = i==0?"gold":i==1?"silver":i==2?"bronze":"";
+    let cls="";
+    if(!roomFilter.value && i<3) cls="gold";
+    if(roomFilter.value && i<3) cls="gray";
     table.innerHTML+=`<div class="${cls}">${i+1}. ${u.name} (${u.room}) - ${u.score} คะแนน</div>`;
   });
 }

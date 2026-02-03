@@ -52,6 +52,9 @@ header{
   height:100%;
   object-fit:cover;
 }
+input[type=file]{
+  margin-top:10px;
+}
 button{
   width:100%;
   padding:14px;
@@ -65,20 +68,21 @@ button{
 .finish{
   background:#00d26a;
 }
-.result{
-  background:#ffffff;   /* <<< พื้นหลังขาวตามที่สั่ง */
+.result-box{
+  background:#ffffff;   /* ✅ พื้นหลังขาว */
   color:#000;
-  padding:14px;
+  padding:16px;
   border-radius:12px;
   text-align:center;
   font-weight:bold;
   margin-top:10px;
 }
 .history-btn{
+  width:100%;
   background:none;
   border:1px solid #1aff8c;
   color:#1aff8c;
-  padding:8px 16px;
+  padding:10px;
   border-radius:20px;
 }
 
@@ -116,31 +120,33 @@ button{
 
 <div class="container">
 
+<!-- รูป -->
 <div class="card">
-  <div class="image-box" id="preview">ถ่ายหรืออัปโหลดรูปขยะ</div>
+  <div class="image-box" id="preview">ยังไม่ได้เลือกรูป</div>
   <input type="file" id="file" accept="image/*">
 </div>
 
+<!-- ปุ่ม -->
 <div class="card">
   <button onclick="analyze()">🧠 วิเคราะห์</button>
   <button class="finish" onclick="finish()">✅ แยกขยะเสร็จแล้ว</button>
 </div>
 
+<!-- ผล -->
 <div class="card">
   <b>ผลการวิเคราะห์</b>
-  <div class="result" id="result">ยังไม่ได้วิเคราะห์</div>
-</div>
-
-<div style="text-align:center;">
-  <button class="history-btn" onclick="openHistory()">📜 ประวัติ</button>
-</div>
-
+  <div class="result-box" id="result">ยังไม่ได้วิเคราะห์</div>
 </div>
 
 <!-- ประวัติ -->
+<button class="history-btn" onclick="openHistory()">📜 ประวัติ</button>
+
+</div>
+
+<!-- modal ประวัติ -->
 <div class="modal" id="historyModal">
   <div class="modal-content">
-    <h3>📜 ประวัติการแยกขยะ</h3>
+    <h3>📜 ประวัติ</h3>
     <div id="historyList"></div>
     <button onclick="closeHistory()">ปิด</button>
   </div>
@@ -162,7 +168,6 @@ function analyze(){
     alert("กรุณาเลือกรูปก่อน");
     return;
   }
-  // จำลองผล (รอ AI จริง)
   const types = ["ขยะรีไซเคิล","ขยะเปียก","ขยะทั่วไป"];
   currentResult = types[Math.floor(Math.random()*types.length)];
   result.innerText = currentResult;
@@ -177,7 +182,7 @@ function finish(){
   document.getElementById("score").innerText = score;
   history.push(currentResult);
   result.innerText = "บันทึกเรียบร้อย ✔️";
-  preview.innerText = "ถ่ายหรืออัปโหลดรูปขยะ";
+  preview.innerText = "ยังไม่ได้เลือกรูป";
   file.value = "";
   currentResult = "";
 }

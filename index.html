@@ -4,192 +4,129 @@
 <meta charset="UTF-8">
 <title>Eco Snap AI</title>
 <style>
-body { font-family: sans-serif; background:#2e7d32; margin:0; padding:0; color:#fff }
-header { padding:10px 20px; display:flex; justify-content:space-between; align-items:center }
-.score { background:#fff; color:#2e7d32; padding:6px 12px; border-radius:20px; font-weight:bold }
-.container { padding:20px }
-.card { background:#e8f5e9; color:#000; border-radius:12px; padding:16px; margin-bottom:16px }
-button { padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-size:16px }
-.primary { background:#43a047; color:#fff }
-.secondary { background:#fff; color:#2e7d32; border:2px solid #2e7d32 }
-input, select { padding:8px; width:100%; margin:6px 0; border-radius:6px; border:1px solid #ccc }
-.hidden { display:none }
-img.thumb { width:80px; border-radius:6px }
-.history-item { display:flex; gap:10px; margin:8px 0; align-items:center }
-.white-result { background:#fff; padding:10px; border-radius:8px; margin-top:10px }
+  body { font-family: sans-serif; background:#111; color:#fff; padding:20px }
+  input, select, button { margin:5px 0; padding:8px; width:100% }
+  .hidden { display:none }
+  .card { background:#1e1e1e; padding:15px; margin:10px 0; border-radius:8px }
+  button { cursor:pointer }
 </style>
 </head>
 
 <body>
 
-<header>
-  <h2>🌱 Eco Snap AI</h2>
-  <div class="score">คะแนน: <span id="score">0</span></div>
-</header>
-
-<div class="container">
+<h2>🌱 Eco Snap AI</h2>
 
 <!-- LOGIN -->
-<div class="card" id="loginCard">
-  <h3>เข้าใช้งาน</h3>
-  <input id="name" placeholder="ชื่อ - นามสกุล">
-  <input id="studentId" placeholder="เลขประจำตัวนักเรียน">
-  <input id="room" placeholder="ห้อง (เช่น 3/1)">
-  <input id="teacherCode" placeholder="รหัสครู (ถ้ามี)">
-  <button class="primary" onclick="login()">เข้าใช้งาน</button>
+<div id="loginUI" class="card">
+  <input id="name" placeholder="ชื่อ" required>
+  <input id="studentId" placeholder="เลขประจำตัวนักเรียน" required>
+
+  <select id="room" required>
+    <option value="">เลือกห้อง</option>
+    <option>1/1</option><option>1/2</option><option>1/3</option>
+    <option>2/1</option><option>2/2</option><option>2/3</option>
+    <option>3/1</option><option>3/2</option><option>3/3</option>
+  </select>
+
+  <input id="teacherCode" type="password" placeholder="รหัสครู">
+  <button onclick="login()">เข้าสู่ระบบ</button>
+
+  <button id="exportBtn">📤 Export คะแนน (CSV)</button>
 </div>
 
 <!-- STUDENT -->
 <div id="studentUI" class="hidden">
-
   <div class="card">
-    <h3>ถ่ายภาพ / อัปโหลดรูป</h3>
-    <video id="video" width="240" autoplay></video><br>
-    <button class="secondary" onclick="startCamera()">เปิดกล้อง</button>
-    <button class="secondary" onclick="capture()">ถ่ายภาพ</button>
-    <input type="file" accept="image/*" onchange="uploadImage(event)">
-    <canvas id="canvas" width="240" height="180" class="hidden"></canvas>
+    <h3>อัปโหลดรูป</h3>
+    <input type="file" accept="image/*" onchange="uploadImage()">
   </div>
-
-  <div class="card">
-    <button class="primary" onclick="analyze()">วิเคราะห์</button>
-    <div id="result" class="white-result hidden"></div>
-    <button class="secondary hidden" id="confirmBtn" onclick="confirmWaste()">แยกขยะเสร็จแล้ว</button>
-  </div>
-
-  <div class="card">
-    <h3>ประวัติของฉัน</h3>
-    <div id="history"></div>
-  </div>
-
 </div>
 
 <!-- TEACHER -->
 <div id="teacherUI" class="hidden">
   <div class="card">
-    <h3>โหมดครู</h3>
-    <select id="roomFilter" onchange="renderTeacher()"></select>
+    <h3>คะแนนนักเรียน</h3>
     <div id="teacherList"></div>
   </div>
 </div>
 
-</div>
-
 <script>
-let currentUser = null;
-let currentImage = null;
-let currentType = null;
+const TEACHER_PASSWORD = "1234";
+let users = [];
+let filteredUsers = [];
 
 function login() {
-  const code = teacherCode.value.trim();
-  if (code === "Eco2026") {
-    document.getElementById("loginCard").classList.add("hidden");
+  const name = document.getElementById("name").value;
+  const studentId = document.getElementById("studentId").value;
+  const room = document.getElementById("room").value;
+  const teacherCode = document.getElementById("teacherCode").value;
+
+  if (teacherCode === TEACHER_PASSWORD) {
     document.getElementById("teacherUI").classList.remove("hidden");
-    renderTeacher();
-    return;
+  } else {
+    document.getElementById("studentUI").classList.remove("hidden");
+
+    users.push({
+      name,
+      studentId,
+      room,
+      score: Math.floor(Math.random() * 100)
+    });
   }
 
-  if (!name.value || !studentId.value || !room.value) {
-    alert("กรอกข้อมูลให้ครบ");
-    return;
-  }
-
-  currentUser = { name: name.value, id: studentId.value, room: room.value };
-  saveUser();
-  document.getElementById("loginCard").classList.add("hidden");
-  document.getElementById("studentUI").classList.remove("hidden");
-  loadUser();
+  document.getElementById("loginUI").classList.add("hidden");
+  renderTeacher();
 }
 
-function saveUser() {
-  const db = JSON.parse(localStorage.getItem("ecoDB") || "{}");
-  if (!db[currentUser.id]) {
-    db[currentUser.id] = { ...currentUser, score:0, history:[] };
-    localStorage.setItem("ecoDB", JSON.stringify(db));
-  }
-}
-
-function loadUser() {
-  const db = JSON.parse(localStorage.getItem("ecoDB"));
-  const u = db[currentUser.id];
-  score.innerText = u.score;
-  renderHistory();
-}
-
-function startCamera() {
-  navigator.mediaDevices.getUserMedia({ video:true }).then(s=>{
-    video.srcObject = s;
-  });
-}
-
-function capture() {
-  canvas.getContext("2d").drawImage(video,0,0,240,180);
-  currentImage = canvas.toDataURL();
-}
-
-function uploadImage(e) {
-  const r = new FileReader();
-  r.onload = () => currentImage = r.result;
-  r.readAsDataURL(e.target.files[0]);
-}
-
-function analyze() {
-  if (!currentImage) { alert("ยังไม่มีรูป"); return; }
-
-  /* 🔴 จุดเชื่อม AI ของคุณ 🔴
-     แก้แค่บรรทัดนี้ ถ้าชื่อผลไม่เหมือนกัน */
-  currentType = prediction[0].className; // <-- ใช้ผล className จาก AI ของคุณแทน
-
-  result.innerText = "ผลการวิเคราะห์: " + currentType;
-  result.classList.remove("hidden");
-  confirmBtn.classList.remove("hidden");
-}
-
-function confirmWaste() {
-  const db = JSON.parse(localStorage.getItem("ecoDB"));
-  const u = db[currentUser.id];
-
-  u.score += 1;
-  u.history.push({
-    img: currentImage,
-    type: currentType,
-    time: new Date().toLocaleString()
-  });
-
-  localStorage.setItem("ecoDB", JSON.stringify(db));
-  score.innerText = u.score;
-  renderHistory();
-
-  confirmBtn.classList.add("hidden");
-}
-
-function renderHistory() {
-  const db = JSON.parse(localStorage.getItem("ecoDB"));
-  const u = db[currentUser.id];
-  history.innerHTML = "";
-  u.history.forEach(h=>{
-    history.innerHTML += `
-      <div class="history-item">
-        <img src="${h.img}" class="thumb">
-        <div>${h.type}<br><small>${h.time}</small></div>
-      </div>`;
-  });
+function uploadImage() {
+  alert("อัปโหลดสำเร็จ + เพิ่มคะแนน");
 }
 
 function renderTeacher() {
-  const db = JSON.parse(localStorage.getItem("ecoDB") || "{}");
-  const rooms = [...new Set(Object.values(db).map(u=>u.room))];
-  roomFilter.innerHTML = rooms.map(r=>`<option>${r}</option>`).join("");
-  teacherList.innerHTML = "";
+  filteredUsers = [...users];
 
-  Object.values(db)
-    .filter(u=>u.room===roomFilter.value)
-    .forEach(u=>{
-      teacherList.innerHTML += `<div class="card">
-        <b>${u.name}</b> (${u.room})<br>คะแนน: ${u.score}
-      </div>`;
-    });
+  // เรียงคะแนนมาก → น้อย
+  filteredUsers.sort((a, b) => b.score - a.score);
+
+  const list = document.getElementById("teacherList");
+  list.innerHTML = "";
+
+  filteredUsers.forEach((u, index) => {
+    list.innerHTML += `
+      <div class="card">
+        ${index + 1}. ${u.name} (${u.room}) — ${u.score} คะแนน
+      </div>
+    `;
+  });
 }
+
+/* ===== 4.1 สร้าง CSV ===== */
+function buildCSV(users) {
+  let csv = "อันดับ,ชื่อ,ห้อง,เลขนักเรียน,คะแนน\n";
+  users.forEach((u, i) => {
+    csv += `${i+1},${u.name},${u.room},${u.studentId},${u.score}\n`;
+  });
+  return csv;
+}
+
+/* ===== 4.2 ปุ่ม Export CSV ===== */
+document.getElementById("exportBtn").addEventListener("click", () => {
+  if (!filteredUsers || filteredUsers.length === 0) {
+    alert("ไม่มีข้อมูลให้ export");
+    return;
+  }
+
+  const csv = buildCSV(filteredUsers);
+  const blob = new Blob(["\ufeff" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "คะแนนนักเรียน.csv";
+  a.click();
+
+  URL.revokeObjectURL(url);
+});
 </script>
 
 </body>

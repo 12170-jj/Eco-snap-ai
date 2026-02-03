@@ -1,164 +1,99 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Eco Snap AI</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
 <style>
 body {
-  margin: 0;
-  font-family: "Prompt", sans-serif;
-  background: linear-gradient(135deg,#0f5132,#198754);
-  color: white;
-  text-align: center;
+  margin:0;
+  font-family:sans-serif;
+  background:linear-gradient(#0f3d2e,#1e7f5c);
+  color:white;
+  text-align:center;
 }
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 20px;
+.card{
+  background:#134e3a;
+  margin:15px;
+  padding:20px;
+  border-radius:20px;
 }
-.card {
-  background: rgba(0,0,0,0.35);
-  border-radius: 20px;
-  padding: 20px;
-  margin-top: 20px;
+button{
+  background:#1eff9c;
+  border:none;
+  padding:15px 25px;
+  border-radius:30px;
+  font-size:18px;
 }
-button {
-  background: #00ff9c;
-  border: none;
-  border-radius: 30px;
-  padding: 15px;
-  width: 100%;
-  font-size: 18px;
-  font-weight: bold;
-  cursor: pointer;
-}
-#camera canvas {
-  border-radius: 15px;
-  margin-top: 10px;
-}
-.history-item {
-  background: rgba(255,255,255,0.1);
-  border-radius: 10px;
-  padding: 8px;
-  margin-top: 6px;
-  font-size: 14px;
-}
+img{max-width:90%;border-radius:15px;margin-top:10px}
 </style>
 </head>
 
 <body>
-<div class="container">
-  <h1>🌱 Eco Snap AI</h1>
-  <p>ถ่ายรูปขยะ → วิเคราะห์ → ได้คะแนน</p>
 
-  <div class="card">
-    <h3>📸 กล้อง</h3>
-    <div id="camera"></div>
-    <button onclick="startAI()">เริ่มวิเคราะห์ขยะ</button>
-  </div>
+<h1>🌱 Eco Snap AI</h1>
+<p>ถ่ายรูปขยะ → วิเคราะห์ → ได้คะแนน</p>
 
-  <div class="card">
-    <h3>🧠 ผลการวิเคราะห์</h3>
-    <div id="result">ยังไม่ได้วิเคราะห์</div>
-  </div>
+<div class="card">
+📸 <b>ถ่ายภาพขยะ</b><br><br>
+<input type="file" accept="image/*" capture="environment" id="imageInput">
+<img id="preview">
+</div>
 
-  <div class="card">
-    <h3>⭐ คะแนนสะสม</h3>
-    <div id="score">0</div>
-  </div>
+<div class="card">
+🧠 <b>ผลการวิเคราะห์</b>
+<div id="result">ยังไม่ได้วิเคราะห์</div>
+</div>
 
-  <div class="card">
-    <h3>🗂️ ประวัติ</h3>
-    <div id="history"></div>
-  </div>
+<div class="card">
+⭐ <b>คะแนนสะสม</b>
+<div id="score">0</div>
+</div>
+
+<div class="card">
+📜 <b>ประวัติ</b>
+<ul id="history"></ul>
 </div>
 
 <script>
-// 🔴 วาง Model URL ของคุณตรงนี้ (อย่างเดียว)
-const MODEL_URL = "วาง_Model_URL_ตรงนี้/";
+const URL = "ใส่ลิงก์โมเดลของคุณตรงนี้/"; // 👈 แก้แค่ตรงนี้
 
-// ===============================
-let model, webcam, maxPredictions;
-let score = Number(localStorage.getItem("ecoScore")) || 0;
-let history = JSON.parse(localStorage.getItem("ecoHistory")) || [];
+let model;
+let score = 0;
 
-document.getElementById("score").innerText = score;
-renderHistory();
-
-async function startAI() {
-  const modelURL = MODEL_URL + "model.json";
-  const metadataURL = MODEL_URL + "metadata.json";
-
-  model = await tmImage.load(modelURL, metadataURL);
-  maxPredictions = model.getTotalClasses();
-
-  webcam = new tmImage.Webcam(250, 250, true);
-  await webcam.setup();
-  await webcam.play();
-
-  document.getElementById("camera").innerHTML = "";
-  document.getElementById("camera").appendChild(webcam.canvas);
-
-  window.requestAnimationFrame(loop);
+async function loadModel(){
+  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
 }
+loadModel();
 
-async function loop() {
-  webcam.update();
-  await predict();
-  window.requestAnimationFrame(loop);
-}
+document.getElementById("imageInput").addEventListener("change", async (e)=>{
+  const file = e.target.files[0];
+  if(!file) return;
 
-async function predict() {
-  const predictions = await model.predict(webcam.canvas);
-  predictions.sort((a,b)=>b.probability-a.probability);
-  const top = predictions[0];
+  const img = document.getElementById("preview");
+  img.src = URL.createObjectURL(file);
 
-  if (top.probability > 0.85) {
-    processResult(top.className);
+  img.onload = async ()=>{
+    const prediction = await model.predict(img);
+    prediction.sort((a,b)=>b.probability-a.probability);
+
+    const best = prediction[0];
+    document.getElementById("result").innerText =
+      best.className + " (" + (best.probability*100).toFixed(1) + "%)";
+
+    score += 10;
+    document.getElementById("score").innerText = score;
+
+    const li = document.createElement("li");
+    li.innerText = best.className;
+    document.getElementById("history").appendChild(li);
   }
-}
-
-function processResult(type) {
-  let bin = "ถังทั่วไป";
-  let tip = "แยกให้ถูกประเภท";
-  let point = 10;
-
-  if (type.toLowerCase().includes("recycle")) {
-    bin = "ถังสีเหลือง";
-    tip = "ล้างให้สะอาดก่อนทิ้ง";
-  }
-  if (type.toLowerCase().includes("hazard")) {
-    bin = "ถังสีแดง";
-    tip = "แยกใส่ถุงเฉพาะ";
-    point = 15;
-  }
-
-  score += point;
-  localStorage.setItem("ecoScore", score);
-
-  history.unshift(`♻️ ${type} → ${bin} (+${point})`);
-  history = history.slice(0,5);
-  localStorage.setItem("ecoHistory", JSON.stringify(history));
-
-  document.getElementById("result").innerHTML = `
-    <b>${type}</b><br>
-    ทิ้งที่: ${bin}<br>
-    คำแนะนำ: ${tip}<br>
-    ⭐ +${point} คะแนน
-  `;
-
-  document.getElementById("score").innerText = score;
-  renderHistory();
-}
-
-function renderHistory() {
-  document.getElementById("history").innerHTML =
-    history.map(h=>`<div class="history-item">${h}</div>`).join("");
-}
+});
 </script>
+
 </body>
 </html>

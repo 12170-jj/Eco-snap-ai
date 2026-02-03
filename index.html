@@ -1,50 +1,142 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Eco Snap AI</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: linear-gradient(#0f5132, #198754);
+      color: #fff;
+      text-align: center;
+    }
+    h1 {
+      margin-top: 20px;
+    }
+    .card {
+      background: #145c3a;
+      margin: 20px;
+      padding: 20px;
+      border-radius: 20px;
+    }
+    .image-box {
+      width: 100%;
+      height: 250px;
+      background: #0b3d28;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+    .image-box img {
+      max-height: 100%;
+      max-width: 100%;
+      border-radius: 10px;
+    }
+    input[type="file"] {
+      margin-top: 10px;
+    }
+    button {
+      width: 90%;
+      padding: 15px;
+      font-size: 18px;
+      border: none;
+      border-radius: 30px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .analyze {
+      background: #2dff9c;
+      color: #000;
+    }
+    .done {
+      background: #00c853;
+      color: #000;
+    }
+    .result {
+      background: #fff;
+      color: #000;
+      padding: 15px;
+      border-radius: 15px;
+      margin-top: 15px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>🌱 Eco Snap AI</h1>
+
+  <div class="card">
+    <div class="image-box">
+      <span id="placeholder">ยังไม่ได้เลือกรูป</span>
+      <img id="preview" style="display:none;">
+    </div>
+    <input type="file" accept="image/*" id="imageInput">
+  </div>
+
+  <div class="card">
+    <button class="analyze" onclick="analyze()">🧠 วิเคราะห์</button>
+    <button class="done">✅ แยกขยะเสร็จแล้ว</button>
+
+    <div id="result" class="result" style="display:none;"></div>
+  </div>
+
 <script>
-const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model;
-let imageElement;
-let score = 0;
-let modelReady = false;
+  const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+  let model;
 
-const resultBox = document.getElementById("result");
+  const imageInput = document.getElementById("imageInput");
+  const preview = document.getElementById("preview");
+  const placeholder = document.getElementById("placeholder");
+  const resultBox = document.getElementById("result");
 
-async function loadModel(){
-    resultBox.innerHTML = "⏳ กำลังโหลดโมเดล AI...";
-    model = await tmImage.load(URL+"model.json", URL+"metadata.json");
-    modelReady = true;
-    resultBox.innerHTML = "✅ โมเดลพร้อมแล้ว กดวิเคราะห์ได้";
-}
-loadModel();
+  imageInput.onchange = () => {
+    const file = imageInput.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      preview.src = reader.result;
+      preview.style.display = "block";
+      placeholder.style.display = "none";
+    };
+    reader.readAsDataURL(file);
+  };
 
-function loadImage(event){
-    const img = document.createElement("img");
-    img.src = URL.createObjectURL(event.target.files[0]);
-    imageElement = img;
-    const preview = document.getElementById("preview");
-    preview.innerHTML="";
-    preview.appendChild(img);
-}
-
-async function analyze(){
-    if(!modelReady){
-        alert("⏳ โมเดลกำลังโหลด รอสักครู่");
-        return;
+  async function loadModel() {
+    if (!model) {
+      model = await tmImage.load(URL + "model.json", URL + "metadata.json");
     }
-    if(!imageElement){
-        alert("กรุณาเลือกรูปก่อน");
-        return;
+  }
+
+  async function analyze() {
+    if (!imageInput.files[0]) {
+      alert("กรุณาเลือกรูปก่อน");
+      return;
     }
 
-    const prediction = await model.predict(imageElement);
-    prediction.sort((a,b)=>b.probability-a.probability);
+    resultBox.style.display = "block";
+    resultBox.innerHTML = "⏳ กำลังวิเคราะห์...";
 
-    resultBox.innerHTML =
-        "🗑️ ประเภทขยะ: <b>"+prediction[0].className+"</b><br>" +
-        "ความมั่นใจ: "+(prediction[0].probability*100).toFixed(1)+"%";
-}
+    await loadModel();
+    const prediction = await model.predict(preview);
 
-function finish(){
-    score += 10;
-    document.querySelector(".score").innerText = "⭐ "+score;
-    alert("บันทึกสำเร็จ +10 คะแนน");
-}
+    prediction.sort((a, b) => b.probability - a.probability);
+    const top = prediction[0];
+
+    resultBox.innerHTML = `
+      <b>ผลการวิเคราะห์</b><br>
+      ประเภท: ${top.className}<br>
+      ความมั่นใจ: ${(top.probability * 100).toFixed(2)}%
+    `;
+  }
 </script>
+
+</body>
+</html>

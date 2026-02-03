@@ -1,141 +1,195 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Eco Snap AI</title>
-
-  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-
-  <style>
-    body {
-      margin: 0;
-      font-family: sans-serif;
-      background: linear-gradient(#0f5132, #198754);
-      color: #fff;
-      text-align: center;
-    }
-    h1 {
-      margin-top: 20px;
-    }
-    .card {
-      background: #145c3a;
-      margin: 20px;
-      padding: 20px;
-      border-radius: 20px;
-    }
-    .image-box {
-      width: 100%;
-      height: 250px;
-      background: #0b3d28;
-      border-radius: 15px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 10px;
-    }
-    .image-box img {
-      max-height: 100%;
-      max-width: 100%;
-      border-radius: 10px;
-    }
-    input[type="file"] {
-      margin-top: 10px;
-    }
-    button {
-      width: 90%;
-      padding: 15px;
-      font-size: 18px;
-      border: none;
-      border-radius: 30px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-    .analyze {
-      background: #2dff9c;
-      color: #000;
-    }
-    .done {
-      background: #00c853;
-      color: #000;
-    }
-    .result {
-      background: #fff;
-      color: #000;
-      padding: 15px;
-      border-radius: 15px;
-      margin-top: 15px;
-    }
-  </style>
+<meta charset="UTF-8">
+<title>Eco Snap AI</title>
+<style>
+body { font-family: sans-serif; background:#2e7d32; margin:0; padding:0; color:#fff }
+header { padding:10px 20px; display:flex; justify-content:space-between; align-items:center }
+.score { background:#fff; color:#2e7d32; padding:6px 12px; border-radius:20px; font-weight:bold }
+.container { padding:20px }
+.card { background:#e8f5e9; color:#000; border-radius:12px; padding:16px; margin-bottom:16px }
+button { padding:10px 16px; border:none; border-radius:8px; cursor:pointer; font-size:16px }
+.primary { background:#43a047; color:#fff }
+.secondary { background:#fff; color:#2e7d32; border:2px solid #2e7d32 }
+input, select { padding:8px; width:100%; margin:6px 0; border-radius:6px; border:1px solid #ccc }
+.hidden { display:none }
+img.thumb { width:80px; border-radius:6px }
+.history-item { display:flex; gap:10px; margin:8px 0; align-items:center }
+.white-result { background:#fff; padding:10px; border-radius:8px; margin-top:10px }
+</style>
 </head>
 
 <body>
-  <h1>🌱 Eco Snap AI</h1>
+
+<header>
+  <h2>🌱 Eco Snap AI</h2>
+  <div class="score">คะแนน: <span id="score">0</span></div>
+</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div class="card" id="loginCard">
+  <h3>เข้าใช้งาน</h3>
+  <input id="name" placeholder="ชื่อ - นามสกุล">
+  <input id="studentId" placeholder="เลขประจำตัวนักเรียน">
+  <input id="room" placeholder="ห้อง (เช่น 3/1)">
+  <input id="teacherCode" placeholder="รหัสครู (ถ้ามี)">
+  <button class="primary" onclick="login()">เข้าใช้งาน</button>
+</div>
+
+<!-- STUDENT -->
+<div id="studentUI" class="hidden">
 
   <div class="card">
-    <div class="image-box">
-      <span id="placeholder">ยังไม่ได้เลือกรูป</span>
-      <img id="preview" style="display:none;">
-    </div>
-    <input type="file" accept="image/*" id="imageInput">
+    <h3>ถ่ายภาพ / อัปโหลดรูป</h3>
+    <video id="video" width="240" autoplay></video><br>
+    <button class="secondary" onclick="startCamera()">เปิดกล้อง</button>
+    <button class="secondary" onclick="capture()">ถ่ายภาพ</button>
+    <input type="file" accept="image/*" onchange="uploadImage(event)">
+    <canvas id="canvas" width="240" height="180" class="hidden"></canvas>
   </div>
 
   <div class="card">
-    <button class="analyze" onclick="analyze()">🧠 วิเคราะห์</button>
-    <button class="done">✅ แยกขยะเสร็จแล้ว</button>
-
-    <div id="result" class="result" style="display:none;"></div>
+    <button class="primary" onclick="analyze()">วิเคราะห์</button>
+    <div id="result" class="white-result hidden"></div>
+    <button class="secondary hidden" id="confirmBtn" onclick="confirmWaste()">แยกขยะเสร็จแล้ว</button>
   </div>
+
+  <div class="card">
+    <h3>ประวัติของฉัน</h3>
+    <div id="history"></div>
+  </div>
+
+</div>
+
+<!-- TEACHER -->
+<div id="teacherUI" class="hidden">
+  <div class="card">
+    <h3>โหมดครู</h3>
+    <select id="roomFilter" onchange="renderTeacher()"></select>
+    <div id="teacherList"></div>
+  </div>
+</div>
+
+</div>
 
 <script>
-  const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-  let model;
+let currentUser = null;
+let currentImage = null;
+let currentType = null;
 
-  const imageInput = document.getElementById("imageInput");
-  const preview = document.getElementById("preview");
-  const placeholder = document.getElementById("placeholder");
-  const resultBox = document.getElementById("result");
-
-  imageInput.onchange = () => {
-    const file = imageInput.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      preview.src = reader.result;
-      preview.style.display = "block";
-      placeholder.style.display = "none";
-    };
-    reader.readAsDataURL(file);
-  };
-
-  async function loadModel() {
-    if (!model) {
-      model = await tmImage.load(URL + "model.json", URL + "metadata.json");
-    }
+function login() {
+  const code = teacherCode.value.trim();
+  if (code === "Eco2026") {
+    document.getElementById("loginCard").classList.add("hidden");
+    document.getElementById("teacherUI").classList.remove("hidden");
+    renderTeacher();
+    return;
   }
 
-  async function analyze() {
-    if (!imageInput.files[0]) {
-      alert("กรุณาเลือกรูปก่อน");
-      return;
-    }
-
-    resultBox.style.display = "block";
-    resultBox.innerHTML = "⏳ กำลังวิเคราะห์...";
-
-    await loadModel();
-    const prediction = await model.predict(preview);
-
-    prediction.sort((a, b) => b.probability - a.probability);
-    const top = prediction[0];
-
-    resultBox.innerHTML = `
-      <b>ผลการวิเคราะห์</b><br>
-      ประเภท: ${top.className}<br>
-      ความมั่นใจ: ${(top.probability * 100).toFixed(2)}%
-    `;
+  if (!name.value || !studentId.value || !room.value) {
+    alert("กรอกข้อมูลให้ครบ");
+    return;
   }
+
+  currentUser = { name: name.value, id: studentId.value, room: room.value };
+  saveUser();
+  document.getElementById("loginCard").classList.add("hidden");
+  document.getElementById("studentUI").classList.remove("hidden");
+  loadUser();
+}
+
+function saveUser() {
+  const db = JSON.parse(localStorage.getItem("ecoDB") || "{}");
+  if (!db[currentUser.id]) {
+    db[currentUser.id] = { ...currentUser, score:0, history:[] };
+    localStorage.setItem("ecoDB", JSON.stringify(db));
+  }
+}
+
+function loadUser() {
+  const db = JSON.parse(localStorage.getItem("ecoDB"));
+  const u = db[currentUser.id];
+  score.innerText = u.score;
+  renderHistory();
+}
+
+function startCamera() {
+  navigator.mediaDevices.getUserMedia({ video:true }).then(s=>{
+    video.srcObject = s;
+  });
+}
+
+function capture() {
+  canvas.getContext("2d").drawImage(video,0,0,240,180);
+  currentImage = canvas.toDataURL();
+}
+
+function uploadImage(e) {
+  const r = new FileReader();
+  r.onload = () => currentImage = r.result;
+  r.readAsDataURL(e.target.files[0]);
+}
+
+function analyze() {
+  if (!currentImage) { alert("ยังไม่มีรูป"); return; }
+
+  /* 🔴 จุดเชื่อม AI ของคุณ 🔴
+     แก้แค่บรรทัดนี้ ถ้าชื่อผลไม่เหมือนกัน */
+  currentType = prediction[0].className; // <-- ใช้ผล className จาก AI ของคุณแทน
+
+  result.innerText = "ผลการวิเคราะห์: " + currentType;
+  result.classList.remove("hidden");
+  confirmBtn.classList.remove("hidden");
+}
+
+function confirmWaste() {
+  const db = JSON.parse(localStorage.getItem("ecoDB"));
+  const u = db[currentUser.id];
+
+  u.score += 1;
+  u.history.push({
+    img: currentImage,
+    type: currentType,
+    time: new Date().toLocaleString()
+  });
+
+  localStorage.setItem("ecoDB", JSON.stringify(db));
+  score.innerText = u.score;
+  renderHistory();
+
+  confirmBtn.classList.add("hidden");
+}
+
+function renderHistory() {
+  const db = JSON.parse(localStorage.getItem("ecoDB"));
+  const u = db[currentUser.id];
+  history.innerHTML = "";
+  u.history.forEach(h=>{
+    history.innerHTML += `
+      <div class="history-item">
+        <img src="${h.img}" class="thumb">
+        <div>${h.type}<br><small>${h.time}</small></div>
+      </div>`;
+  });
+}
+
+function renderTeacher() {
+  const db = JSON.parse(localStorage.getItem("ecoDB") || "{}");
+  const rooms = [...new Set(Object.values(db).map(u=>u.room))];
+  roomFilter.innerHTML = rooms.map(r=>`<option>${r}</option>`).join("");
+  teacherList.innerHTML = "";
+
+  Object.values(db)
+    .filter(u=>u.room===roomFilter.value)
+    .forEach(u=>{
+      teacherList.innerHTML += `<div class="card">
+        <b>${u.name}</b> (${u.room})<br>คะแนน: ${u.score}
+      </div>`;
+    });
+}
 </script>
 
 </body>

@@ -103,23 +103,32 @@ input,select{
   <div id="teacherList"></div>
 </div>
 
-<script>
-const URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model;
-let modelLoaded = false;
-let currentPrediction = null;
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@0.8/dist/teachablemachine-image.min.js"></script>
 
+<script>
+/* ===== AI ===== */
+const URL = "https://teachablemachine.withgoogle.com/models/ใส่ลิงก์โมเดลของเธอ/";
+let model, currentPrediction = null;
+
+/* ===== โหลด AI ===== */
+async function loadModel(){
+  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+}
+loadModel();
+
+/* ===== เลือกบทบาท ===== */
 function selectRole(r){
   document.getElementById("role").classList.add("hidden");
 
-  if(r==="student"){
+  if(r === "student"){
     document.getElementById("studentLogin").classList.remove("hidden");
-    document.getElementById("teacherPage").classList.add("hidden");
   }else{
-    alert("หน้าคุณครูจะมาในขั้นถัดไป");
     document.getElementById("teacherPage").classList.remove("hidden");
+    loadTeacher();
   }
 }
+
+/* ===== นักเรียนเข้า ===== */
 function enterStudent(){
   const name = document.getElementById("sName").value;
   const id   = document.getElementById("sId").value;
@@ -131,6 +140,15 @@ function enterStudent(){
   }
 
   sessionStorage.sid = id;
+  const key = "stu_" + id;
+
+  if(!localStorage[key]){
+    localStorage[key] = JSON.stringify({
+      name: name,
+      class: cls,
+      history: []
+    });
+  }
 
   document.getElementById("studentLogin").classList.add("hidden");
   document.getElementById("studentPage").classList.remove("hidden");
@@ -138,20 +156,85 @@ function enterStudent(){
 
   loadStudent();
 }
+
+/* ===== โหลดข้อมูลนักเรียน ===== */
 function loadStudent(){
-  const data=JSON.parse(localStorage["stu_"+sessionStorage.sid]);
-  studentName.textContent=data.name+" ("+data.cls+")";
-  score.textContent=data.score;
-  history.innerHTML="";
-  data.history.forEach(h=>{
-    history.innerHTML+=`
-      <div class="history-item">
-        <img src="${h.img}" style="width:100%">
-        <div>${h.type} (${h.conf}%)</div>
-        <small>${h.time}</small>
-      </div>`;
-  });
+  const data = JSON.parse(localStorage["stu_" + sessionStorage.sid]);
+  document.getElementById("studentName").innerText = data.name;
+  document.getElementById("studentClass").innerText = data.class;
 }
+
+/* ===== วิเคราะห์ ===== */
+async function analyze(){
+  if(!model){
+    alert("AI ยังโหลดไม่เสร็จ");
+    return;
+  }
+
+  const img = document.getElementById("imagePreview");
+  const prediction = await model.predict(img);
+
+  prediction.sort((a,b)=>b.probability-a.probability);
+  const best = prediction[0];
+
+  currentPrediction = best.className;
+
+  document.getElementById("result").innerText =
+    best.className + " (" + (best.probability*100).toFixed(1) + "%)";
+}
+
+/* ===== บันทึกผล ===== */
+function saveResult(){
+  if(!currentPrediction){
+    alert("ยังไม่ได้วิเคราะห์");
+    return;
+  }
+
+  const key = "stu_" + sessionStorage.sid;
+  const data = JSON.parse(localStorage[key]);
+
+  data.history.push({
+    type: currentPrediction,
+    time: new Date().toLocaleString()
+  });
+
+  localStorage[key] = JSON.stringify(data);
+
+  resetAnalyze();
+  alert("บันทึกแล้ว");
+}
+
+/* ===== รีเซ็ตเพื่อชิ้นต่อไป ===== */
+function resetAnalyze(){
+  currentPrediction = null;
+  document.getElementById("result").innerText = "";
+  document.getElementById("imagePreview").src = "";
+}
+
+/* ===== ครูดูผลรวม ===== */
+function loadTeacher(){
+  const list = document.getElementById("teacherList");
+  list.innerHTML = "";
+
+  for(let key in localStorage){
+    if(key.startsWith("stu_")){
+      const s = JSON.parse(localStorage[key]);
+
+      let count = {};
+      s.history.forEach(h=>{
+        count[h.type] = (count[h.type] || 0) + 1;
+      });
+
+      let text = `<b>${s.name}</b> (${s.class})<br>`;
+      for(let k in count){
+        text += `- ${k}: ${count[k]} ชิ้น<br>`;
+      }
+
+      list.innerHTML += `<div class="card">${text}</div>`;
+    }
+  }
+}
+</script>
 
 imgInput.onchange=e=>{
   const f=e.target.files[0];

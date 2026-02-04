@@ -105,25 +105,39 @@ input,select{
 
 <script>
 const URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model,currentPrediction;
+let model;
+let modelLoaded = false;
+let currentPrediction = null;
 
 function selectRole(r){
   document.getElementById("role").classList.add("hidden");
-  if(r==="student") document.getElementById("studentLogin").classList.remove("hidden");
-  else document.getElementById("teacherPage").classList.remove("hidden"),loadTeacher();
-}
 
+  if(r==="student"){
+    document.getElementById("studentLogin").classList.remove("hidden");
+    document.getElementById("teacherPage").classList.add("hidden");
+  }else{
+    alert("หน้าคุณครูจะมาในขั้นถัดไป");
+    document.getElementById("teacherPage").classList.remove("hidden");
+  }
+}
 function enterStudent(){
-  const name=sName.value,id=sId.value,cls=sClass.value;
-  if(!name||!id) return alert("กรอกข้อมูลให้ครบ");
-  const key="stu_"+id;
-  if(!localStorage[key]) localStorage[key]=JSON.stringify({name,id,cls,score:0,history:[]});
-  sessionStorage.sid=id;
-  studentLogin.classList.add("hidden");
-  studentPage.classList.remove("hidden");
+  const name = document.getElementById("sName").value;
+  const id   = document.getElementById("sId").value;
+  const cls  = document.getElementById("sClass").value;
+
+  if(!name || !id){
+    alert("กรอกข้อมูลให้ครบ");
+    return;
+  }
+
+  sessionStorage.sid = id;
+
+  document.getElementById("studentLogin").classList.add("hidden");
+  document.getElementById("studentPage").classList.remove("hidden");
+  document.getElementById("analyzePage").classList.remove("hidden");
+
   loadStudent();
 }
-
 function loadStudent(){
   const data=JSON.parse(localStorage["stu_"+sessionStorage.sid]);
   studentName.textContent=data.name+" ("+data.cls+")";

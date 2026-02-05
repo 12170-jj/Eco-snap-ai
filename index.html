@@ -9,100 +9,42 @@
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
 
 <style>
-body{
-  margin:0;
-  font-family:sans-serif;
-  background:#e8f5e9;
-}
-header{
-  background:#2e7d32;
-  color:#fff;
-  padding:10px;
-  text-align:center;
-  position:relative;
-}
-.back{
-  position:absolute;
-  left:10px;
-  top:10px;
-  font-size:14px;
-  cursor:pointer;
-}
-.container{
-  padding:15px;
-}
-.card{
-  background:#fff;
-  border-radius:12px;
-  padding:15px;
-  margin-bottom:15px;
-  box-shadow:0 2px 6px rgba(0,0,0,.1);
-}
-button{
-  width:100%;
-  padding:12px;
-  border:none;
-  border-radius:20px;
-  background:#43a047;
-  color:#fff;
-  font-size:16px;
-  margin-top:10px;
-  cursor:pointer;
-}
-button.secondary{
-  background:#9e9e9e;
-}
+body{margin:0;font-family:sans-serif;background:#e9f7ef}
+header{background:#198754;color:#fff;padding:10px;display:flex;align-items:center}
+.back{font-size:14px;margin-right:10px;cursor:pointer}
+.container{padding:15px}
 .hidden{display:none}
-input,select{
-  width:100%;
-  padding:10px;
-  margin-top:8px;
-  border-radius:10px;
-  border:1px solid #ccc;
-}
-.history-item{
-  border:1px solid #c8e6c9;
-  border-radius:10px;
-  padding:10px;
-  margin-bottom:10px;
-}
-.history-item img{
-  width:100%;
-  border-radius:8px;
-}
-.score{
-  position:absolute;
-  right:10px;
-  top:10px;
-}
-.gold{color:gold;font-weight:bold}
+button{width:100%;padding:12px;border:none;border-radius:10px;background:#198754;color:#fff;font-size:16px;margin-top:10px}
+.card{background:#fff;border-radius:12px;padding:12px;margin-top:10px}
+img{max-width:100%;border-radius:10px}
+input,select{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px solid #ccc}
+.history{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.history .card{font-size:13px}
+.score{margin-left:auto;font-weight:bold}
 </style>
 </head>
 
 <body>
 
 <header>
-  <span class="back hidden" onclick="goHome()">⬅</span>
-  <span id="headerTitle">Eco Snap AI</span>
-  <span class="score" id="scoreBox"></span>
+  <span class="back hidden" onclick="goHome()">⬅ ย้อนกลับ</span>
+  <span id="title">Eco Snap AI</span>
+  <span class="score" id="score"></span>
 </header>
 
 <div class="container">
 
-<!-- เลือกบทบาท -->
-<div id="rolePage" class="card">
-  <h3>เลือกบทบาท</h3>
-  <button onclick="showStudentLogin()">นักเรียน</button>
-  <button onclick="showTeacherLogin()">คุณครู</button>
+<!-- ROLE -->
+<div id="role">
+  <button onclick="chooseRole('student')">นักเรียน</button>
+  <button onclick="chooseRole('teacher')">ครู</button>
 </div>
 
-<!-- นักเรียนล็อกอิน -->
-<div id="studentLogin" class="card hidden">
-  <h3>เข้าสู่ระบบนักเรียน</h3>
-  <input id="stuName" placeholder="ชื่อ-นามสกุล">
-  <input id="stuId" placeholder="รหัสนักเรียน">
-  <select id="stuRoom">
-    <option value="">เลือกห้อง</option>
+<!-- STUDENT LOGIN -->
+<div id="studentLogin" class="hidden">
+  <input id="sname" placeholder="ชื่อ-นามสกุล">
+  <input id="sid" placeholder="รหัสนักเรียน">
+  <select id="sclass">
     <option>ม.1/1</option><option>ม.1/2</option><option>ม.1/3</option><option>ม.1/4</option><option>ม.1/5</option>
     <option>ม.2/1</option><option>ม.2/2</option><option>ม.2/3</option><option>ม.2/4</option><option>ม.2/5</option>
     <option>ม.3/1</option><option>ม.3/2</option><option>ม.3/3</option><option>ม.3/4</option>
@@ -110,151 +52,109 @@ input,select{
     <option>ม.5/1</option><option>ม.5/2</option><option>ม.5/3</option><option>ม.5/4</option>
     <option>ม.6/1</option><option>ม.6/2</option><option>ม.6/3</option>
   </select>
-  <button onclick="studentLogin()">เข้าสู่ระบบ</button>
+  <button onclick="loginStudent()">เข้าสู่ระบบ</button>
 </div>
 
-<!-- หน้านักเรียน -->
-<div id="studentPage" class="hidden">
-  <div class="card">
-    <input type="file" id="imgInput" accept="image/*">
-    <img id="preview" style="width:100%;margin-top:10px;border-radius:10px;display:none">
-    <button onclick="analyze()">วิเคราะห์ขยะ</button>
-    <div id="result"></div>
-    <button onclick="confirmTrash()">แยกขยะเสร็จ</button>
-  </div>
-
-  <div class="card">
-    <h3>ประวัติการแยกขยะ</h3>
-    <div id="history"></div>
-  </div>
+<!-- STUDENT APP -->
+<div id="studentApp" class="hidden">
+  <input type="file" id="imgInput" accept="image/*">
+  <img id="preview">
+  <button onclick="analyze()">วิเคราะห์</button>
+  <div id="result" class="card hidden"></div>
+  <button onclick="saveTrash()">แยกขยะเสร็จแล้ว</button>
+  <h3>ประวัติ</h3>
+  <div id="history" class="history"></div>
 </div>
 
-<!-- ครู -->
-<div id="teacherLogin" class="card hidden">
-  <h3>เข้าสู่ระบบครู</h3>
-  <input id="teacherPass" placeholder="รหัสผ่าน">
-  <button onclick="teacherLogin()">เข้าสู่ระบบ</button>
+<!-- TEACHER -->
+<div id="teacherLogin" class="hidden">
+  <input id="tpass" placeholder="รหัสครู">
+  <button onclick="loginTeacher()">เข้าสู่ระบบครู</button>
 </div>
 
-<div id="teacherPage" class="hidden">
-  <div class="card">
-    <input id="search" placeholder="ค้นหาชื่อหรือรหัส" oninput="renderTeacher()">
-    <select id="roomFilter" onchange="renderTeacher()">
-      <option value="">ทุกห้อง</option>
-      <option>ม.1/1</option><option>ม.1/2</option><option>ม.1/3</option><option>ม.1/4</option><option>ม.1/5</option>
-      <option>ม.2/1</option><option>ม.2/2</option><option>ม.2/3</option><option>ม.2/4</option><option>ม.2/5</option>
-      <option>ม.3/1</option><option>ม.3/2</option><option>ม.3/3</option><option>ม.3/4</option>
-      <option>ม.4/1</option><option>ม.4/2</option><option>ม.4/3</option>
-      <option>ม.5/1</option><option>ม.5/2</option><option>ม.5/3</option><option>ม.5/4</option>
-      <option>ม.6/1</option><option>ม.6/2</option><option>ม.6/3</option>
-    </select>
-  </div>
-
-  <div id="teacherList"></div>
+<div id="teacherApp" class="hidden">
+  <input id="search" placeholder="ค้นหาชื่อหรือรหัส">
+  <div id="board"></div>
 </div>
 
 </div>
 
 <script>
 const MODEL_URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model,currentUser,currentPrediction;
+let model,user,prediction;
 
-function goHome(){location.reload();}
+const title=document.getElementById("title");
+const scoreBox=document.getElementById("score");
 
-function showStudentLogin(){
-  rolePage.classList.add("hidden");
-  studentLogin.classList.remove("hidden");
+function goHome(){location.reload()}
+
+function chooseRole(r){
+  document.getElementById("role").classList.add("hidden");
   document.querySelector(".back").classList.remove("hidden");
-}
-function showTeacherLogin(){
-  rolePage.classList.add("hidden");
-  teacherLogin.classList.remove("hidden");
-  document.querySelector(".back").classList.remove("hidden");
+  if(r==="student")document.getElementById("studentLogin").classList.remove("hidden");
+  else document.getElementById("teacherLogin").classList.remove("hidden");
 }
 
-function studentLogin(){
-  const id=stuId.value;
-  if(!id||!stuName.value||!stuRoom.value)return alert("กรอกข้อมูลให้ครบ");
-  let users=JSON.parse(localStorage.getItem("users")||"{}");
-  if(!users[id]){
-    users[id]={name:stuName.value,room:stuRoom.value,score:0,history:[]};
-    localStorage.setItem("users",JSON.stringify(users));
-  }
-  currentUser=id;
+function loginStudent(){
+  const id=sid.value;
+  let users=JSON.parse(localStorage.getItem("users"))||{};
+  if(!users[id])users[id]={name:sname.value,class:sclass.value,score:0,history:[]};
+  user=users[id];
+  localStorage.setItem("current",id);
+  localStorage.setItem("users",JSON.stringify(users));
   studentLogin.classList.add("hidden");
-  studentPage.classList.remove("hidden");
-  headerTitle.innerText=`${users[id].name} (${users[id].room})`;
-  scoreBox.innerText=`คะแนน ${users[id].score}`;
-  renderHistory();
+  studentApp.classList.remove("hidden");
+  title.innerText=`${user.name} (${user.class})`;
+  updateScore(); renderHistory();
 }
 
 async function analyze(){
-  if(!imgInput.files[0])return alert("เลือกรูปก่อน");
-  result.innerText="⏳ กำลังวิเคราะห์...";
-  if(!model) model=await tmImage.load(MODEL_URL+"model.json",MODEL_URL+"metadata.json");
-  preview.src=URL.createObjectURL(imgInput.files[0]);
-  preview.style.display="block";
-  const p=await model.predict(preview);
-  p.sort((a,b)=>b.probability-a.probability);
-  currentPrediction=p[0];
-  result.innerHTML=`<b>${currentPrediction.className}</b><br>${(currentPrediction.probability*100).toFixed(2)}%`;
+  if(!model)model=await tmImage.load(MODEL_URL+"model.json",MODEL_URL+"metadata.json");
+  const img=preview;
+  result.classList.remove("hidden");
+  result.innerText="กำลังวิเคราะห์...";
+  prediction=(await model.predict(img)).sort((a,b)=>b.probability-a.probability)[0];
+  result.innerHTML=`<b>${prediction.className}</b><br>${(prediction.probability*100).toFixed(2)}%`;
 }
 
-function confirmTrash(){
-  if(!currentPrediction)return alert("ยังไม่ได้วิเคราะห์");
+function saveTrash(){
+  if(!prediction)return;
   let users=JSON.parse(localStorage.getItem("users"));
-  users[currentUser].score+=1;
-  users[currentUser].history.unshift({
-    img:preview.src,
-    type:currentPrediction.className,
-    conf:(currentPrediction.probability*100).toFixed(2),
-    time:new Date().toLocaleString()
-  });
+  user.history.unshift({img:preview.src,type:prediction.className,conf:prediction.probability,time:new Date().toLocaleString()});
+  user.score++;
+  users[localStorage.getItem("current")]=user;
   localStorage.setItem("users",JSON.stringify(users));
-  scoreBox.innerText=`คะแนน ${users[currentUser].score}`;
-  imgInput.value="";
-  preview.style.display="none";
-  result.innerText="";
-  currentPrediction=null;
-  renderHistory();
+  imgInput.value=""; preview.src=""; result.classList.add("hidden");
+  updateScore(); renderHistory();
 }
 
 function renderHistory(){
-  let users=JSON.parse(localStorage.getItem("users"));
   history.innerHTML="";
-  users[currentUser].history.forEach(h=>{
-    history.innerHTML+=`
-    <div class="history-item">
-      <img src="${h.img}">
-      <b>${h.type}</b><br>
-      ความมั่นใจ ${h.conf}%<br>
-      ${h.time}
-    </div>`;
+  user.history.forEach(h=>{
+    history.innerHTML+=`<div class="card"><img src="${h.img}">${h.type}<br>${h.time}</div>`;
   });
 }
 
-function teacherLogin(){
-  if(teacherPass.value!=="Eco2026")return alert("รหัสไม่ถูกต้อง");
-  teacherLogin.classList.add("hidden");
-  teacherPage.classList.remove("hidden");
-  document.querySelector(".back").classList.remove("hidden");
-  renderTeacher();
+function updateScore(){scoreBox.innerText=`⭐ ${user.score}`}
+
+imgInput.onchange=e=>{
+  const r=new FileReader();
+  r.onload=()=>preview.src=r.result;
+  r.readAsDataURL(e.target.files[0]);
 }
 
-function renderTeacher(){
-  let users=JSON.parse(localStorage.getItem("users")||"{}");
-  let list=Object.entries(users)
-    .filter(([id,u])=>{
-      return (!search.value||u.name.includes(search.value)||id.includes(search.value)) &&
-             (!roomFilter.value||u.room===roomFilter.value);
-    })
-    .sort((a,b)=>b[1].score-a[1].score);
-  teacherList.innerHTML="";
-  list.forEach(([id,u],i)=>{
-    teacherList.innerHTML+=`
-    <div class="card">
-      <span class="${i<3?'gold':''}">${i+1}. ${u.name} (${u.room}) - ${u.score} คะแนน</span>
-    </div>`;
+function loginTeacher(){
+  if(tpass.value!=="Eco2026")return alert("รหัสผิด");
+  teacherLogin.classList.add("hidden");
+  teacherApp.classList.remove("hidden");
+  renderBoard();
+}
+
+function renderBoard(){
+  const users=Object.values(JSON.parse(localStorage.getItem("users"))||{}).sort((a,b)=>b.score-a.score);
+  board.innerHTML="";
+  users.forEach(u=>{
+    board.innerHTML+=`<div class="card"><b>${u.name}</b> (${u.class}) ⭐${u.score}</div>`;
   });
 }
 </script>

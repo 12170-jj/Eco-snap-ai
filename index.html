@@ -107,30 +107,65 @@ function chooseRole(r){
 }
 
 function loginStudent(){
-  let users=JSON.parse(localStorage.getItem("users"))||{};
-  if(!users[sid.value]){
-    users[sid.value]={name:sname.value,class:sclass.value,score:0,history:[]};
+  if(!sname.value || !sid.value || !sclass.value){
+    alert("กรุณากรอกข้อมูลให้ครบก่อนเข้าสู่ระบบ");
+    return;
   }
-  user=users[sid.value];
-  localStorage.setItem("current",sid.value);
-  localStorage.setItem("users",JSON.stringify(users));
+
+  let users = JSON.parse(localStorage.getItem("users")) || {};
+
+  if(!users[sid.value]){
+    users[sid.value] = {
+      name: sname.value,
+      class: sclass.value,
+      score: 0,
+      history: []
+    };
+  }
+
+  user = users[sid.value];
+  localStorage.setItem("current", sid.value);
+  localStorage.setItem("users", JSON.stringify(users));
+
   studentLogin.classList.add("hidden");
   studentApp.classList.remove("hidden");
-  title.innerText=`${user.name} (${user.class})`;
-  updateScore(); renderHistory();
-}
 
+  title.innerText = `${user.name} (${user.class})`;
+  updateScore();
+  renderHistory();
+}
 async function analyze(){
-  if(!preview.src){alert("กรุณาอัปโหลดรูป");return;}
-  result.classList.remove("hidden");
-  result.innerText="⏳ กำลังวิเคราะห์...";
-  if(!model){
-    model=await tmImage.load(MODEL_URL+"model.json",MODEL_URL+"metadata.json");
+  if(!imgInput.files.length){
+    alert("กรุณาเลือกรูปก่อนวิเคราะห์");
+    return;
   }
-  await new Promise(r=>setTimeout(r,300));
-  const preds=await model.predict(preview);
-  prediction=preds.sort((a,b)=>b.probability-a.probability)[0];
-  result.innerHTML=`<b>${prediction.className}</b><br>${(prediction.probability*100).toFixed(2)}%`;
+
+  result.classList.remove("hidden");
+  result.innerText = "⏳ กำลังวิเคราะห์...";
+
+  if(!model){
+    model = await tmImage.load(
+      MODEL_URL + "model.json",
+      MODEL_URL + "metadata.json"
+    );
+  }
+
+  // รอให้รูปโหลดจริง (แก้ iOS bug)
+  await new Promise(resolve => {
+    if (preview.complete) resolve();
+    else preview.onload = resolve;
+  });
+
+  const predictions = await model.predict(preview);
+  prediction = predictions.sort(
+    (a,b)=>b.probability - a.probability
+  )[0];
+
+  result.innerHTML = `
+    <b>ผลการวิเคราะห์</b><br>
+    ประเภทขยะ: <b>${prediction.className}</b><br>
+    ความมั่นใจ: ${(prediction.probability*100).toFixed(2)}%
+  `;
 }
 
 function saveTrash(){

@@ -93,6 +93,7 @@ input,select{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px
 <script>
 const MODEL_URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
 let model,user,prediction;
+const preview = document.getElementById("preview");
 
 const title=document.getElementById("title");
 const scoreBox=document.getElementById("score");
@@ -137,6 +138,11 @@ function loginStudent(){
 async function analyze(){
   if(!imgInput.files.length){
     alert("กรุณาเลือกรูปก่อนวิเคราะห์");
+    return;
+  }
+
+  if (!preview.src) {
+    alert("รูปยังไม่พร้อม กรุณารอสักครู่");
     return;
   }
 
@@ -193,11 +199,19 @@ function renderHistory(){
 
 function updateScore(){scoreBox.innerText=`⭐ ${user.score}`}
 
-imgInput.onchange=e=>{
-  const r=new FileReader();
-  r.onload=()=>preview.src=r.result;
-  r.readAsDataURL(e.target.files[0]);
-}
+imgInput.onchange = e => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+    preview.onload = () => {
+      console.log("✅ รูปโหลดเสร็จแล้ว");
+    };
+  };
+  reader.readAsDataURL(file);
+};
 
 function loginTeacher(){
   if(tpass.value!=="Eco2026"){alert("รหัสผิด");return;}

@@ -5,194 +5,208 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Eco Snap AI</title>
 
+<!-- AI -->
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: sans-serif;
-  background: linear-gradient(#e8f5e9, #c8e6c9);
-  color: #1b5e20;
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:linear-gradient(#dff5e1,#b7e4c7);
 }
-h1 {
-  text-align: center;
-}
-.card {
-  background: #ffffff;
-  margin: 15px;
-  padding: 15px;
-  border-radius: 20px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-}
-.image-box {
-  width: 100%;
-  height: 240px;
-  background: #e0f2f1;
-  border-radius: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.image-box img {
-  max-width: 100%;
-  max-height: 100%;
-  border-radius: 10px;
-}
-button {
-  width: 100%;
-  padding: 14px;
-  font-size: 18px;
-  border: none;
-  border-radius: 30px;
-  margin-top: 10px;
-  cursor: pointer;
-}
-.analyze { background:#81c784; }
-.done { background:#66bb6a; }
-.score {
-  position: fixed;
-  top: 10px;
-  right: 10px;
-  background: #2e7d32;
-  color: #fff;
-  padding: 10px 16px;
-  border-radius: 20px;
-}
-.history-card {
-  background:#f1f8e9;
+.page{display:none;padding:20px}
+.active{display:block}
+h1{text-align:center}
+button{
+  padding:15px;
+  border:none;
+  border-radius:30px;
+  font-size:18px;
+  width:100%;
   margin-top:10px;
-  padding:10px;
-  border-radius:12px;
 }
+.role-btn{background:#40916c;color:white}
+.card{
+  background:white;
+  padding:20px;
+  border-radius:20px;
+  margin-top:15px;
+}
+.image-box{
+  height:220px;
+  background:#eee;
+  border-radius:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+}
+.image-box img{max-width:100%;max-height:100%;border-radius:10px}
+.score{position:fixed;top:10px;right:15px;font-weight:bold}
+.history-card{
+  background:#f1f1f1;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+}
+.gold{color:gold;font-weight:bold}
 </style>
 </head>
 
 <body>
 
-<div class="score">คะแนน: <span id="score">0</span></div>
+<!-- หน้าเลือกบทบาท -->
+<div id="rolePage" class="page active">
+  <h1>🌱 Eco Snap AI</h1>
+  <p style="text-align:center">เลือกบทบาทของคุณ</p>
+  <button class="role-btn" onclick="goStudent()">👩‍🎓 นักเรียน</button>
+  <button class="role-btn" onclick="goTeacher()">👩‍🏫 คุณครู</button>
+</div>
 
-<h1>🌱 Eco Snap AI</h1>
+<!-- หน้านักเรียน -->
+<div id="studentPage" class="page">
+  <div class="score">คะแนน: <span id="score">0</span></div>
+  <h1>แยกขยะด้วย AI</h1>
 
-<div class="card">
-  <div class="image-box">
-    <span id="placeholder">ยังไม่ได้เลือกรูป</span>
-    <img id="preview" style="display:none;">
+  <div class="card">
+    <div class="image-box">
+      <span id="placeholder">ยังไม่ได้เลือกรูป</span>
+      <img id="preview" style="display:none">
+    </div>
+    <input type="file" accept="image/*" id="imageInput">
   </div>
-  <input type="file" accept="image/*" id="imageInput">
+
+  <div class="card">
+    <button onclick="analyze()">🧠 วิเคราะห์</button>
+    <button onclick="saveResult()">✅ แยกขยะเสร็จแล้ว</button>
+    <div id="result" style="margin-top:10px"></div>
+  </div>
+
+  <div class="card">
+    <h3>📜 ประวัติ</h3>
+    <div id="history"></div>
+  </div>
 </div>
 
-<div class="card">
-  <button class="analyze" onclick="analyze()">🧠 วิเคราะห์ขยะ</button>
-  <button class="done" onclick="saveResult()">✅ แยกขยะเสร็จแล้ว</button>
-  <div id="result" style="margin-top:10px;"></div>
-</div>
-
-<div class="card">
-  <h3>📜 ประวัติการแยกขยะ</h3>
-  <div id="history"></div>
+<!-- หน้าครู -->
+<div id="teacherPage" class="page">
+  <h1>🏆 ตารางคะแนน</h1>
+  <div id="leaderboard"></div>
 </div>
 
 <script>
-const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+/* ====== เปลี่ยนหน้า ====== */
+function show(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(page).classList.add('active');
+}
+function goStudent(){show('studentPage')}
+function goTeacher(){loadTeacher();show('teacherPage')}
 
-let model = null;
-let currentResult = null;
-let score = 0;
-let historyList = [];
+/* ====== AI ====== */
+const URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+let model;
+async function loadModel(){
+  if(!model){
+    model=await tmImage.load(URL+"model.json",URL+"metadata.json");
+  }
+}
 
-const imageInput = document.getElementById("imageInput");
-const preview = document.getElementById("preview");
-const placeholder = document.getElementById("placeholder");
-const resultBox = document.getElementById("result");
-const historyBox = document.getElementById("history");
-const scoreBox = document.getElementById("score");
+/* ====== นักเรียน ====== */
+let currentResult=null;
+let score=0;
 
-imageInput.onchange = () => {
-  const file = imageInput.files[0];
-  if (!file) return;
+const imageInput=document.getElementById("imageInput");
+const preview=document.getElementById("preview");
+const placeholder=document.getElementById("placeholder");
+const resultBox=document.getElementById("result");
+const historyBox=document.getElementById("history");
 
-  const reader = new FileReader();
-  reader.onload = () => {
-    preview.src = reader.result;
-    preview.style.display = "block";
-    placeholder.style.display = "none";
-    resultBox.innerHTML = "";
-    currentResult = null;
+imageInput.onchange=()=>{
+  const file=imageInput.files[0];
+  if(!file)return;
+  const r=new FileReader();
+  r.onload=()=>{
+    preview.src=r.result;
+    preview.style.display="block";
+    placeholder.style.display="none";
   };
-  reader.readAsDataURL(file);
+  r.readAsDataURL(file);
 };
 
-async function analyze() {
-  if (!imageInput.files[0]) {
-    alert("กรุณาเลือกรูปก่อน");
+async function analyze(){
+  if(!imageInput.files[0]){
+    alert("กรุณาเลือกรูป");
     return;
   }
-
-  resultBox.innerHTML = "⏳ กำลังวิเคราะห์...";
-
-  if (!model) {
-    model = await tmImage.load(
-      URL + "model.json",
-      URL + "metadata.json"
-    );
-  }
-
-  const prediction = await model.predict(preview);
-  prediction.sort((a,b)=>b.probability-a.probability);
-
-  currentResult = {
-    className: prediction[0].className,
-    probability: prediction[0].probability
-  };
-
-  resultBox.innerHTML = `
-    <b>ผลการวิเคราะห์</b><br>
-    ประเภท: ${currentResult.className}<br>
-    ความมั่นใจ: ${(currentResult.probability*100).toFixed(2)}%
-  `;
+  resultBox.innerHTML="⏳ กำลังวิเคราะห์...";
+  await loadModel();
+  const p=await model.predict(preview);
+  p.sort((a,b)=>b.probability-a.probability);
+  currentResult=p[0];
+  resultBox.innerHTML=
+    `ประเภท: ${currentResult.className}<br>
+     ความมั่นใจ: ${(currentResult.probability*100).toFixed(2)}%`;
 }
 
-function saveResult() {
-  if (!currentResult) {
-    alert("ยังไม่ได้วิเคราะห์ขยะ");
+function saveResult(){
+  if(!currentResult){
+    alert("กรุณาวิเคราะห์ก่อน");
     return;
   }
-
-  historyList.unshift({
-    image: preview.src,
-    type: currentResult.className,
-    conf: currentResult.probability,
-    time: new Date().toLocaleString()
-  });
-
   score++;
-  scoreBox.innerText = score;
+  document.getElementById("score").innerText=score;
+
+  const data=JSON.parse(localStorage.getItem("ecoData")||"[]");
+  data.push({
+    type:currentResult.className,
+    conf:(currentResult.probability*100).toFixed(2),
+    time:new Date().toLocaleString(),
+    img:preview.src,
+    score:score
+  });
+  localStorage.setItem("ecoData",JSON.stringify(data));
+
   renderHistory();
-  resetUpload();
+  resetInput();
 }
 
-function renderHistory() {
-  historyBox.innerHTML = "";
-  historyList.forEach(item=>{
-    historyBox.innerHTML += `
+function renderHistory(){
+  historyBox.innerHTML="";
+  const data=JSON.parse(localStorage.getItem("ecoData")||"[]");
+  data.forEach(d=>{
+    historyBox.innerHTML+=`
       <div class="history-card">
-        <img src="${item.image}" style="width:100%;border-radius:8px;">
-        <div>ประเภท: ${item.type}</div>
-        <div>ความมั่นใจ: ${(item.conf*100).toFixed(2)}%</div>
-        <div>เวลา: ${item.time}</div>
-      </div>
-    `;
+        <img src="${d.img}" width="80"><br>
+        ${d.type} (${d.conf}%)<br>
+        ${d.time}
+      </div>`;
   });
 }
 
-function resetUpload() {
-  imageInput.value = "";
-  preview.src = "";
-  preview.style.display = "none";
-  placeholder.style.display = "block";
-  resultBox.innerHTML = "";
-  currentResult = null;
+function resetInput(){
+  imageInput.value="";
+  preview.style.display="none";
+  placeholder.style.display="block";
+  resultBox.innerHTML="";
+  currentResult=null;
+}
+
+/* ====== ครู ====== */
+function loadTeacher(){
+  const box=document.getElementById("leaderboard");
+  box.innerHTML="";
+  const data=JSON.parse(localStorage.getItem("ecoData")||"[]");
+  if(data.length===0){
+    box.innerHTML="ยังไม่มีข้อมูล";
+    return;
+  }
+  data.forEach((d,i)=>{
+    box.innerHTML+=`
+      <div class="${i<3?'gold':''}">
+        อันดับ ${i+1} : ${d.type} | ${d.score} คะแนน
+      </div>`;
+  });
 }
 </script>
 

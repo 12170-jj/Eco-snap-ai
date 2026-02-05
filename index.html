@@ -133,8 +133,13 @@ button{background:#2e7d32;color:#fff;border:none}
 </div>
 
 <script>
-const URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model,current,student;
+ 
+let students = JSON.parse(localStorage.getItem("students") || "{}");
+let student = null;
+
+const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+let model;
+let current = null;
 
 function show(id){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -143,20 +148,30 @@ function show(id){
 
 /* ===== นักเรียน ===== */
 function studentLogin(){
-  student={
-    name:stuName.value,
-    id:stuId.value,
-    room:stuRoom.value,
-    score:0
-  };
-  if(!student.name||!student.id||!student.room){
-    alert("กรอกข้อมูลให้ครบ");
-    return;
+  const id = sid.value;
+  const name = sname.value;
+  const room = sroom.value;
+
+  // ถ้าเคยมีนักเรียนคนนี้แล้ว → ดึงข้อมูลเก่า
+  if(students[id]){
+    student = students[id];
+  }else{
+    // ถ้ายังไม่เคยมี → สร้างใหม่
+    student = {
+      id: id,
+      name: name,
+      room: room,
+      score: 0,
+      history: []
+    };
+    students[id] = student;
+    localStorage.setItem("students", JSON.stringify(students));
   }
-  localStorage.setItem("student",JSON.stringify(student));
+
+  score.innerText = student.score;
   show('studentPage');
 }
-
+  
 imgInput.onchange=()=>{
   const r=new FileReader();
   r.onload=()=>{
@@ -178,20 +193,28 @@ async function analyze(){
 }
 
 function save(){
-  if(!current)return alert("วิเคราะห์ก่อน");
-  student.score++;
-  score.innerText=student.score;
+  if(!current) return alert("วิเคราะห์ก่อน");
 
-  const data=JSON.parse(localStorage.getItem("records")||"[]");
-  data.push({...student,
-    type:current.className,
-    conf:(current.probability*100).toFixed(2),
-    img:preview.src,
-    time:new Date().toLocaleString()
+  // เพิ่มคะแนน
+  student.score += 1;
+  score.innerText = student.score;
+
+  // เพิ่มประวัติ
+  student.history.push({
+    type: current.className,
+    time: new Date().toLocaleString()
   });
-  localStorage.setItem("records",JSON.stringify(data));
-  renderHistory();
-  reset();
+
+  // บันทึกกลับ students
+  students[student.id] = student;
+  localStorage.setItem("students", JSON.stringify(students));
+
+  // reset เพื่อวิเคราะห์ชิ้นถัดไป
+  current = null;
+  result.innerText = "";
+  imgInput.value = "";
+  preview.style.display = "none";
+  ph.style.display = "block";
 }
 
 function renderHistory(){
@@ -217,14 +240,15 @@ function reset(){
 
 /* ===== ครู ===== */
 function teacherLogin(){
-  if(teacherPass.value!=="Eco2026"){
-    alert("รหัสผิด");
+  const password = document.getElementById("tpass").value;
+
+  if(password !== "Eco2026"){
+    alert("รหัสครูไม่ถูกต้อง");
     return;
   }
-  renderTeacher();
+
   show('teacherPage');
 }
-
 function renderTeacher(){
   const q=search.value.toLowerCase();
   const room=roomFilter.value;

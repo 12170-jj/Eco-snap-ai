@@ -92,7 +92,12 @@ button{background:#2e7d32;color:#fff;border:none}
   <div class="score">คะแนน <span id="score">0</span></div>
   <h1>แยกขยะด้วย AI</h1>
 
+<button onclick="backToHome()">← ย้อนกลับไปหน้าเลือกบทบาท</button>
+
   <div class="card">
+  <h3>ประวัติการใช้งาน</h3>
+  <ul id="historyList"></ul>
+</div>
     <div class="image-box">
       <span id="ph">ยังไม่ได้เลือกรูป</span>
       <img id="preview" style="display:none">
@@ -134,7 +139,7 @@ button{background:#2e7d32;color:#fff;border:none}
 
 <script>
  
-let students = JSON.parse(localStorage.getItem("students") || "{}");
+let students = JSON.parse(localStorage.getItem("students")) || {};
 let student = null;
 
 const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
@@ -148,13 +153,14 @@ function show(id){
 
 /* ===== นักเรียน ===== */
 function studentLogin(){
-  const id = sid.value;
-  const name = sname.value;
-  const room = sroom.value;
-
+  const id = document.getElementById("stuId").value;
+const name = document.getElementById("stuName").value;
+const room = document.getElementById("stuRoom").value;
   // ถ้าเคยมีนักเรียนคนนี้แล้ว → ดึงข้อมูลเก่า
   if(students[id]){
-    student = students[id];
+  student = students[id];
+  student.name = name;
+  student.room = room;
   }else{
     // ถ้ายังไม่เคยมี → สร้างใหม่
     student = {
@@ -165,11 +171,11 @@ function studentLogin(){
       history: []
     };
     students[id] = student;
-    localStorage.setItem("students", JSON.stringify(students));
   }
 
   score.innerText = student.score;
-  show('studentPage');
+localStorage.setItem("students", JSON.stringify(students));
+show('studentPage');
 }
   
 imgInput.onchange=()=>{
@@ -192,24 +198,32 @@ async function analyze(){
   result.innerHTML=`${current.className} (${(current.probability*100).toFixed(2)}%)`;
 }
 
-function save(){
-  if(!current) return alert("วิเคราะห์ก่อน");
+function save() {
+  if (!current) {
+    alert("กรุณาวิเคราะห์ก่อน");
+    return;
+  }
 
   // เพิ่มคะแนน
   student.score += 1;
-  score.innerText = student.score;
+  document.getElementById("score").innerText = student.score;
 
   // เพิ่มประวัติ
+  if (!student.history) {
+    student.history = [];
+  }
+
   student.history.push({
-    type: current.className,
-    time: new Date().toLocaleString()
+    time: new Date().toLocaleString(),
+    label: current.className,
+    probability: current.probability
   });
 
-  // บันทึกกลับ students
+  // บันทึก
   students[student.id] = student;
   localStorage.setItem("students", JSON.stringify(students));
 
-  // reset เพื่อวิเคราะห์ชิ้นถัดไป
+  // reset
   current = null;
   result.innerText = "";
   imgInput.value = "";

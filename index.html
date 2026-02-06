@@ -99,7 +99,17 @@ const imgInput = document.getElementById("imgInput");
 const title = document.getElementById("appTitle");
 const scoreBox=document.getElementById("score");
 const result = document.getElementById("result");
+imgInput.addEventListener("change", () => {
+  const file = imgInput.files[0];
+  if (!file) return;
 
+  const reader = new FileReader();
+  reader.onload = () => {
+    preview.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+  
 function goHome(){location.reload()}
 
 function chooseRole(r){
@@ -164,6 +174,7 @@ async function analyze(){
     else preview.onload = resolve;
   });
 
+  console.log("เริ่ม predict แล้ว", preview.src);
   const predictions = await model.predict(preview);
   prediction = predictions.sort(
     (a,b)=>b.probability - a.probability

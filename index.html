@@ -3,97 +3,84 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Eco Snap AI</title>
 
 <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
 <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #f4f7f6;
+body{
+  margin:0;
+  font-family:sans-serif;
+  background:#f2f6f5;
 }
-
-.container {
-  max-width: 420px;
-  margin: auto;
-  padding: 15px;
+.container{
+  max-width:420px;
+  margin:auto;
+  padding:15px;
 }
-
-header {
-  background: #2ecc71;
-  color: white;
-  padding: 12px;
-  text-align: center;
-  font-size: 20px;
-  font-weight: bold;
+header{
+  background:#2ecc71;
+  color:white;
+  text-align:center;
+  padding:12px;
+  font-size:20px;
+  font-weight:bold;
 }
-
-.box {
-  background: white;
-  border-radius: 10px;
-  padding: 15px;
-  margin-top: 15px;
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+.box{
+  background:white;
+  border-radius:12px;
+  padding:15px;
+  margin-top:15px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
-
-input, select, button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 8px;
-  font-size: 16px;
+input,select,button{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  font-size:16px;
 }
-
-button {
-  background: #2ecc71;
-  color: white;
-  border: none;
-  border-radius: 8px;
+button{
+  background:#2ecc71;
+  color:white;
+  border:none;
+  border-radius:8px;
 }
-
-button:disabled {
-  background: gray;
+button:disabled{
+  background:gray;
 }
-
-#preview {
-  width: 100%;
-  border-radius: 8px;
-  margin-top: 10px;
+#preview{
+  width:100%;
+  margin-top:10px;
+  border-radius:8px;
 }
-
-.result {
-  border: 2px solid #2ecc71;
-  padding: 10px;
-  border-radius: 8px;
-  margin-top: 10px;
-  text-align: center;
-  font-size: 18px;
-  font-weight: bold;
+.result{
+  border:2px solid #2ecc71;
+  padding:10px;
+  border-radius:10px;
+  margin-top:10px;
+  text-align:center;
+  font-size:18px;
 }
-
-.history-item {
-  border: 1px solid #ccc;
-  padding: 8px;
-  margin-top: 8px;
-  border-radius: 6px;
-  font-size: 14px;
+.history{
+  font-size:14px;
+  border:1px solid #ccc;
+  padding:8px;
+  border-radius:6px;
+  margin-top:6px;
 }
 </style>
 </head>
 
 <body>
-
 <header>Eco Snap AI</header>
 
 <div class="container">
 
-<!-- LOGIN -->
 <div class="box" id="loginBox">
   <h3>เข้าสู่ระบบ (นักเรียน)</h3>
   <input id="name" placeholder="ชื่อ-นามสกุล">
-  <input id="studentId" placeholder="รหัสนักเรียน 5 หลัก" maxlength="5">
+  <input id="sid" placeholder="รหัสนักเรียน 5 หลัก" maxlength="5">
   <select id="room">
     <option value="">เลือกห้อง</option>
     <option>1/1</option><option>1/2</option><option>1/3</option>
@@ -106,20 +93,23 @@ button:disabled {
   <button onclick="login()">เข้าสู่ระบบ</button>
 </div>
 
-<!-- MAIN -->
-<div class="box" id="mainBox" style="display:none;">
-  <h3 id="userInfo"></h3>
-  <p>คะแนน: <span id="score">0</span></p>
+<div class="box" id="mainBox" style="display:none">
+  <h3 id="info"></h3>
+  คะแนน: <b id="score">0</b>
 
   <input type="file" accept="image/*" onchange="loadImage(event)">
   <img id="preview">
 
-  <button onclick="analyze()">วิเคราะห์</button>
+  <button id="analyzeBtn" onclick="analyze()" disabled>
+    กำลังโหลด AI...
+  </button>
 
   <div id="status"></div>
-  <div id="result" class="result" style="display:none;"></div>
+  <div id="result" class="result" style="display:none"></div>
 
-  <button id="doneBtn" style="display:none;" onclick="saveResult()">แยกขยะเสร็จแล้ว</button>
+  <button id="saveBtn" onclick="save()" style="display:none">
+    แยกขยะเสร็จแล้ว
+  </button>
 
   <h4>ประวัติ</h4>
   <div id="history"></div>
@@ -128,101 +118,79 @@ button:disabled {
 </div>
 
 <script>
-const modelURL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
-let model, maxPredictions;
-let currentImage = null;
-let user = null;
+const URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+let model, user, currentImg, lastResult;
 
-async function initModel() {
-  const modelURLFull = modelURL + "model.json";
-  const metadataURL = modelURL + "metadata.json";
-  model = await tmImage.load(modelURLFull, metadataURL);
-  maxPredictions = model.getTotalClasses();
+// โหลดโมเดล
+async function loadModel(){
+  const modelURL = URL + "model.json";
+  const metaURL = URL + "metadata.json";
+  model = await tmImage.load(modelURL, metaURL);
+
+  document.getElementById("analyzeBtn").disabled = false;
+  document.getElementById("analyzeBtn").innerText = "วิเคราะห์";
 }
-initModel();
+loadModel();
 
-function login() {
-  const name = document.getElementById("name").value;
-  const studentId = document.getElementById("studentId").value;
-  const room = document.getElementById("room").value;
+function login(){
+  const name=nameInput.value, sid=sidInput.value, room=roomSelect.value;
+  if(!name||!sid||!room){alert("กรอกข้อมูลให้ครบ");return;}
 
-  if (!name || !studentId || !room) {
-    alert("กรอกข้อมูลให้ครบ");
-    return;
-  }
+  const key="eco_"+sid;
+  user=JSON.parse(localStorage.getItem(key))||{name,sid,room,score:0,history:[]};
+  localStorage.setItem(key,JSON.stringify(user));
 
-  const key = "eco_" + studentId;
-  user = JSON.parse(localStorage.getItem(key)) || {
-    name, studentId, room, score: 0, history: []
-  };
-
-  localStorage.setItem(key, JSON.stringify(user));
-
-  document.getElementById("loginBox").style.display = "none";
-  document.getElementById("mainBox").style.display = "block";
-  document.getElementById("userInfo").innerText = `${user.name} ห้อง ${user.room}`;
-  document.getElementById("score").innerText = user.score;
-
+  loginBox.style.display="none";
+  mainBox.style.display="block";
+  info.innerText=`${user.name} ห้อง ${user.room}`;
+  score.innerText=user.score;
   renderHistory();
 }
 
-function loadImage(event) {
-  const img = document.getElementById("preview");
-  img.src = URL.createObjectURL(event.target.files[0]);
-  currentImage = img;
+function loadImage(e){
+  currentImg = new Image();
+  currentImg.src = URL.createObjectURL(e.target.files[0]);
+  preview.src = currentImg.src;
 }
 
-async function analyze() {
-  if (!currentImage) {
-    alert("กรุณาเลือกรูปก่อน");
-    return;
-  }
+async function analyze(){
+  if(!model){alert("AI ยังโหลดไม่เสร็จ");return;}
+  if(!currentImg){alert("เลือกรูปก่อน");return;}
 
-  document.getElementById("status").innerText = "กำลังวิเคราะห์...";
-  const prediction = await model.predict(currentImage);
+  status.innerText="กำลังวิเคราะห์...";
+  const prediction = await model.predict(currentImg);
 
-  let best = prediction.reduce((a,b)=> a.probability>b.probability?a:b);
+  let best = prediction.reduce((a,b)=>a.probability>b.probability?a:b);
 
-  document.getElementById("status").innerText = "";
-  document.getElementById("result").style.display = "block";
-  document.getElementById("result").innerText =
-    `ผลวิเคราะห์: ${best.className}\nมั่นใจ ${(best.probability*100).toFixed(2)}%`;
-
-  document.getElementById("doneBtn").style.display = "block";
-  window.lastResult = best;
+  status.innerText="";
+  result.style.display="block";
+  result.innerHTML=`ผลวิเคราะห์: ${best.className}<br>มั่นใจ ${(best.probability*100).toFixed(2)}%`;
+  saveBtn.style.display="block";
+  lastResult=best;
 }
 
-function saveResult() {
-  user.score += 1;
-
+function save(){
+  user.score++;
   user.history.unshift({
-    type: lastResult.className,
-    confidence: (lastResult.probability*100).toFixed(2),
-    time: new Date().toLocaleString()
+    type:lastResult.className,
+    conf:(lastResult.probability*100).toFixed(2),
+    time:new Date().toLocaleString()
   });
-
-  localStorage.setItem("eco_" + user.studentId, JSON.stringify(user));
-
-  document.getElementById("score").innerText = user.score;
-  document.getElementById("result").style.display = "none";
-  document.getElementById("doneBtn").style.display = "none";
-  document.getElementById("preview").src = "";
-  currentImage = null;
-
+  localStorage.setItem("eco_"+user.sid,JSON.stringify(user));
+  score.innerText=user.score;
+  result.style.display="none";
+  saveBtn.style.display="none";
+  preview.src="";
+  currentImg=null;
   renderHistory();
 }
 
-function renderHistory() {
-  const h = document.getElementById("history");
-  h.innerHTML = "";
-  user.history.forEach(item=>{
-    h.innerHTML += `
-      <div class="history-item">
-        ${item.type} | ${item.confidence}%<br>${item.time}
-      </div>`;
+function renderHistory(){
+  history.innerHTML="";
+  user.history.forEach(h=>{
+    history.innerHTML+=`<div class="history">${h.type} | ${h.conf}%<br>${h.time}</div>`;
   });
 }
 </script>
-
 </body>
 </html>

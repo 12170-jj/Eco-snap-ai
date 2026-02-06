@@ -26,11 +26,11 @@
         h1 { color: var(--primary); font-size: 28px; margin-bottom: 10px; }
         button { 
             background: var(--primary); color: white; border: none; padding: 12px 25px; 
-            border-radius: 50px; font-size: 18px; cursor: pointer; transition: 0.3s; width: 100%; margin: 10px 0;
+            border-radius: 50px; font-size: 18px; cursor: pointer; transition: 0.1s; width: 100%; margin: 10px 0;
             box-shadow: 0 4px 0 #388E3C;
         }
         button:active { transform: translateY(4px); box-shadow: none; }
-        button:disabled { background: #ccc; box-shadow: 0 4px 0 #999; cursor: not-allowed; }
+        button:disabled { background: #ccc !important; box-shadow: 0 4px 0 #999 !important; cursor: not-allowed; }
         button.secondary { background: var(--accent); box-shadow: 0 4px 0 #E65100; }
         
         input, select { 
@@ -51,7 +51,7 @@
         .history-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .history-item { display: flex; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: left; align-items: center; }
         .history-item img { width: 80px; height: 80px; object-fit: cover; }
-        .history-info { padding: 10px; font-size: 13px; }
+        .history-info { padding: 10px; font-size: 13px; flex: 1; }
 
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
@@ -160,11 +160,9 @@
 
     async function initModel() {
         try {
-            const modelURL = MODEL_URL + "model.json";
-            const metadataURL = MODEL_URL + "metadata.json";
-            model = await tmImage.load(modelURL, metadataURL);
+            model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
             maxPredictions = model.getTotalClasses();
-        } catch (e) { console.log("Model load error"); }
+        } catch (e) { console.error("Model Error"); }
     }
     initModel();
 
@@ -198,10 +196,14 @@
     }
 
     function updateStudentUI() {
-        document.getElementById('display-name').innerText = currentUser.name;
-        document.getElementById('display-room').innerText = "ห้อง: " + currentUser.room;
-        document.getElementById('display-score').innerText = currentUser.score;
-        renderHistory('student-history', currentUser.history);
+        if(!currentUser) return;
+        let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
+        let data = users[currentUser.id] || currentUser;
+        
+        document.getElementById('display-name').innerText = data.name;
+        document.getElementById('display-room').innerText = "ห้อง: " + data.room;
+        document.getElementById('display-score').innerText = data.score;
+        renderHistory('student-history', data.history);
     }
 
     function handleImage(e) {
@@ -240,21 +242,23 @@
                 conf: (bestMatch.probability * 100).toFixed(2)
             };
 
-            setTimeout(() => {
-                document.getElementById('status-text').classList.add('hidden');
-                document.getElementById('result-area').classList.remove('hidden');
-                document.getElementById('waste-type').innerText = currentAnalysis.type;
-                document.getElementById('confidence-score').innerText = `มั่นใจ: ${currentAnalysis.conf}%`;
-                document.getElementById('btn-save').classList.remove('hidden');
-            }, 1000);
+            document.getElementById('status-text').classList.add('hidden');
+            document.getElementById('result-area').classList.remove('hidden');
+            document.getElementById('waste-type').innerText = currentAnalysis.type;
+            document.getElementById('confidence-score').innerText = `มั่นใจ: ${currentAnalysis.conf}%`;
+            document.getElementById('btn-save').classList.remove('hidden');
         } catch(e) {
-            alert("เกิดข้อผิดพลาดในการวิเคราะห์");
+            alert("วิเคราะห์ผิดพลาด");
             document.getElementById('btn-analyze').classList.remove('hidden');
         }
     }
 
+    // ฟังก์ชันที่แก้ไขให้บันทึกได้แน่นอน
     function saveTrash() {
-        if(!currentAnalysis || !currentUser) return;
+        if(!currentAnalysis || !currentUser || !currentImageBase64) {
+            alert("ข้อมูลไม่ครบถ้วน กรุณาวิเคราะห์ใหม่");
+            return;
+        }
 
         const now = new Date();
         const record = {
@@ -265,52 +269,56 @@
             time: now.toLocaleTimeString('th-TH')
         };
 
-        // Update LocalStorage สำหรับข้อมูลทั้งหมด
+        // ดึงข้อมูลล่าสุดจาก LocalStorage มาอัปเดต
         let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
         if(users[currentUser.id]) {
-            users[currentUser.id].score += 1;
+            users[currentUser.id].score = (users[currentUser.id].score || 0) + 1;
+            if(!users[currentUser.id].history) users[currentUser.id].history = [];
             users[currentUser.id].history.unshift(record);
+            
+            // เซฟกลับลงเครื่อง
             localStorage.setItem('eco_users', JSON.stringify(users));
             
-            // Update ข้อมูลใน Session ปัจจุบัน
+            // อัปเดตสถานะในหน้าเว็บปัจจุบัน
             currentUser.score = users[currentUser.id].score;
             currentUser.history = users[currentUser.id].history;
+            
+            alert("บันทึกเรียบร้อย! +1 คะแนน");
+            
+            // รีเซ็ตหน้าจอเพื่อเริ่มใหม่
+            document.getElementById('preview-img').classList.add('hidden');
+            document.getElementById('placeholder-text').classList.remove('hidden');
+            document.getElementById('analysis-section').classList.add('hidden');
+            document.getElementById('result-area').classList.add('hidden');
+            document.getElementById('btn-save').classList.add('hidden');
+            
+            currentImageBase64 = null;
+            currentAnalysis = null;
+
+            updateStudentUI(); // บังคับให้หน้าจอกะพริบคะแนนใหม่
         }
-
-        alert("บันทึกสำเร็จ! +1 คะแนน");
-        
-        // Reset หน้าจอสำหรับการสแกนชิ้นต่อไป
-        document.getElementById('preview-img').classList.add('hidden');
-        document.getElementById('placeholder-text').classList.remove('hidden');
-        document.getElementById('analysis-section').classList.add('hidden');
-        document.getElementById('result-area').classList.add('hidden');
-        document.getElementById('btn-save').classList.add('hidden');
-        
-        currentImageBase64 = null;
-        currentAnalysis = null;
-
-        updateStudentUI();
     }
 
     function renderHistory(elementId, history) {
         const container = document.getElementById(elementId);
-        container.innerHTML = history.length === 0 ? '<p>ยังไม่มีประวัติ</p>' : '';
-        history.forEach(item => {
-            container.innerHTML += `
-                <div class="history-item">
-                    <img src="${item.img}">
-                    <div class="history-info">
-                        <strong>${item.type}</strong> (${item.conf}%)<br>
-                        <small>${item.date} | ${item.time}</small>
+        container.innerHTML = (!history || history.length === 0) ? '<p>ยังไม่มีประวัติ</p>' : '';
+        if(history) {
+            history.forEach(item => {
+                container.innerHTML += `
+                    <div class="history-item">
+                        <img src="${item.img}">
+                        <div class="history-info">
+                            <strong>${item.type}</strong> (${item.conf}%)<br>
+                            <small>${item.date} | ${item.time}</small>
+                        </div>
                     </div>
-                </div>
-            `;
-        });
+                `;
+            });
+        }
     }
 
     function loginTeacher() {
-        const pwd = document.getElementById('teacher-pwd').value;
-        if(pwd === "Eco2026") {
+        if(document.getElementById('teacher-pwd').value === "Eco2026") {
             showPage('page-teacher-main');
             renderLeaderboard();
         } else {
@@ -324,24 +332,14 @@
         const filterRoom = document.getElementById('filter-room').value;
         
         let userList = Object.keys(users).map(id => ({ ...users[id], id }));
-        
-        userList = userList.filter(u => {
-            const matchSearch = u.name.toLowerCase().includes(searchTerm) || u.id.includes(searchTerm);
-            const matchRoom = filterRoom === "" || u.room === filterRoom;
-            return matchSearch && matchRoom;
-        });
-
+        userList = userList.filter(u => (u.name.toLowerCase().includes(searchTerm) || u.id.includes(searchTerm)) && (filterRoom === "" || u.room === filterRoom));
         userList.sort((a, b) => b.score - a.score);
 
         const tbody = document.getElementById('leaderboard-body');
         tbody.innerHTML = "";
         userList.forEach(u => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td onclick="viewStudentDetail('${u.id}')" style="color:blue; text-decoration:underline; cursor:pointer">${u.name}</td>
-                <td>${u.room}</td>
-                <td>${u.score}</td>
-            `;
+            tr.innerHTML = `<td onclick="viewStudentDetail('${u.id}')" style="color:blue; text-decoration:underline; cursor:pointer">${u.name}</td><td>${u.room}</td><td>${u.score}</td>`;
             tbody.appendChild(tr);
         });
     }
@@ -355,6 +353,5 @@
         window.scrollTo(0, document.body.scrollHeight);
     }
 </script>
-
 </body>
 </html>

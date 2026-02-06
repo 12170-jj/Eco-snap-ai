@@ -28,7 +28,7 @@ input,select{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px
 
 <header>
   <span class="back hidden" onclick="goHome()">⬅</span>
-  <span id="title">Eco Snap AI</span>
+  <span id="appTitle">Eco Snap AI</span>
   <span class="score" id="score"></span>
 </header>
 
@@ -94,9 +94,11 @@ input,select{width:100%;padding:10px;margin-top:8px;border-radius:8px;border:1px
 const MODEL_URL="https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
 let model,user,prediction;
 const preview = document.getElementById("preview");
+const imgInput = document.getElementById("imgInput");
 
-const title=document.getElementById("title");
+const title = document.getElementById("appTitle");
 const scoreBox=document.getElementById("score");
+const result = document.getElementById("result");
 
 function goHome(){location.reload()}
 

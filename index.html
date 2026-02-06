@@ -30,6 +30,7 @@
             box-shadow: 0 4px 0 #388E3C;
         }
         button:active { transform: translateY(4px); box-shadow: none; }
+        button:disabled { background: #ccc; box-shadow: 0 4px 0 #999; cursor: not-allowed; }
         button.secondary { background: var(--accent); box-shadow: 0 4px 0 #E65100; }
         
         input, select { 
@@ -37,25 +38,21 @@
             border: 2px solid #ddd; font-size: 16px; outline: none;
         }
 
-        /* UI Elements */
         .hidden { display: none !important; }
         .back-btn { position: absolute; top: 20px; left: 20px; width: auto; padding: 5px 15px; font-size: 14px; z-index: 100; }
         .score-badge { position: absolute; top: 20px; right: 20px; background: var(--secondary); padding: 5px 15px; border-radius: 20px; font-weight: bold; border: 2px solid var(--accent); }
 
-        /* Camera & Analysis */
         #webcam-container { border: 4px dashed var(--primary); border-radius: 15px; width: 100%; height: 250px; background: #eee; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
         #webcam-container img { width: 100%; height: 100%; object-fit: cover; }
         
         .result-box { border: 3px solid var(--primary); background: #E8F5E9; padding: 15px; border-radius: 15px; margin: 15px 0; }
-        .analyzing { font-style: italic; color: var(--accent); }
+        .analyzing { font-style: italic; color: var(--accent); font-weight: bold; margin: 10px 0; }
 
-        /* History */
         .history-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-top: 20px; }
         .history-item { display: flex; background: white; border-radius: 15px; overflow: hidden; box-shadow: 0 2px 5px rgba(0,0,0,0.1); text-align: left; align-items: center; }
         .history-item img { width: 80px; height: 80px; object-fit: cover; }
         .history-info { padding: 10px; font-size: 13px; }
 
-        /* Table */
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { padding: 12px; border-bottom: 1px solid #ddd; text-align: left; }
     </style>
@@ -161,23 +158,22 @@
     let currentImageBase64 = null;
     let currentAnalysis = null;
 
-    // Load Model
     async function initModel() {
-        const modelURL = MODEL_URL + "model.json";
-        const metadataURL = MODEL_URL + "metadata.json";
-        model = await tmImage.load(modelURL, metadataURL);
-        maxPredictions = model.getTotalClasses();
+        try {
+            const modelURL = MODEL_URL + "model.json";
+            const metadataURL = MODEL_URL + "metadata.json";
+            model = await tmImage.load(modelURL, metadataURL);
+            maxPredictions = model.getTotalClasses();
+        } catch (e) { console.log("Model load error"); }
     }
     initModel();
 
-    // Navigation
     function showPage(pageId) {
         document.querySelectorAll('.container > div').forEach(div => div.classList.add('hidden'));
         document.getElementById(pageId).classList.remove('hidden');
         window.scrollTo(0,0);
     }
 
-    // Validation
     function validateStudentForm() {
         const name = document.getElementById('std-name').value;
         const id = document.getElementById('std-id').value;
@@ -185,7 +181,6 @@
         document.getElementById('btn-login-std').disabled = !(name && id.length === 5 && room);
     }
 
-    // Student Logic
     function loginStudent() {
         const id = document.getElementById('std-id').value;
         const name = document.getElementById('std-name').value;
@@ -231,54 +226,69 @@
         document.getElementById('status-text').classList.remove('hidden');
         document.getElementById('btn-analyze').classList.add('hidden');
         
-        const imgElement = document.getElementById('preview-img');
-        const prediction = await model.predict(imgElement);
-        
-        // Find best match
-        let bestMatch = { className: "", probability: 0 };
-        prediction.forEach(p => {
-            if(p.probability > bestMatch.probability) bestMatch = p;
-        });
+        try {
+            const imgElement = document.getElementById('preview-img');
+            const prediction = await model.predict(imgElement);
+            
+            let bestMatch = { className: "", probability: 0 };
+            prediction.forEach(p => {
+                if(p.probability > bestMatch.probability) bestMatch = p;
+            });
 
-        currentAnalysis = {
-            type: bestMatch.className,
-            conf: (bestMatch.probability * 100).toFixed(2)
-        };
+            currentAnalysis = {
+                type: bestMatch.className,
+                conf: (bestMatch.probability * 100).toFixed(2)
+            };
 
-        setTimeout(() => {
-            document.getElementById('status-text').classList.add('hidden');
-            document.getElementById('result-area').classList.remove('hidden');
-            document.getElementById('waste-type').innerText = currentAnalysis.type;
-            document.getElementById('confidence-score').innerText = `มั่นใจ: ${currentAnalysis.conf}%`;
-            document.getElementById('btn-save').classList.remove('hidden');
-        }, 1500);
+            setTimeout(() => {
+                document.getElementById('status-text').classList.add('hidden');
+                document.getElementById('result-area').classList.remove('hidden');
+                document.getElementById('waste-type').innerText = currentAnalysis.type;
+                document.getElementById('confidence-score').innerText = `มั่นใจ: ${currentAnalysis.conf}%`;
+                document.getElementById('btn-save').classList.remove('hidden');
+            }, 1000);
+        } catch(e) {
+            alert("เกิดข้อผิดพลาดในการวิเคราะห์");
+            document.getElementById('btn-analyze').classList.remove('hidden');
+        }
     }
 
     function saveTrash() {
+        if(!currentAnalysis || !currentUser) return;
+
         const now = new Date();
         const record = {
             img: currentImageBase64,
             type: currentAnalysis.type,
             conf: currentAnalysis.conf,
-            date: now.toLocaleDateString(),
-            time: now.toLocaleTimeString()
+            date: now.toLocaleDateString('th-TH'),
+            time: now.toLocaleTimeString('th-TH')
         };
 
-        // Update LocalStorage
-        let users = JSON.parse(localStorage.getItem('eco_users'));
-        users[currentUser.id].score += 1;
-        users[currentUser.id].history.unshift(record);
-        localStorage.setItem('eco_users', JSON.stringify(users));
+        // Update LocalStorage สำหรับข้อมูลทั้งหมด
+        let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
+        if(users[currentUser.id]) {
+            users[currentUser.id].score += 1;
+            users[currentUser.id].history.unshift(record);
+            localStorage.setItem('eco_users', JSON.stringify(users));
+            
+            // Update ข้อมูลใน Session ปัจจุบัน
+            currentUser.score = users[currentUser.id].score;
+            currentUser.history = users[currentUser.id].history;
+        }
 
-        // Update Current Session
-        currentUser.score += 1;
-        currentUser.history.unshift(record);
-
-        // Reset UI
         alert("บันทึกสำเร็จ! +1 คะแนน");
+        
+        // Reset หน้าจอสำหรับการสแกนชิ้นต่อไป
         document.getElementById('preview-img').classList.add('hidden');
         document.getElementById('placeholder-text').classList.remove('hidden');
         document.getElementById('analysis-section').classList.add('hidden');
+        document.getElementById('result-area').classList.add('hidden');
+        document.getElementById('btn-save').classList.add('hidden');
+        
+        currentImageBase64 = null;
+        currentAnalysis = null;
+
         updateStudentUI();
     }
 
@@ -298,7 +308,6 @@
         });
     }
 
-    // Teacher Logic
     function loginTeacher() {
         const pwd = document.getElementById('teacher-pwd').value;
         if(pwd === "Eco2026") {
@@ -316,14 +325,12 @@
         
         let userList = Object.keys(users).map(id => ({ ...users[id], id }));
         
-        // Filter
         userList = userList.filter(u => {
             const matchSearch = u.name.toLowerCase().includes(searchTerm) || u.id.includes(searchTerm);
             const matchRoom = filterRoom === "" || u.room === filterRoom;
             return matchSearch && matchRoom;
         });
 
-        // Sort
         userList.sort((a, b) => b.score - a.score);
 
         const tbody = document.getElementById('leaderboard-body');

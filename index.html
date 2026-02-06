@@ -161,11 +161,29 @@ async function analyze(){
   result.classList.remove("hidden");
   result.innerText = "⏳ กำลังวิเคราะห์...";
 
-  if(!model){
-    model = await tmImage.load(
-      MODEL_URL + "model.json",
-      MODEL_URL + "metadata.json"
-    );
+  if (!model) {
+  model = await tmImage.load(
+    MODEL_URL + "model.json",
+    MODEL_URL + "metadata.json"
+  );
+}
+
+prediction = await model.predict(preview);
+
+// หาค่าที่มั่นใจที่สุด
+let best = prediction[0];
+for (let i = 1; i < prediction.length; i++) {
+  if (prediction[i].probability > best.probability) {
+    best = prediction[i];
+  }
+}
+
+// แสดงผล (สำคัญ: ใช้ backtick)
+result.innerHTML = `
+  <h3>ผลการวิเคราะห์</h3>
+  <p>ประเภท: <b>${best.className}</b></p>
+  <p>ความมั่นใจ: ${(best.probability * 100).toFixed(2)}%</p>
+`;
   }
 
   // รอให้รูปโหลดจริง (แก้ iOS bug)

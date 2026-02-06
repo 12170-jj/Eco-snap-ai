@@ -14,16 +14,17 @@
         #app { width: 100%; max-width: 500px; min-height: 100vh; background: var(--bg); display: flex; flex-direction: column; box-shadow: 0 0 20px rgba(0,0,0,0.1); }
         .page { padding: 20px; flex: 1; display: flex; flex-direction: column; }
         .hidden { display: none !important; }
-        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 20px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; }
+        .btn { background: var(--primary); color: white; border: none; padding: 16px; border-radius: 20px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; transition: 0.2s; }
+        .btn:active { transform: scale(0.98); }
         .btn-secondary { background: #84b6f4; }
         .btn-back { width: auto; padding: 8px 15px; background: var(--secondary); font-size: 14px; border-radius: 12px; color: white; border:none; margin-bottom: 20px; align-self: flex-start; }
-        input, select { width: 100%; padding: 15px; margin: 8px 0; border-radius: 15px; border: 2px solid #c8e6c9; font-size: 16px; font-family: 'Kanit'; }
+        input, select { width: 100%; padding: 15px; margin: 8px 0; border-radius: 15px; border: 2px solid #c8e6c9; font-size: 16px; font-family: 'Kanit'; outline: none; }
         .upload-zone { width: 100%; height: 280px; border: 4px dashed var(--primary); border-radius: 30px; margin: 15px 0; overflow: hidden; background: #fff; display: flex; align-items: center; justify-content: center; position: relative; }
         #webcam, #img-preview { width: 100%; height: 100%; object-fit: cover; }
         .result-card { background: white; border: 4px solid var(--primary); border-radius: 25px; padding: 20px; text-align: center; margin: 15px 0; }
         .history-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 15px; }
         .history-card { background: white; border-radius: 20px; overflow: hidden; border: 1px solid #eee; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
-        .history-card img { width: 100%; height: 100px; object-fit: cover; }
+        .history-card img { width: 100%; height: 110px; object-fit: cover; }
         .history-info { padding: 8px; font-size: 11px; line-height: 1.4; }
         .score-row { background: white; padding: 18px; border-radius: 20px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #f0f0f0; }
     </style>
@@ -33,7 +34,8 @@
 <div id="app">
     <div id="role-page" class="page" style="justify-content:center; text-align:center;">
         <div style="font-size: 70px;">🌿</div>
-        <h1 style="color:#2d6a4f;">Eco Snap AI</h1>
+        <h1 style="color:#2d6a4f; margin:10px 0;">Eco Snap AI</h1>
+        <p style="color:#666; margin-bottom:30px;">คัดแยกขยะด้วย AI เพื่อโลกสีเขียว</p>
         <button class="btn" onclick="showPage('student-login-page')">เข้าสู่ระบบนักเรียน</button>
         <button class="btn btn-secondary" onclick="showPage('teacher-login-page')">เข้าสู่ระบบคุณครู</button>
     </div>
@@ -55,15 +57,15 @@
 
     <div id="ai-page" class="page hidden">
         <button class="btn-back" onclick="showPage('role-page')">⬅ ย้อนกลับ</button>
-        <div style="background:white; padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center;">
-            <div id="user-display" style="font-weight:600; font-size:14px;"></div>
-            <div style="font-weight:bold; color:#2d6a4f;">⭐ <span id="user-score">0</span></div>
+        <div style="background:white; padding:15px; border-radius:20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 2px 5px rgba(0,0,0,0.05);">
+            <div id="user-display" style="font-weight:600; font-size:14px; color:#2d6a4f;"></div>
+            <div style="font-weight:bold; color:#1b4332; background:var(--accent); padding:5px 12px; border-radius:15px;">⭐ <span id="user-score">0</span></div>
         </div>
 
         <div class="upload-zone">
             <video id="webcam" autoplay playsinline muted class="hidden"></video>
             <img id="img-preview" class="hidden">
-            <div id="placeholder" style="color:#aaa;">📸 ถ่ายภาพหรืออัปโหลด</div>
+            <div id="placeholder" style="color:#aaa; text-align:center;">📸 ถ่ายภาพหรืออัปโหลดขยะ</div>
         </div>
 
         <div style="display:flex; gap:8px;">
@@ -72,40 +74,40 @@
         </div>
         <input type="file" id="file-input" class="hidden" accept="image/*" onchange="previewFile(event)">
 
-        <button class="btn" onclick="predict()">🚀 วิเคราะห์ขยะ</button>
-        <div id="loading" class="hidden" style="text-align:center; color:#77dd77; font-weight:bold;">⌛ กำลังวิเคราะห์...</div>
+        <button class="btn" onclick="predict()" style="background:#77dd77;">🚀 วิเคราะห์ขยะ</button>
+        <div id="loading" class="hidden" style="text-align:center; color:#77dd77; font-weight:bold; margin:10px 0;">⌛ กำลังวิเคราะห์...</div>
 
         <div id="result-box" class="result-card hidden">
             <h2 id="res-label" style="margin:0; color:#1b4332;">---</h2>
-            <div id="res-conf" style="color:#666;">มั่นใจ 0%</div>
-            <button id="btn-save-final" class="btn" onclick="saveRecord()" style="background:#2d6a4f; margin-top:15px;">✅ แยกขยะเสร็จแล้ว</button>
+            <div id="res-conf" style="color:#666; margin-bottom:15px;">มั่นใจ 0%</div>
+            <button class="btn" onclick="saveRecord()" style="background:#2d6a4f; margin:0;">✅ แยกขยะเสร็จแล้ว</button>
         </div>
 
-        <h3 style="margin-top:25px;">📜 ประวัติของฉัน</h3>
+        <h3 style="margin-top:25px; border-left:4px solid var(--primary); padding-left:10px;">📜 ประวัติของฉัน</h3>
         <div id="my-history" class="history-grid"></div>
     </div>
 
     <div id="teacher-login-page" class="page hidden">
         <button class="btn-back" onclick="showPage('role-page')">⬅ ย้อนกลับ</button>
-        <h2>คุณครูยืนยันตัวตน</h2>
-        <input type="password" id="teacher-pass" placeholder="รหัสผ่าน">
-        <button class="btn btn-secondary" onclick="loginTeacher()">ตกลง</button>
+        <h2>สำหรับคุณครู</h2>
+        <input type="password" id="teacher-pass" placeholder="รหัสผ่านยืนยันตัวตน">
+        <button class="btn btn-secondary" onclick="loginTeacher()">ยืนยัน</button>
     </div>
 
     <div id="teacher-dashboard" class="page hidden">
         <button class="btn-back" onclick="showPage('role-page')">ออกจากระบบ</button>
-        <h2>Eco Point 🏆</h2>
-        <input type="text" id="search-input" placeholder="🔍 ค้นหาชื่อ/รหัส" oninput="renderLeaderboard()">
+        <h2 style="color:#2d6a4f;">Eco Point 🏆</h2>
+        <input type="text" id="search-input" placeholder="🔍 ค้นหาชื่อ หรือ รหัสนักเรียน" oninput="renderLeaderboard()">
         <select id="filter-room" onchange="renderLeaderboard()">
-            <option value="">-- ทุกห้อง --</option>
-            <script>rooms.forEach(r => document.write(`<option value="${r}">${r}</option>`));</script>
+            <option value="">-- ทุกห้องเรียน --</option>
+            <script>rooms.forEach(r => document.write(`<option value="${r}">ห้อง ${r}</option>`));</script>
         </select>
-        <div id="leaderboard"></div>
+        <div id="leaderboard" style="margin-top:15px;"></div>
     </div>
 
     <div id="detail-page" class="page hidden">
         <button class="btn-back" onclick="showPage('teacher-dashboard')">⬅ ย้อนกลับ</button>
-        <h2 id="detail-name"></h2>
+        <h2 id="detail-name" style="color:#2d6a4f;"></h2>
         <div id="detail-history" class="history-grid"></div>
     </div>
 </div>
@@ -114,12 +116,12 @@
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
     let model, webcam, currentUserID, allUsers = {};
 
-    // 1. โหลดข้อมูล (ใช้ Key เดียวกันทั่วทั้งแอป)
-    function loadData() {
-        const saved = localStorage.getItem('eco_snap_final_v12');
+    // 1. โหลดข้อมูลจากเครื่อง (ใช้ Key ใหม่เพื่อความสะอาด)
+    function loadDB() {
+        const saved = localStorage.getItem('ecosnap_v15_final');
         allUsers = saved ? JSON.parse(saved) : {};
     }
-    loadData();
+    loadDB();
 
     function showPage(id) {
         document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
@@ -127,26 +129,28 @@
         if(webcam && id !== 'ai-page') { webcam.stop(); webcam = null; }
     }
 
-    // 2. ล็อกอินนักเรียน (แก้ปัญหาเข้าซ้ำไม่ได้)
+    // 2. ล็อกอินนักเรียน
     function loginStudent() {
         const name = document.getElementById('std-name').value.trim();
         const id = document.getElementById('std-id').value.trim();
         const room = document.getElementById('std-room').value;
 
-        if(!name || id.length !== 5 || !room) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        if(!name || id.length !== 5 || !room) return alert("กรุณากรอกข้อมูลให้ครบจ้า");
 
+        // ถ้าไม่มีข้อมูลเดิม ให้สร้างใหม่ ถ้ามีแล้วให้ใช้ของเดิม
         if(!allUsers[id]) {
             allUsers[id] = { name, id, room, score: 0, history: [] };
         }
         currentUserID = id;
-        saveToDisk();
+        saveDB();
         updateStudentUI();
         showPage('ai-page');
     }
 
     function updateStudentUI() {
+        loadDB(); // ดึงข้อมูลล่าสุดก่อนวาดหน้าจอ
         const u = allUsers[currentUserID];
-        document.getElementById('user-display').innerText = `${u.name} (${u.room})`;
+        document.getElementById('user-display').innerText = `${u.name} | ${u.room}`;
         document.getElementById('user-score').innerText = u.score;
         renderList('my-history', u.history);
     }
@@ -190,7 +194,7 @@
         document.getElementById('res-conf').innerText = `มั่นใจ ${(top.probability * 100).toFixed(1)}%`;
     }
 
-    // 3. ฟังก์ชันแยกขยะ (แก้ปัญหาปุ่มกดไม่ได้)
+    // 3. ฟังก์ชันบันทึกขยะ (แก้ไขเรื่องประวัติไม่ขึ้น)
     function saveRecord() {
         const label = document.getElementById('res-label').innerText;
         const conf = document.getElementById('res-conf').innerText;
@@ -203,27 +207,26 @@
             img = webcam.canvas.toDataURL('image/jpeg', 0.5);
         }
 
-        if(!img) return alert("ไม่พบรูปภาพ กรุณาลองใหม่");
+        if(!img) return alert("ไม่พบรูปภาพ");
 
-        // บันทึกเข้า Database
+        // บันทึกข้อมูล
         allUsers[currentUserID].score += 1;
         allUsers[currentUserID].history.unshift({
             label, conf, img, time: new Date().toLocaleString('th-TH')
         });
 
-        saveToDisk();
+        saveDB(); // เซฟลง LocalStorage
 
-        // **จุดสำคัญ: บังคับวาดหน้าจอทันที**
-        updateStudentUI();
-
-        // รีเซ็ตหน้าจอหลังจากบันทึกแล้ว
+        // **รีเซ็ตหน้าจอทันที**
         document.getElementById('result-box').classList.add('hidden');
         document.getElementById('img-preview').classList.add('hidden');
         document.getElementById('webcam').classList.add('hidden');
         document.getElementById('placeholder').classList.remove('hidden');
         if(webcam) { webcam.stop(); webcam = null; }
-        
-        alert("บันทึกสำเร็จ! ข้อมูลจะปรากฏในประวัติของคุณทันที 🌿");
+
+        // **วาดประวัติใหม่ทันทีจากฐานข้อมูล**
+        updateStudentUI(); 
+        alert("บันทึกสำเร็จ! +1 คะแนน 🌿");
     }
 
     function renderList(target, data) {
@@ -252,7 +255,7 @@
     }
 
     function renderLeaderboard() {
-        loadData();
+        loadDB();
         const search = document.getElementById('search-input').value.toLowerCase();
         const room = document.getElementById('filter-room').value;
         const container = document.getElementById('leaderboard');
@@ -269,12 +272,12 @@
                     renderList('detail-history', u.history);
                     showPage('detail-page');
                 };
-                div.innerHTML = `<div><strong>${u.name}</strong><br><small>${u.id} | ${u.room}</small></div><b style="color:#77dd77; font-size:20px;">${u.score}</b>`;
+                div.innerHTML = `<div><strong>${u.name}</strong><br><small>${u.id} | ห้อง ${u.room}</small></div><b style="color:#77dd77; font-size:20px;">${u.score}</b>`;
                 container.appendChild(div);
             });
     }
 
-    function saveToDisk() { localStorage.setItem('eco_snap_final_v12', JSON.stringify(allUsers)); }
+    function saveDB() { localStorage.setItem('ecosnap_v15_final', JSON.stringify(allUsers)); }
 </script>
 </body>
 </html>

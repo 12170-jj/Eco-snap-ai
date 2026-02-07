@@ -66,8 +66,8 @@
         <button class="back-btn" onclick="showPage('page-role')">ย้อนกลับ</button>
         <div class="score-badge" id="badge">คะแนน: <span id="display-score">0</span></div>
         <div class="card" style="margin-top: 60px;">
-            <h2 id="display-name" style="margin: 0; font-size: 18px;">-</h2>
-            <p id="display-room" style="margin: 0; color: #666;">-</p>
+            <h2 id="display-name">-</h2>
+            <p id="display-room">-</p>
             <hr>
             <h3>วิเคราะห์ขยะ</h3>
             <div id="webcam-container">
@@ -88,7 +88,7 @@
                 <button id="btn-save" class="hidden" onclick="saveTrash()">แยกขยะเสร็จแล้ว</button>
             </div>
         </div>
-        <h3>ประวัติการคัดแยกของคุณ</h3>
+        <h3>ประวัติของคุณ</h3>
         <div id="student-history" class="history-grid"></div>
     </div>
 
@@ -102,8 +102,7 @@
     <div id="page-teacher-main" class="hidden">
         <button class="back-btn" onclick="showPage('page-role')">ย้อนกลับ</button>
         <div class="card">
-            <h1>Eco Points 🏆</h1>
-            <p style="font-size: 12px; color: #666;">(รวมข้อมูลนักเรียนจากทุกเครื่อง)</p>
+            <h1>Eco Points (รวมนักเรียนทั้งหมด) 🏆</h1>
             <input type="text" id="search-input" placeholder="ค้นชื่อหรือรหัส..." oninput="renderLeaderboard()">
             <div id="leaderboard-container">
                 <table>
@@ -121,17 +120,16 @@
 </div>
 
 <script>
-    // ข้อมูลจากภาพที่คุณส่งมา (ภาพที่ 9)
+    // *** นำ Firebase Config ของคุณมาวางทับที่นี่ ***
     const firebaseConfig = {
-        apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
-        authDomain: "eco-snap-ai.firebaseapp.com",
-        databaseURL: "https://eco-snap-ai-default-rtdb.asia-southeast1.firebasedatabase.app",
-        projectId: "eco-snap-ai",
-        storageBucket: "eco-snap-ai.firebasestorage.app",
-        messagingSenderId: "700051453001",
-        appId: "1:700051453001:web:0ad07a5fe34fcaf3523b98"
+        apiKey: "ใส่ของคุณ",
+        authDomain: "ใส่ของคุณ",
+        databaseURL: "ใส่ของคุณ",
+        projectId: "ใส่ของคุณ",
+        storageBucket: "ใส่ของคุณ",
+        messagingSenderId: "ใส่ของคุณ",
+        appId: "ใส่ของคุณ"
     };
-    
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
@@ -139,9 +137,7 @@
     let model, currentId = null;
 
     async function init() {
-        try {
-            model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
-        } catch (e) { console.error("Model load error"); }
+        model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
     }
     init();
 
@@ -180,9 +176,10 @@
             document.getElementById('display-name').innerText = u.name;
             document.getElementById('display-room').innerText = "ห้อง: " + u.room;
             
-            db.ref('history/' + currentId).limitToLast(10).once('value', (hSnap) => {
+            // ดึงประวัติแบบ Realtime
+            db.ref('history/' + currentId).on('value', (snap) => {
                 const h = [];
-                hSnap.forEach(item => h.unshift(item.val()));
+                snap.forEach(item => { h.unshift(item.val()); });
                 renderHistory('student-history', h);
             });
         });
@@ -216,16 +213,19 @@
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
+    // แก้ไข: บันทึกประวัติได้ต่อเนื่องและ Reset ข้อมูลให้พร้อมครั้งถัดไป
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
         const confStr = document.getElementById('confidence-score').innerText;
         const imgData = document.getElementById('preview-img').src;
         const now = new Date();
 
-        // 1. ส่งคะแนนขึ้น Cloud
+        if(!currentId) return;
+
+        // 1. เพิ่มคะแนน
         db.ref('users/' + currentId + '/score').transaction((s) => (s || 0) + 1);
 
-        // 2. ส่งประวัติขึ้น Cloud
+        // 2. บันทึกประวัติ (ใช้ push เพื่อสร้างรายการใหม่เสมอ)
         db.ref('history/' + currentId).push({
             img: imgData,
             type: type,
@@ -234,17 +234,22 @@
             time: now.toLocaleTimeString('th-TH')
         });
 
-        // 3. Auto-Reset ทันที (ไม่มี Alert)
-        document.getElementById('preview-img').classList.add('hidden');
+        // 3. Reset UI ทันทีตามที่คุณต้องการ
+        const previewImg = document.getElementById('preview-img');
+        previewImg.src = "";
+        previewImg.classList.add('hidden');
         document.getElementById('placeholder-text').classList.remove('hidden');
         document.getElementById('analysis-section').classList.add('hidden');
-        document.getElementById('file-input').value = "";
-        
+        document.getElementById('file-input').value = ""; // ล้างค่าไฟล์เพื่อให้เลือกรูปเดิมซ้ำได้
+
+        // เอฟเฟกต์คะแนนเด้ง
         const b = document.getElementById('badge');
+        b.style.transform = "scale(1.2)";
         b.style.backgroundColor = '#4CAF50';
-        setTimeout(() => b.style.backgroundColor = '#FFEB3B', 500);
-        
-        updateUI();
+        setTimeout(() => {
+            b.style.transform = "scale(1)";
+            b.style.backgroundColor = '#FFEB3B';
+        }, 500);
     }
 
     function renderHistory(id, h) {
@@ -283,7 +288,7 @@
     function viewHistory(id) {
         db.ref('history/' + id).once('value', (snap) => {
             const h = [];
-            snap.forEach(item => h.unshift(item.val()));
+            snap.forEach(item => { h.unshift(item.val()); });
             document.getElementById('teacher-history-view').classList.remove('hidden');
             renderHistory('teacher-history-list', h);
         });

@@ -12,131 +12,84 @@
     
     <style>
         :root {
-            --p-green: #7BC67E; /* เขียวพาสเทลสดใส */
-            --d-green: #2D6A4F; /* เขียวเข้มดูดี */
-            --y-pastel: #FFF9C4; /* เหลืองนวล */
-            --o-pastel: #FFCC80; /* ส้มอ่อน */
-            --p-pink: #FCE4EC;   /* ชมพูฟรุ้งฟริ้ง */
-            --bg: #E8F5E9;       /* พื้นหลังเขียวอ่อนมาก */
+            --p-green: #7BC67E; 
+            --d-green: #2D6A4F; 
+            --y-pastel: #FFF9C4; 
+            --o-pastel: #FFCC80; 
+            --p-pink: #FCE4EC;   
+            --bg: #E8F5E9;       
             --white: #ffffff;
         }
 
-        * { 
-            box-sizing: border-box; 
-            font-family: 'Kanit', sans-serif; 
-            -webkit-tap-highlight-color: transparent; 
-        }
+        * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body { 
             margin: 0; 
             background: var(--bg);
-            /* เพิ่มลายก้อนเมฆจางๆ ในพื้นหลัง */
             background-image: radial-gradient(circle at 20% 30%, #fff 5%, transparent 5.01%),
                               radial-gradient(circle at 80% 70%, #fff 8%, transparent 8.01%);
-            background-size: 100% 100%;
-            color: #333;
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center; /* จัดทุกอย่างให้อยู่กลางหน้าจอ */
+            color: #333; min-height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
-        .container { 
-            width: 100%;
-            max-width: 420px; 
-            min-height: 100vh;
-            padding: 25px 20px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; /* กึ่งกลางแนวตั้ง */
-        }
+        .container { width: 100%; max-width: 420px; min-height: 100vh; padding: 25px 20px; display: flex; flex-direction: column; justify-content: center; }
 
-        /* การ์ดสไตล์นุ่มนิ่ม */
         .card { 
-            background: rgba(255, 255, 255, 0.95); 
-            padding: 40px 25px; 
-            border-radius: 50px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.08); 
-            text-align: center; 
-            border: 5px solid #fff;
-            position: relative;
-            animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            background: rgba(255, 255, 255, 0.95); padding: 40px 25px; border-radius: 50px; 
+            box-shadow: 0 25px 50px rgba(0,0,0,0.08); text-align: center; border: 5px solid #fff;
+            position: relative; animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
-        @keyframes bounceIn {
-            0% { transform: scale(0.3); opacity: 0; }
-            100% { transform: scale(1); opacity: 1; }
-        }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
-        h1 { color: var(--d-green); font-size: 38px; margin: 0; letter-spacing: -1px; line-height: 1.1; }
+        h1 { color: var(--d-green); font-size: 38px; margin: 0; letter-spacing: -1px; }
         p { color: #666; font-size: 16px; margin-top: 10px; }
 
-        /* ปุ่ม Bubble สุดนุ่ม */
         button { 
-            background: var(--p-green); 
-            color: white; 
-            border: none; 
-            padding: 20px; 
-            border-radius: 30px; 
-            font-size: 20px; 
-            font-weight: 600;
-            cursor: pointer; 
-            width: 100%; 
-            margin: 15px 0; 
-            box-shadow: 0 10px 0 #5E9D61; 
-            transition: 0.1s;
-            display: flex; align-items: center; justify-content: center; gap: 12px;
+            background: var(--p-green); color: white; border: none; padding: 20px; border-radius: 30px; 
+            font-size: 20px; font-weight: 600; cursor: pointer; width: 100%; margin: 15px 0; 
+            box-shadow: 0 10px 0 #5E9D61; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 12px;
         }
-
         button:active { transform: translateY(6px); box-shadow: 0 4px 0 #5E9D61; }
-        button:disabled { background: #D1D9D1 !important; box-shadow: 0 10px 0 #A9B2A9 !important; transform: none; color: #999; }
+        button:disabled { background: #D1D9D1 !important; box-shadow: 0 10px 0 #A9B2A9 !important; color: #999; }
         
         button.teacher-btn { background: var(--o-pastel); box-shadow: 0 10px 0 #E6A440; color: #784C00; }
         button.back-btn { background: #E0E0E0; box-shadow: 0 5px 0 #BDBDBD; color: #666; font-size: 14px; width: auto; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; }
+        
+        /* ปุ่ม Tutorial */
+        .btn-how { background: #BBDEFB; color: #1976D2; box-shadow: 0 5px 0 #90CAF9; font-size: 16px; padding: 12px; margin-top: 5px; }
+        .btn-how:active { box-shadow: 0 2px 0 #90CAF9; }
 
-        input, select { 
-            width: 100%; padding: 18px; margin: 12px 0; border-radius: 25px; 
-            border: 3px solid #F0F0F0; font-size: 17px; background: #fff; text-align: center;
-            transition: 0.3s; color: #333;
-        }
-        input:focus { border-color: var(--p-green); outline: none; background: #FBFFFB; }
+        input, select { width: 100%; padding: 18px; margin: 12px 0; border-radius: 25px; border: 3px solid #F0F0F0; font-size: 17px; background: #fff; text-align: center; transition: 0.3s; }
+        input:focus { border-color: var(--p-green); outline: none; }
 
         .hidden { display: none !important; }
 
-        /* ส่วนแสดงผล AI */
+        /* Modal คู่มือการใช้งาน */
+        .modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000;
+        }
+        .modal-content { 
+            background: white; width: 85%; max-width: 350px; padding: 30px; border-radius: 40px; 
+            text-align: center; border: 5px solid var(--p-green); position: relative;
+        }
+        .tutorial-step { margin-bottom: 20px; text-align: left; background: #f9f9f9; padding: 15px; border-radius: 20px; }
+
         #webcam-container { 
             border: 6px dashed #B9E2BC; border-radius: 45px; height: 320px; 
-            background: #F9F9F9; display: flex; align-items: center; justify-content: center; 
-            overflow: hidden; margin: 25px 0; position: relative;
-            box-shadow: inset 0 10px 20px rgba(0,0,0,0.02);
+            background: #F9F9F9; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 25px 0; box-shadow: inset 0 10px 20px rgba(0,0,0,0.02);
         }
         #webcam-container img { width: 100%; height: 100%; object-fit: cover; }
 
-        .score-badge { 
-            background: linear-gradient(135deg, var(--y-pastel), #FFF176);
-            padding: 15px 30px; border-radius: 40px; 
-            font-weight: bold; border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.07);
-            font-size: 26px; color: #5D4037; display: inline-block; margin: 15px 0;
-        }
-
-        .result-box { 
-            background: var(--p-pink); padding: 25px; border-radius: 40px; border: 3px solid #fff; margin: 20px 0;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
-        }
-
-        .history-item { 
-            display: flex; background: white; border-radius: 35px; margin-bottom: 20px;
-            box-shadow: 0 12px 24px rgba(0,0,0,0.05); overflow: hidden; border: 4px solid #fff;
-            align-items: center;
-        }
+        .score-badge { background: linear-gradient(135deg, var(--y-pastel), #FFF176); padding: 15px 30px; border-radius: 40px; font-weight: bold; border: 4px solid #fff; box-shadow: 0 10px 25px rgba(0,0,0,0.07); font-size: 26px; color: #5D4037; display: inline-block; margin: 15px 0; }
+        .result-box { background: var(--p-pink); padding: 25px; border-radius: 40px; border: 3px solid #fff; margin: 20px 0; }
+        .history-item { display: flex; background: white; border-radius: 35px; margin-bottom: 20px; box-shadow: 0 12px 24px rgba(0,0,0,0.05); overflow: hidden; border: 4px solid #fff; align-items: center; }
         .history-item img { width: 110px; height: 110px; object-fit: cover; border-radius: 25px; margin: 10px; }
-        .history-info { padding-right: 20px; font-size: 14px; text-align: left; }
 
-        table { width: 100%; border-radius: 35px; overflow: hidden; background: white; border-collapse: collapse; box-shadow: 0 10px 30px rgba(0,0,0,0.05); }
-        th { background: #E8F5E9; color: var(--d-green); padding: 22px; font-size: 17px; }
-        td { padding: 20px; border-bottom: 1px solid #F0F0F0; text-align: center; }
+        table { width: 100%; border-radius: 35px; overflow: hidden; background: white; border-collapse: collapse; }
+        th { background: #E8F5E9; color: var(--d-green); padding: 20px; }
+        td { padding: 18px; border-bottom: 1px solid #F0F0F0; text-align: center; }
 
-        /* ตกแต่งพื้นหลังเพิ่มเติม */
         .decor-leaf { position: absolute; font-size: 40px; z-index: -1; opacity: 0.5; animation: float 3s infinite ease-in-out; }
         @keyframes float { 0%, 100% { transform: translateY(0) rotate(0); } 50% { transform: translateY(-20px) rotate(20deg); } }
     </style>
@@ -154,13 +107,23 @@
         <br>
         <button onclick="showPage('page-login-student')"><span>👦</span> เข้าสู่ระบบนักเรียน</button>
         <button onclick="showPage('page-login-teacher')" class="teacher-btn"><span>👩‍🏫</span> เข้าสู่ระบบคุณครู</button>
-        <p style="font-size: 12px; margin-top: 20px;">โรงเรียนสะอาดได้ด้วยมือเรา 💚</p>
+        <button onclick="toggleModal(true)" class="btn-how"><span>📖</span> วิธีใช้งานเว็บไซต์</button>
+    </div>
+
+    <div id="tutorial-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--d-green);">📖 วิธีใช้งาน</h2>
+            <div class="tutorial-step"><strong>1. เข้าสู่ระบบ:</strong> เลือกบทบาทของคุณเพื่อเริ่มใช้งาน</div>
+            <div class="tutorial-step"><strong>2. ถ่ายรูป:</strong> ถ่ายภาพขยะที่ต้องการแยกให้ชัดเจน</div>
+            <div class="tutorial-step"><strong>3. วิเคราะห์:</strong> ให้ AI ช่วยตรวจว่าควรทิ้งถังไหน</div>
+            <div class="tutorial-step"><strong>4. รับแต้ม:</strong> กดบันทึกเพื่อสะสมแต้มความดี</div>
+            <button onclick="toggleModal(false)" style="margin-top: 10px; padding: 15px;">เข้าใจแล้วจ้า! ✨</button>
+        </div>
     </div>
 
     <div id="page-login-student" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">⬅️ กลับหน้าหลัก</button>
-        <h2 style="color: var(--d-green); margin: 0;">ยินดีต้อนรับจ้า!</h2>
-        <p>กรอกข้อมูลเพื่อสะสมแต้มความดี</p>
+        <button class="back-btn" onclick="showPage('page-role')">⬅️ กลับ</button>
+        <h2 style="color: var(--d-green);">ยินดีต้อนรับจ้า!</h2>
         <input type="text" id="std-name" placeholder="ชื่อ - นามสกุล" oninput="validateStudentForm()">
         <input type="number" id="std-id" placeholder="รหัสนักเรียน 5 หลัก" oninput="validateStudentForm()">
         <select id="std-room" onchange="validateStudentForm()">
@@ -177,28 +140,24 @@
         <div class="card">
             <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button><br>
             <div class="score-badge">✨ <span id="display-score">0</span> แต้ม ✨</div>
-            <h2 id="display-name" style="margin: 5px 0;">-</h2>
-            <div style="color: var(--d-green); background: #E8F5E9; display: inline-block; padding: 6px 20px; border-radius: 15px; font-weight: bold;" id="display-room">-</div>
-            
+            <h2 id="display-name">-</h2>
+            <div style="color: var(--d-green); font-weight: bold;" id="display-room">-</div>
             <div id="webcam-container">
-                <div id="placeholder-text" style="color: var(--p-green); font-weight: bold; font-size: 18px;">📷<br>ส่องขยะตรงนี้เลย</div>
+                <div id="placeholder-text" style="color: var(--p-green);">📷<br>ส่องขยะตรงนี้เลย</div>
                 <img id="preview-img" class="hidden">
             </div>
-            
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
             <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพขยะ</button>
-            
             <div id="analysis-section" class="hidden">
                 <div id="result-area" class="result-box hidden">
-                    <div id="waste-type" style="font-size: 34px; color: var(--d-green); font-weight: bold; margin-bottom: 5px;">-</div>
-                    <div id="confidence-score" style="color: #888; font-size: 14px;">-</div>
+                    <div id="waste-type" style="font-size: 34px; color: var(--d-green); font-weight: bold;">-</div>
+                    <div id="confidence-score" style="color: #888;">-</div>
                 </div>
                 <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 ให้ AI ช่วยตรวจดู</button>
                 <button id="btn-save" class="hidden" onclick="saveTrash()">✅ แยกเรียบร้อยแล้ว!</button>
             </div>
         </div>
-        <h3 style="text-align: center; color: var(--d-green);">🕒 บันทึกความดีล่าสุด</h3>
-        <div id="student-history" class="history-grid"></div>
+        <div id="student-history"></div>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
@@ -219,15 +178,15 @@
             </select>
             <div style="overflow-x: auto; border-radius: 30px; margin-top: 20px;">
                 <table>
-                    <thead><tr><th>ชื่อ-นามสกุล</th><th>ห้อง</th><th>แต้ม</th></tr></thead>
+                    <thead><tr><th>ชื่อ</th><th>ห้อง</th><th>แต้ม</th></tr></thead>
                     <tbody id="leaderboard-body"></tbody>
                 </table>
             </div>
         </div>
         <div id="teacher-history-view" class="card hidden" style="border: 6px solid var(--o-pastel); width: 100%;">
             <h3 id="viewing-name">-</h3>
-            <div id="teacher-history-list" class="history-grid"></div>
-            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#999; box-shadow: 0 5px 0 #777;">✖️ ปิดหน้านี้</button>
+            <div id="teacher-history-list"></div>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')">✖️ ปิด</button>
         </div>
     </div>
 </div>
@@ -251,6 +210,10 @@
     let model, currentId = null;
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
+
+    function toggleModal(show) {
+        document.getElementById('tutorial-modal').classList.toggle('hidden', !show);
+    }
 
     function showPage(p) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
@@ -340,7 +303,7 @@
 
     function renderHistoryItems(containerId, data) {
         const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p style="text-align:center; color:#bbb; padding:20px;">ยังไม่มีประวัติในห้องนี้เลย 🎈</p>' : '';
+        container.innerHTML = data.length === 0 ? '<p style="text-align:center; color:#bbb;">ยังไม่มีประวัติจ้า 🎈</p>' : '';
         data.forEach(i => {
             container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>${i.type}</strong><br><small>${i.conf}</small><br><small>${i.date} | ${i.time}</small></div></div>`;
         });

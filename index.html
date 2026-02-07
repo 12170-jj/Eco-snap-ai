@@ -12,13 +12,13 @@
     
     <style>
         :root {
-            --primary: #66BB6A;
-            --primary-dark: #43A047;
-            --secondary: #FFF176;
-            --accent: #FFB74D;
-            --bg: #F1FBF2;
+            --primary: #81C784;
+            --primary-dark: #388E3C;
+            --secondary: #FFF59D;
+            --accent: #FFCC80;
+            --bg: #F9FFF9;
             --white: #ffffff;
-            --text: #2E4031;
+            --text: #37474F;
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; }
@@ -26,136 +26,156 @@
         body { 
             margin: 0; 
             background-color: var(--bg); 
-            background-image: radial-gradient(#e0f2e1 1px, transparent 1px);
-            background-size: 20px 20px;
-            color: var(--text); 
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(129, 199, 132, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(255, 204, 128, 0.1) 0%, transparent 20%);
+            color: var(--text);
+            min-height: 100vh;
         }
 
-        .container { max-width: 450px; margin: 0 auto; min-height: 100vh; padding: 25px 15px; position: relative; }
+        .container { max-width: 480px; margin: 0 auto; min-height: 100vh; padding: 20px 15px; display: flex; flex-direction: column; }
 
         .card { 
-            background: var(--white); 
-            padding: 25px; 
-            border-radius: 30px; 
-            box-shadow: 0 10px 25px rgba(102, 187, 106, 0.15); 
+            background: rgba(255, 255, 255, 0.9); 
+            padding: 30px 20px; 
+            border-radius: 40px; 
+            box-shadow: 0 15px 35px rgba(129, 199, 132, 0.2); 
             text-align: center; 
             margin-bottom: 25px;
-            border: 2px solid #e8f5e9;
+            border: 4px solid #fff;
+            position: relative;
+            overflow: hidden;
         }
 
-        h1 { color: var(--primary-dark); font-size: 32px; margin: 10px 0; text-shadow: 1px 1px 0px #fff; }
-        h3 { font-weight: 600; color: #555; }
+        /* ตกแต่งหน้าแรกให้ดูเต็ม */
+        .hero-decor { font-size: 80px; margin-bottom: 10px; display: inline-block; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-        /* ปุ่มกดสไตล์น่ารัก */
+        .welcome-text { font-size: 18px; color: #666; line-height: 1.6; margin-bottom: 25px; }
+
+        h1 { color: var(--primary-dark); font-size: 36px; margin: 5px 0; letter-spacing: -1px; }
+
+        /* ปุ่มสไตล์นุ่มนิ่ม (Bubble) */
         button { 
             background: var(--primary); 
             color: white; 
             border: none; 
-            padding: 15px 25px; 
-            border-radius: 20px; 
-            font-size: 18px; 
+            padding: 18px 25px; 
+            border-radius: 25px; 
+            font-size: 19px; 
             font-weight: 600;
             cursor: pointer; 
             width: 100%; 
-            margin: 12px 0; 
-            box-shadow: 0 6px 0 #3d8b40; 
-            transition: all 0.1s ease;
+            margin: 15px 0; 
+            box-shadow: 0 8px 0 #5a9e5d; 
+            transition: 0.1s;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
 
-        button:active { transform: translateY(4px); box-shadow: 0 2px 0 #3d8b40; }
-        button:disabled { background: #BDBDBD !important; box-shadow: 0 6px 0 #9E9E9E !important; cursor: not-allowed; }
-        button.secondary { background: var(--accent); box-shadow: 0 6px 0 #e69138; }
+        button:active { transform: translateY(5px); box-shadow: 0 3px 0 #5a9e5d; }
+        button:disabled { background: #CFD8DC !important; box-shadow: 0 8px 0 #90A4AE !important; transform: none; }
+        button.secondary { background: var(--accent); box-shadow: 0 8px 0 #e6a440; }
 
         input, select { 
             width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border-radius: 15px; 
-            border: 2px solid #e0e0e0; 
-            font-size: 16px; 
-            background: #fafafa;
-            transition: border 0.3s;
+            padding: 16px; 
+            margin: 12px 0; 
+            border-radius: 20px; 
+            border: 2px solid #E0E0E0; 
+            font-size: 17px; 
+            background: #fff;
+            text-align: center;
         }
 
-        input:focus { border-color: var(--primary); }
+        input:focus { border-color: var(--primary); outline: none; }
 
         .hidden { display: none !important; }
 
-        /* ส่วนแสดงผล AI */
+        /* กรอบ AI */
         #webcam-container { 
-            border: 3px dashed var(--primary); 
-            border-radius: 25px; 
-            height: 280px; 
-            background: #f9f9f9; 
+            border: 5px dashed #C8E6C9; 
+            border-radius: 35px; 
+            height: 300px; 
+            background: #fff; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
             overflow: hidden; 
-            margin-bottom: 20px;
-            position: relative;
+            margin: 20px 0;
+            box-shadow: inset 0 5px 15px rgba(0,0,0,0.05);
         }
-        #webcam-container img { width: 100%; height: 100%; object-fit: cover; border-radius: 20px; }
+        #webcam-container img { width: 100%; height: 100%; object-fit: cover; }
 
         .score-badge { 
-            background: var(--secondary); 
-            padding: 10px 20px; 
-            border-radius: 50px; 
+            background: linear-gradient(135deg, var(--secondary), #FFF176);
+            padding: 12px 25px; 
+            border-radius: 30px; 
             font-weight: bold; 
             border: 3px solid #fff;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 22px;
+            color: #795548;
             display: inline-block;
-            margin-bottom: 15px;
-            font-size: 20px;
+            margin: 10px 0;
         }
 
         .result-box { 
-            background: #E8F5E9; 
-            padding: 20px; 
-            border-radius: 20px; 
-            margin: 15px 0; 
-            border: 2px solid var(--primary);
+            background: #F1F8E9; 
+            padding: 25px; 
+            border-radius: 30px; 
+            margin: 20px 0; 
+            border: 3px solid var(--primary);
+            position: relative;
         }
 
-        /* ตารางและประวัติ */
+        /* ประวัติ */
         .history-item { 
             display: flex; 
             background: white; 
-            border-radius: 20px; 
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            border-radius: 25px; 
+            margin-bottom: 18px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.06);
             overflow: hidden;
-            border-left: 6px solid var(--primary);
+            border: 2px solid #F1F8E9;
         }
-        .history-item img { width: 90px; height: 90px; object-fit: cover; }
-        .history-info { padding: 12px; font-size: 14px; }
+        .history-item img { width: 100px; height: 100px; object-fit: cover; }
+        .history-info { padding: 15px; font-size: 15px; flex: 1; }
 
-        table { width: 100%; border-radius: 15px; overflow: hidden; background: white; border-collapse: collapse; }
-        th { background: #DCEDC8; color: var(--primary-dark); padding: 15px; }
-        td { padding: 15px; border-bottom: 1px solid #f0f0f0; }
+        table { width: 100%; border-radius: 25px; overflow: hidden; background: white; border-collapse: collapse; }
+        th { background: #F1F8E9; color: var(--primary-dark); padding: 18px; font-size: 16px; }
+        td { padding: 18px; border-bottom: 1px solid #F5F5F5; font-size: 15px; }
 
-        .back-btn { background: #90A4AE; width: auto; font-size: 14px; padding: 8px 15px; box-shadow: 0 4px 0 #546E7A; }
+        .back-btn { background: #B0BEC5; width: auto; font-size: 14px; padding: 10px 20px; box-shadow: 0 5px 0 #78909C; }
+        
+        .footer-decor { font-size: 40px; margin-top: auto; padding: 20px; text-align: center; opacity: 0.6; }
+
     </style>
 </head>
 <body>
 
 <div class="container">
     <div id="page-role" class="card">
-        <div style="font-size: 60px;">🌱</div>
+        <div class="hero-decor">🌍✨</div>
         <h1>Eco Snap AI</h1>
-        <p style="color: #666;">มาช่วยกันแยกขยะให้โลกยิ้มกันเถอะ!</p>
-        <button onclick="showPage('page-login-student')">👤 นักเรียนเข้าใช้งาน</button>
-        <button onclick="showPage('page-login-teacher')" class="secondary">👩‍🏫 คุณครูเข้าดูระบบ</button>
+        <div class="welcome-text">
+            ภารกิจกู้โลกเริ่มได้ที่มือคุณ!<br>
+            <strong>ถ่ายภาพ > วิเคราะห์ > แยกขยะ</strong><br>
+            เพื่อคะแนนรักษ์โลกสุดเท่ 🏆
+        </div>
+        <button onclick="showPage('page-login-student')">👦 นักเรียนเข้าใช้งาน</button>
+        <button onclick="showPage('page-login-teacher')" class="secondary">👩‍🏫 คุณครูตรวจสอบระบบ</button>
+        <div style="margin-top: 20px; font-size: 12px; color: #999;">ร่วมใจแยกขยะ เพื่อโรงเรียนที่สะอาดขึ้น 🍃</div>
     </div>
 
     <div id="page-login-student" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">⬅️ ย้อนกลับ</button>
-        <h2>ลงชื่อเข้าใช้งาน</h2>
-        <input type="text" id="std-name" placeholder="ชื่อ-นามสกุล" oninput="validateStudentForm()">
-        <input type="number" id="std-id" placeholder="รหัสนักเรียน 5 หลัก" oninput="validateStudentForm()">
+        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับหน้าหลัก</button>
+        <h2 style="color: var(--primary-dark);">ลงชื่อเข้าเรียน</h2>
+        <p>กรุณากรอกข้อมูลให้ครบถ้วนเพื่อเริ่มเก็บแต้ม</p>
+        <input type="text" id="std-name" placeholder="ชื่อ - นามสกุล">
+        <input type="number" id="std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <select id="std-room" onchange="validateStudentForm()">
             <option value="">เลือกชั้นเรียนของคุณ</option>
             <script>
@@ -163,19 +183,18 @@
                 rooms.forEach(r => document.write(`<option value="${r}">มัธยมศึกษาปีที่ ${r}</option>`));
             </script>
         </select>
-        <button id="btn-login-std" disabled onclick="loginStudent()">🎉 เริ่มใช้งานเลย!</button>
+        <button id="btn-login-std" disabled onclick="loginStudent()">🚀 ลุยเลยยย!</button>
     </div>
 
     <div id="page-student-main" class="hidden">
         <div class="card">
-            <button class="back-btn" onclick="location.reload()">ออกจากระบบ</button><br><br>
-            <div class="score-badge">⭐️ <span id="display-score">0</span> แต้มรักษ์โลก</div>
-            <h2 id="display-name" style="margin: 5px 0;">-</h2>
-            <p id="display-room" style="color: #888;">-</p>
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button><br><br>
+            <div class="score-badge">🌟 สะสมได้ <span id="display-score">0</span> แต้ม</div>
+            <h2 id="display-name">-</h2>
+            <div style="color: var(--primary-dark); background: #E8F5E9; display: inline-block; padding: 5px 15px; border-radius: 10px; font-size: 14px;" id="display-room">-</div>
             
             <div id="webcam-container">
-                <div id="placeholder-text" style="color: #aaa; text-align: center;">📸<br>ถ่ายภาพขยะเพื่อวิเคราะห์</div>
+                <div id="placeholder-text" style="color: #66BB6A; font-weight: bold;">📸<br>กดปุ่มด้านล่างเพื่อถ่ายภาพ</div>
                 <img id="preview-img" class="hidden">
             </div>
             
@@ -184,50 +203,53 @@
             
             <div id="analysis-section" class="hidden">
                 <div id="result-area" class="result-box hidden">
-                    <strong style="color: #555;">AI บอกว่านี่คือ:</strong>
-                    <div id="waste-type" style="font-size: 28px; color: var(--primary-dark); font-weight: 600;">-</div>
-                    <div id="confidence-score" style="font-size: 14px; color: #777;">-</div>
+                    <div id="waste-type" style="font-size: 32px; color: var(--primary-dark); font-weight: bold;">-</div>
+                    <div id="confidence-score" style="color: #666;">-</div>
                 </div>
-                <button id="btn-analyze" onclick="analyzeImage()" class="secondary">🔍 เริ่มวิเคราะห์</button>
-                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ แยกขยะเรียบร้อย</button>
+                <button id="btn-analyze" onclick="analyzeImage()" class="secondary">🔍 เริ่มตรวจหาประเภทขยะ</button>
+                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ แยกขยะเรียบร้อยแล้ว</button>
             </div>
         </div>
-        <h3 style="margin-left: 10px;">🕒 ประวัติความดีของคุณ</h3>
+        <h3 style="padding-left: 10px; color: #555;">📋 ประวัติการแยกขยะของคุณ</h3>
         <div id="student-history" class="history-grid"></div>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">ย้อนกลับ</button>
-        <h2>สำหรับคุณครู</h2>
-        <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่าน">
-        <button onclick="loginTeacher()">🔓 เข้าสู่ระบบ</button>
+        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
+        <h2>ผู้บริหารระบบ</h2>
+        <input type="password" id="teacher-pwd" placeholder="รหัสผ่านเข้าถึงข้อมูล">
+        <button onclick="loginTeacher()">🔓 ตรวจสอบ Dashboard</button>
     </div>
 
     <div id="page-teacher-main" class="hidden">
         <div class="card">
-            <button class="back-btn" onclick="location.reload()">ย้อนกลับ</button>
-            <h1>รายงานสรุปคะแนน 📊</h1>
-            <select id="filter-room" onchange="renderLeaderboard()">
-                <option value="">ดูทุกห้องเรียน</option>
-                <script>rooms.forEach(r => document.write(`<option value="${r}">ชั้น ${r}</option>`));</script>
+            <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button>
+            <h1>สถิติรวม 📈</h1>
+            <select id="filter-room" onchange="renderLeaderboard()" style="margin-bottom: 10px;">
+                <option value="">ดูสรุปทุกห้องเรียน</option>
+                <script>rooms.forEach(r => document.write(`<option value="${r}">ห้อง ${r}</option>`));</script>
             </select>
-            <div style="margin-top: 15px;">
+            <div style="overflow-x: auto; border-radius: 20px;">
                 <table>
                     <thead><tr><th>นักเรียน</th><th>ห้อง</th><th>คะแนน</th></tr></thead>
                     <tbody id="leaderboard-body"></tbody>
                 </table>
             </div>
         </div>
-        <div id="teacher-history-view" class="card hidden" style="border: 3px solid var(--accent);">
+        <div id="teacher-history-view" class="card hidden" style="border: 4px solid var(--accent);">
             <h3 id="viewing-name">-</h3>
             <div id="teacher-history-list" class="history-grid"></div>
-            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#90A4AE;">ปิดหน้านี้</button>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#607D8B;">✖️ ปิดหน้าต่างนี้</button>
         </div>
     </div>
+
+    <div class="footer-decor">🍃☁️🌸</div>
 </div>
 
 <script>
-    // --- ห้ามแก้ไขส่วนนี้ (ระบบที่คุณยืนยันว่าใช้ได้แล้ว) ---
+    /* =========================================
+       ห้ามแตะต้องส่วนนี้ (หลักการทำงานเดิม 100%)
+       ========================================= */
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -244,6 +266,9 @@
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
 
+    // ฟังการพิมพ์ข้อมูลเพื่อเปิดปุ่มล็อกอิน
+    document.addEventListener('input', validateStudentForm);
+
     function showPage(p) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(p).classList.remove('hidden');
@@ -253,7 +278,8 @@
         const name = document.getElementById('std-name').value.trim();
         const id = document.getElementById('std-id').value.trim();
         const room = document.getElementById('std-room').value;
-        document.getElementById('btn-login-std').disabled = !(name !== "" && id.length === 5 && room !== "");
+        const btn = document.getElementById('btn-login-std');
+        if(btn) btn.disabled = !(name !== "" && id.length === 5 && room !== "");
     }
 
     function loginStudent() {
@@ -300,14 +326,14 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ กำลังวิเคราะห์...";
+        document.getElementById('btn-analyze').innerText = "⏳ กำลังประมวลผล...";
         const prediction = await model.predict(document.getElementById('preview-img'));
         let best = prediction.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
-        document.getElementById('confidence-score').innerText = "แม่นยำ: " + (best.probability * 100).toFixed(2) + "%";
+        document.getElementById('confidence-score').innerText = "AI มั่นใจ: " + (best.probability * 100).toFixed(2) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 เริ่มวิเคราะห์";
+        document.getElementById('btn-analyze').innerText = "🔍 เริ่มตรวจหาประเภทขยะ";
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
@@ -330,9 +356,9 @@
 
     function renderHistoryItems(containerId, data) {
         const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p style="text-align:center; color:#999;">ยังไม่มีประวัติการคัดแยก</p>' : '';
+        container.innerHTML = data.length === 0 ? '<p style="text-align:center; color:#999; padding:20px;">ยังไม่มีข้อมูลบันทึกในวันนี้</p>' : '';
         data.forEach(i => {
-            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>${i.type}</strong><br><small>${i.conf}</small><br><small>${i.date} ${i.time}</small></div></div>`;
+            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>ประเภท: ${i.type}</strong><br><small>${i.conf}</small><br><small>${i.date} | ${i.time}</small></div></div>`;
         });
     }
 
@@ -354,7 +380,7 @@
                 .sort((a,b) => b.score - a.score);
             list.forEach(u => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--primary-dark); cursor:pointer; font-weight:600;">${u.name}</td><td>${u.room}</td><td>${u.score}</td>`;
+                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--primary-dark); cursor:pointer; font-weight:bold; text-decoration:underline;">${u.name}</td><td>ห้อง ${u.room}</td><td>${u.score}</td>`;
                 tbody.appendChild(tr);
             });
         });

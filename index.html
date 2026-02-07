@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Eco Snap AI - มิติใหม่แห่งการแยกขยะ</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -14,11 +17,7 @@
         .container { max-width: 500px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; padding: 20px; position: relative; }
         .card { background: var(--white); padding: 20px; border-radius: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; margin-bottom: 20px; }
         h1 { color: var(--primary); font-size: 28px; margin-bottom: 10px; }
-        button { 
-            background: var(--primary); color: white; border: none; padding: 12px 25px; 
-            border-radius: 50px; font-size: 18px; cursor: pointer; transition: 0.1s; width: 100%; margin: 10px 0;
-            box-shadow: 0 4px 0 #388E3C;
-        }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 50px; font-size: 18px; cursor: pointer; transition: 0.1s; width: 100%; margin: 10px 0; box-shadow: 0 4px 0 #388E3C; }
         button:active { transform: translateY(4px); box-shadow: none; }
         button:disabled { background: #ccc !important; box-shadow: 0 4px 0 #999 !important; }
         button.secondary { background: var(--accent); box-shadow: 0 4px 0 #E65100; }
@@ -89,7 +88,7 @@
                 <button id="btn-save" class="hidden" onclick="saveTrash()">แยกขยะเสร็จแล้ว</button>
             </div>
         </div>
-        <h3>ประวัติการคัดแยก</h3>
+        <h3>ประวัติการคัดแยกของคุณ</h3>
         <div id="student-history" class="history-grid"></div>
     </div>
 
@@ -104,14 +103,8 @@
         <button class="back-btn" onclick="showPage('page-role')">ย้อนกลับ</button>
         <div class="card">
             <h1>Eco Points 🏆</h1>
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="search-input" placeholder="ค้นชื่อหรือรหัส...">
-                <button style="width: 80px;" onclick="renderLeaderboard()">ค้นหา</button>
-            </div>
-            <select id="filter-room" onchange="renderLeaderboard()">
-                <option value="">ทุกห้องเรียน</option>
-                <script>rooms.forEach(r => document.write(`<option value="${r}">${r}</option>`));</script>
-            </select>
+            <p style="font-size: 12px; color: #666;">(รวมข้อมูลนักเรียนจากทุกเครื่อง)</p>
+            <input type="text" id="search-input" placeholder="ค้นชื่อหรือรหัส..." oninput="renderLeaderboard()">
             <div id="leaderboard-container">
                 <table>
                     <thead><tr><th>ชื่อ</th><th>ห้อง</th><th>คะแนน</th></tr></thead>
@@ -128,7 +121,20 @@
 </div>
 
 <script>
-    // อัปเดตโมเดลล่าสุด
+    // ข้อมูลจากภาพที่คุณส่งมา (ภาพที่ 9)
+    const firebaseConfig = {
+        apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
+        authDomain: "eco-snap-ai.firebaseapp.com",
+        databaseURL: "https://eco-snap-ai-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "eco-snap-ai",
+        storageBucket: "eco-snap-ai.firebasestorage.app",
+        messagingSenderId: "700051453001",
+        appId: "1:700051453001:web:0ad07a5fe34fcaf3523b98"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/ypIN9Z3VF/";
     let model, currentId = null;
 
@@ -155,22 +161,31 @@
         const id = document.getElementById('std-id').value;
         const name = document.getElementById('std-name').value;
         const room = document.getElementById('std-room').value;
-        let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
-        if(!users[id]) users[id] = { name, room, score: 0, history: [] };
         currentId = id;
-        localStorage.setItem('eco_users', JSON.stringify(users));
-        updateUI();
-        showPage('page-student-main');
+
+        db.ref('users/' + id).once('value', (snapshot) => {
+            if (!snapshot.exists()) {
+                db.ref('users/' + id).set({ name, room, score: 0 });
+            }
+            updateUI();
+            showPage('page-student-main');
+        });
     }
 
     function updateUI() {
-        const users = JSON.parse(localStorage.getItem('eco_users') || '{}');
-        const u = users[currentId];
-        if(!u) return;
-        document.getElementById('display-score').innerText = u.score;
-        document.getElementById('display-name').innerText = u.name;
-        document.getElementById('display-room').innerText = "ห้อง: " + u.room;
-        renderHistory('student-history', u.history);
+        db.ref('users/' + currentId).on('value', (snapshot) => {
+            const u = snapshot.val();
+            if(!u) return;
+            document.getElementById('display-score').innerText = u.score || 0;
+            document.getElementById('display-name').innerText = u.name;
+            document.getElementById('display-room').innerText = "ห้อง: " + u.room;
+            
+            db.ref('history/' + currentId).limitToLast(10).once('value', (hSnap) => {
+                const h = [];
+                hSnap.forEach(item => h.unshift(item.val()));
+                renderHistory('student-history', h);
+            });
+        });
     }
 
     function handleImage(e) {
@@ -201,50 +216,43 @@
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
-    // แก้ไขระบบบันทึก: รองรับทุกแหล่งภาพ และ Auto-Reset ทันที
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
         const confStr = document.getElementById('confidence-score').innerText;
-        const imgDisplay = document.getElementById('preview-img');
+        const imgData = document.getElementById('preview-img').src;
         const now = new Date();
 
-        const imgData = imgDisplay.src; // ดึง Base64 โดยตรงจากหน้าจอ
+        // 1. ส่งคะแนนขึ้น Cloud
+        db.ref('users/' + currentId + '/score').transaction((s) => (s || 0) + 1);
 
-        let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
-        if(users[currentId] && imgData) {
-            users[currentId].score += 1;
-            users[currentId].history.unshift({
-                img: imgData,
-                type: type,
-                conf: confStr.replace("มั่นใจ: ",""),
-                date: now.toLocaleDateString('th-TH'),
-                time: now.toLocaleTimeString('th-TH')
-            });
-            localStorage.setItem('eco_users', JSON.stringify(users));
-            
-            // คะแนนเด้ง
-            const b = document.getElementById('badge');
-            b.style.backgroundColor = '#4CAF50';
-            setTimeout(() => b.style.backgroundColor = '#FFEB3B', 500);
+        // 2. ส่งประวัติขึ้น Cloud
+        db.ref('history/' + currentId).push({
+            img: imgData,
+            type: type,
+            conf: confStr.replace("มั่นใจ: ",""),
+            date: now.toLocaleDateString('th-TH'),
+            time: now.toLocaleTimeString('th-TH')
+        });
 
-            // Auto-Reset ทันที (ไม่มี Alert ตามคลิปวิดีโอ)
-            imgDisplay.classList.add('hidden');
-            document.getElementById('placeholder-text').classList.remove('hidden');
-            document.getElementById('analysis-section').classList.add('hidden');
-            document.getElementById('file-input').value = "";
-            
-            updateUI();
-        }
+        // 3. Auto-Reset ทันที (ไม่มี Alert)
+        document.getElementById('preview-img').classList.add('hidden');
+        document.getElementById('placeholder-text').classList.remove('hidden');
+        document.getElementById('analysis-section').classList.add('hidden');
+        document.getElementById('file-input').value = "";
+        
+        const b = document.getElementById('badge');
+        b.style.backgroundColor = '#4CAF50';
+        setTimeout(() => b.style.backgroundColor = '#FFEB3B', 500);
+        
+        updateUI();
     }
 
     function renderHistory(id, h) {
         const container = document.getElementById(id);
-        container.innerHTML = (!h || h.length === 0) ? '<p>ไม่มีประวัติ</p>' : '';
-        if(h) {
-            h.forEach(i => {
-                container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>${i.type}</strong><br><small>${i.conf}</small><br><small>${i.date} ${i.time}</small></div></div>`;
-            });
-        }
+        container.innerHTML = h.length === 0 ? '<p>ไม่มีประวัติ</p>' : '';
+        h.forEach(i => {
+            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>${i.type}</strong><br><small>${i.conf}</small><br><small>${i.date} ${i.time}</small></div></div>`;
+        });
     }
 
     function loginTeacher() {
@@ -255,27 +263,30 @@
     }
 
     function renderLeaderboard() {
-        const users = JSON.parse(localStorage.getItem('eco_users') || '{}');
-        const search = document.getElementById('search-input').value.toLowerCase();
-        const room = document.getElementById('filter-room').value;
-        let list = Object.keys(users).map(k => ({...users[k], id: k}))
-            .filter(u => (u.name.toLowerCase().includes(search) || u.id.includes(search)) && (room === "" || u.room === room))
-            .sort((a,b) => b.score - a.score);
-        const tbody = document.getElementById('leaderboard-body');
-        tbody.innerHTML = "";
-        list.forEach(u => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `<td onclick="viewHistory('${u.id}')" style="color:blue;text-decoration:underline;cursor:pointer">${u.name}</td><td>${u.room}</td><td>${u.score}</td>`;
-            tbody.appendChild(tr);
+        db.ref('users').on('value', (snapshot) => {
+            const users = snapshot.val() || {};
+            const search = document.getElementById('search-input').value.toLowerCase();
+            let list = Object.keys(users).map(k => ({...users[k], id: k}))
+                .filter(u => u.name.toLowerCase().includes(search) || u.id.includes(search))
+                .sort((a,b) => b.score - a.score);
+            
+            const tbody = document.getElementById('leaderboard-body');
+            tbody.innerHTML = "";
+            list.forEach(u => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td onclick="viewHistory('${u.id}')" style="color:blue;text-decoration:underline;cursor:pointer">${u.name}</td><td>${u.room}</td><td>${u.score}</td>`;
+                tbody.appendChild(tr);
+            });
         });
     }
 
     function viewHistory(id) {
-        const users = JSON.parse(localStorage.getItem('eco_users'));
-        const u = users[id];
-        document.getElementById('teacher-history-view').classList.remove('hidden');
-        document.getElementById('viewing-name').innerText = "ประวัติของ " + u.name;
-        renderHistory('teacher-history-list', u.history);
+        db.ref('history/' + id).once('value', (snap) => {
+            const h = [];
+            snap.forEach(item => h.unshift(item.val()));
+            document.getElementById('teacher-history-view').classList.remove('hidden');
+            renderHistory('teacher-history-list', h);
+        });
     }
 </script>
 </body>

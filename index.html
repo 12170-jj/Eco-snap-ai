@@ -11,126 +11,75 @@
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
     
     <style>
-        :root {
-            --p-green: #7BC67E; 
-            --d-green: #2D6A4F; 
-            --y-pastel: #FFF9C4; 
-            --o-pastel: #FFCC80; 
-            --p-pink: #FCE4EC;   
-            --bg: #E8F5E9;       
-            --white: #ffffff;
-        }
-
+        :root { --p-green: #7BC67E; --d-green: #2D6A4F; --y-pastel: #FFF9C4; --o-pastel: #FFCC80; --p-pink: #FCE4EC; --bg: #E8F5E9; --white: #ffffff; }
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
-
-        body { 
-            margin: 0; 
-            background: var(--bg);
-            background-image: radial-gradient(circle at 20% 30%, #fff 5%, transparent 5.01%),
-                              radial-gradient(circle at 80% 70%, #fff 8%, transparent 8.01%);
-            color: #333; min-height: 100vh; display: flex; justify-content: center; align-items: center;
-        }
-
+        body { margin: 0; background: var(--bg); color: #333; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
         .container { width: 100%; max-width: 420px; min-height: 100vh; padding: 25px 20px; display: flex; flex-direction: column; justify-content: center; }
-
-        .card { 
-            background: rgba(255, 255, 255, 0.95); padding: 40px 25px; border-radius: 50px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.08); text-align: center; border: 5px solid #fff;
-            position: relative; animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55);
-        }
-
+        .card { background: rgba(255, 255, 255, 0.95); padding: 40px 25px; border-radius: 50px; box-shadow: 0 25px 50px rgba(0,0,0,0.08); text-align: center; border: 5px solid #fff; position: relative; animation: bounceIn 0.8s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
         @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-
-        h1 { color: var(--d-green); font-size: 38px; margin: 0; letter-spacing: -1px; }
+        h1 { color: var(--d-green); font-size: 38px; margin: 0; }
         p { color: #666; font-size: 16px; margin-top: 10px; }
-
-        button { 
-            background: var(--p-green); color: white; border: none; padding: 20px; border-radius: 30px; 
-            font-size: 20px; font-weight: 600; cursor: pointer; width: 100%; margin: 15px 0; 
-            box-shadow: 0 10px 0 #5E9D61; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 12px;
-        }
+        button { background: var(--p-green); color: white; border: none; padding: 20px; border-radius: 30px; font-size: 20px; font-weight: 600; cursor: pointer; width: 100%; margin: 15px 0; box-shadow: 0 10px 0 #5E9D61; transition: 0.1s; display: flex; align-items: center; justify-content: center; gap: 12px; }
         button:active { transform: translateY(6px); box-shadow: 0 4px 0 #5E9D61; }
-        button:disabled { background: #D1D9D1 !important; box-shadow: 0 10px 0 #A9B2A9 !important; color: #999; }
-        
         button.teacher-btn { background: var(--o-pastel); box-shadow: 0 10px 0 #E6A440; color: #784C00; }
         button.back-btn { background: #E0E0E0; box-shadow: 0 5px 0 #BDBDBD; color: #666; font-size: 14px; width: auto; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; }
-        
-        .btn-how { background: #BBDEFB; color: #1976D2; box-shadow: 0 5px 0 #90CAF9; font-size: 16px; padding: 12px; margin-top: 5px; }
-
-        /* ปุ่มคุมเพลง (Floating Music Button) */
-        .music-control {
-            position: fixed; top: 20px; right: 20px; z-index: 2000;
-            background: white; border: 3px solid var(--p-green); border-radius: 50%;
-            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); font-size: 20px;
-        }
-
+        .music-control { position: fixed; top: 20px; right: 20px; z-index: 2000; background: white; border: 3px solid var(--p-green); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         input, select { width: 100%; padding: 18px; margin: 12px 0; border-radius: 25px; border: 3px solid #F0F0F0; font-size: 17px; background: #fff; text-align: center; }
-
         .hidden { display: none !important; }
-
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; width: 85%; max-width: 350px; padding: 30px; border-radius: 40px; text-align: center; border: 5px solid var(--p-green); }
-
         #webcam-container { border: 6px dashed #B9E2BC; border-radius: 45px; height: 320px; background: #F9F9F9; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 25px 0; }
         #webcam-container img { width: 100%; height: 100%; object-fit: cover; }
-
         .score-badge { background: linear-gradient(135deg, var(--y-pastel), #FFF176); padding: 15px 30px; border-radius: 40px; font-weight: bold; border: 4px solid #fff; font-size: 26px; color: #5D4037; display: inline-block; margin: 15px 0; }
-        .result-box { background: var(--p-pink); padding: 25px; border-radius: 40px; border: 3px solid #fff; margin: 20px 0; }
         .history-item { display: flex; background: white; border-radius: 35px; margin-bottom: 20px; box-shadow: 0 12px 24px rgba(0,0,0,0.05); overflow: hidden; border: 4px solid #fff; align-items: center; }
         .history-item img { width: 110px; height: 110px; object-fit: cover; border-radius: 25px; margin: 10px; }
-
-        table { width: 100%; border-radius: 35px; overflow: hidden; background: white; border-collapse: collapse; }
-        th { background: #E8F5E9; color: var(--d-green); padding: 20px; }
-        td { padding: 18px; text-align: center; }
-
-        .decor-leaf { position: absolute; font-size: 40px; z-index: -1; opacity: 0.5; animation: float 3s infinite ease-in-out; }
-        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        table { width: 100%; border-radius: 30px; overflow: hidden; background: white; border-collapse: collapse; margin-top: 15px; }
+        th { background: #E8F5E9; color: var(--d-green); padding: 15px; }
+        td { padding: 15px; text-align: center; border-bottom: 1px solid #eee; }
     </style>
 </head>
 <body>
 
-<audio id="bg-music" loop>
-    <source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg">
-</audio>
+<audio id="bg-music" loop><source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg"></audio>
 <div class="music-control" onclick="toggleMusic()" id="music-btn">🔇</div>
-
-<div class="decor-leaf" style="top: 10%; left: 5%;">🍃</div>
-<div class="decor-leaf" style="bottom: 10%; right: 5%;">🌿</div>
 
 <div class="container">
     <div id="page-role" class="card">
-        <div style="font-size: 70px;">☀️</div>
         <h1>Eco Snap AI</h1>
         <p>มาเปลี่ยนขยะให้เป็นรอยยิ้มกันนะ!</p>
-        <br>
-        <button onclick="showPage('page-login-student')"><span>👦</span> เข้าสู่ระบบนักเรียน</button>
-        <button onclick="showPage('page-login-teacher')" class="teacher-btn"><span>👩‍🏫</span> เข้าสู่ระบบคุณครู</button>
-        <button onclick="toggleModal(true)" class="btn-how"><span>📖</span> วิธีใช้งานเว็บไซต์</button>
+        <button onclick="showPage('page-login-student')">👦 เข้าสู่ระบบนักเรียน</button>
+        <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 เข้าสู่ระบบคุณครู</button>
     </div>
 
-    <div id="tutorial-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 style="color: var(--d-green);">📖 วิธีใช้งาน</h2>
-            <p>1. เลือกบทบาท 👦👩‍🏫</p>
-            <p>2. ถ่ายรูปขยะ 📸</p>
-            <p>3. ให้ AI ตรวจสอบ 🔍</p>
-            <p>4. บันทึกแต้มความดี! ✨</p>
-            <button onclick="toggleModal(false)">ตกลงจ้า!</button>
+    <div id="page-teacher-main" class="hidden">
+        <div class="card" style="padding: 25px 15px;">
+            <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
+            <h2>สรุปแต้ม 🏆</h2>
+            <select id="filter-room" onchange="renderLeaderboard()">
+                <option value="">ดูทุกห้องเรียน</option>
+                <script>
+                    const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
+                    rooms.forEach(r => document.write(`<option value="${r}">ม. ${r}</option>`));
+                </script>
+            </select>
+            <table>
+                <thead><tr><th>ชื่อ (กดดูรูป)</th><th>แต้ม</th></tr></thead>
+                <tbody id="leaderboard-body"></tbody>
+            </table>
+        </div>
+        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 5px solid var(--o-pastel);">
+            <h3 id="viewing-name">-</h3>
+            <div id="teacher-history-list"></div>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#999; box-shadow:0 5px 0 #777;">✖️ ปิด</button>
         </div>
     </div>
 
     <div id="page-login-student" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">⬅️ กลับ</button>
-        <h2 style="color: var(--d-green);">ยินดีต้อนรับ!</h2>
-        <input type="text" id="std-name" placeholder="ชื่อ - นามสกุล" oninput="validateStudentForm()">
-        <input type="number" id="std-id" placeholder="รหัสนักเรียน 5 หลัก" oninput="validateStudentForm()">
-        <select id="std-room" onchange="validateStudentForm()">
+        <h2>ข้อมูลนักเรียน</h2>
+        <input type="text" id="std-name" placeholder="ชื่อ-นามสกุล" oninput="validateForm()">
+        <input type="number" id="std-id" placeholder="รหัส 5 หลัก" oninput="validateForm()">
+        <select id="std-room" onchange="validateForm()">
             <option value="">เลือกชั้นเรียน</option>
-            <script>
-                const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
-                rooms.forEach(r => document.write(`<option value="${r}">ม. ${r}</option>`));
-            </script>
+            <script>rooms.forEach(r => document.write(`<option value="${r}">ม. ${r}</option>`));</script>
         </select>
         <button id="btn-login-std" disabled onclick="loginStudent()">🌈 เริ่มเลย!</button>
     </div>
@@ -147,60 +96,35 @@
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
             <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพ</button>
             <div id="analysis-section" class="hidden">
-                <div id="result-area" class="result-box hidden">
-                    <div id="waste-type" style="font-size: 30px; font-weight: bold;">-</div>
+                <div id="result-area" class="result-box hidden" style="background:var(--p-pink); padding:15px; border-radius:20px; margin-bottom:10px;">
+                    <div id="waste-type" style="font-size: 24px; font-weight: bold;">-</div>
                     <div id="confidence-score">-</div>
                 </div>
-                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 วิเคราะห์ขยะ</button>
-                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ บันทึกแต้ม</button>
+                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 วิเคราะห์</button>
+                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ บันทึก</button>
             </div>
         </div>
-        <div id="student-history"></div>
+        <div id="student-history" style="margin-top:20px;"></div>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">⬅️ กลับ</button>
-        <h2>สำหรับคุณครู</h2>
-        <input type="password" id="teacher-pwd" placeholder="รหัสผ่าน">
+        <input type="password" id="teacher-pwd" placeholder="รหัสผ่านครู">
         <button onclick="loginTeacher()">🔓 เข้าสู่ระบบ</button>
-    </div>
-
-    <div id="page-teacher-main" class="hidden" style="width: 100%;">
-        <div class="card" style="width: 100%;">
-            <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
-            <h1>สรุปแต้ม 🏆</h1>
-            <select id="filter-room" onchange="renderLeaderboard()">
-                <option value="">ทุกห้องเรียน</option>
-                <script>rooms.forEach(r => document.write(`<option value="${r}">ม. ${r}</option>`));</script>
-            </select>
-            <table style="margin-top:20px;">
-                <thead><tr><th>ชื่อ</th><th>ห้อง</th><th>แต้ม</th></tr></thead>
-                <tbody id="leaderboard-body"></tbody>
-            </table>
-        </div>
     </div>
 </div>
 
 <script>
-    // ระบบควบคุมเพลง
+    // --- ระบบเพลง ---
     const music = document.getElementById('bg-music');
-    const musicBtn = document.getElementById('music-btn');
     let isPlaying = false;
-
     function toggleMusic() {
-        if (isPlaying) {
-            music.pause();
-            musicBtn.innerText = "🔇";
-        } else {
-            music.play().catch(e => alert("กรุณากดที่หน้าจอหนึ่งครั้งเพื่อเริ่มเล่นเพลงจ้า 🎵"));
-            musicBtn.innerText = "🎵";
-        }
+        if (isPlaying) { music.pause(); document.getElementById('music-btn').innerText = "🔇"; }
+        else { music.play(); document.getElementById('music-btn').innerText = "🎵"; }
         isPlaying = !isPlaying;
     }
 
-    /* =========================================
-       Logic เดิม 100% (Firebase/AI)
-       ========================================= */
+    // --- Firebase Config ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -214,6 +138,7 @@
     const db = firebase.database();
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/ypIN9Z3VF/";
     let model, currentId = null;
+
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
 
@@ -222,9 +147,8 @@
         document.getElementById(p).classList.remove('hidden');
     }
 
-    function toggleModal(show) { document.getElementById('tutorial-modal').classList.toggle('hidden', !show); }
-
-    function validateStudentForm() {
+    // --- ระบบนักเรียน ---
+    function validateForm() {
         const name = document.getElementById('std-name').value.trim();
         const id = document.getElementById('std-id').value.trim();
         const room = document.getElementById('std-room').value;
@@ -233,11 +157,15 @@
 
     function loginStudent() {
         const id = document.getElementById('std-id').value.trim();
-        const name = document.getElementById('std-name').value.trim();
-        const room = document.getElementById('std-room').value;
         currentId = id;
         db.ref('users/' + id).once('value', (snap) => {
-            if (!snap.exists()) db.ref('users/' + id).set({ name, room, score: 0 });
+            if (!snap.exists()) {
+                db.ref('users/' + id).set({
+                    name: document.getElementById('std-name').value.trim(),
+                    room: document.getElementById('std-room').value,
+                    score: 0
+                });
+            }
             updateStudentUI();
             showPage('page-student-main');
         });
@@ -246,14 +174,15 @@
     function updateStudentUI() {
         db.ref('users/' + currentId).on('value', (snap) => {
             const u = snap.val();
-            if(!u) return;
-            document.getElementById('display-score').innerText = u.score || 0;
-            document.getElementById('display-name').innerText = u.name;
-            db.ref('history/' + currentId).on('value', (hSnap) => {
-                const h = [];
-                hSnap.forEach(item => { h.unshift(item.val()); });
-                renderHistoryItems('student-history', h);
-            });
+            if(u) {
+                document.getElementById('display-score').innerText = u.score || 0;
+                document.getElementById('display-name').innerText = u.name;
+            }
+        });
+        db.ref('history/' + currentId).on('value', (snap) => {
+            const h = [];
+            snap.forEach(item => { h.unshift(item.val()); });
+            renderHistory('student-history', h);
         });
     }
 
@@ -266,68 +195,81 @@
             img.classList.remove('hidden');
             document.getElementById('placeholder-text').classList.add('hidden');
             document.getElementById('analysis-section').classList.remove('hidden');
-            document.getElementById('result-area').classList.add('hidden');
-            document.getElementById('btn-analyze').classList.remove('hidden');
             document.getElementById('btn-save').classList.add('hidden');
+            document.getElementById('btn-analyze').classList.remove('hidden');
         };
         reader.readAsDataURL(e.target.files[0]);
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ รอสักครู่...";
+        document.getElementById('btn-analyze').innerText = "⏳...";
         const prediction = await model.predict(document.getElementById('preview-img'));
         let best = prediction.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
-        document.getElementById('confidence-score').innerText = "ความมั่นใจ: " + (best.probability * 100).toFixed(2) + "%";
+        document.getElementById('confidence-score').innerText = (best.probability * 100).toFixed(0) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
     function saveTrash() {
-        const type = document.getElementById('waste-type').innerText;
-        const conf = document.getElementById('confidence-score').innerText;
-        const imgData = document.getElementById('preview-img').src;
         const now = new Date();
         db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + 1);
         db.ref('history/' + currentId).push({
-            img: imgData, type: type, conf: conf,
-            date: now.toLocaleDateString('th-TH'), time: now.toLocaleTimeString('th-TH')
+            img: document.getElementById('preview-img').src,
+            type: document.getElementById('waste-type').innerText,
+            date: now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH')
         });
         document.getElementById('preview-img').classList.add('hidden');
         document.getElementById('placeholder-text').classList.remove('hidden');
         document.getElementById('analysis-section').classList.add('hidden');
     }
 
-    function renderHistoryItems(containerId, data) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p style="text-align:center; color:#bbb;">ยังไม่มีประวัติจ้า 🎈</p>' : '';
-        data.forEach(i => {
-            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div class="history-info"><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`;
-        });
-    }
-
+    // --- ระบบคุณครู (จุดที่แก้ไข) ---
     function loginTeacher() {
         if(document.getElementById('teacher-pwd').value === "Eco2026") { 
             showPage('page-teacher-main'); 
             renderLeaderboard(); 
-        } else alert("รหัสผ่านไม่ถูกต้องจ้า ❌");
+        } else alert("รหัสผ่านไม่ถูกต้อง");
     }
 
     function renderLeaderboard() {
         const filter = document.getElementById('filter-room').value;
         db.ref('users').on('value', (snap) => {
-            const users = snap.val() || {};
             const tbody = document.getElementById('leaderboard-body');
             tbody.innerHTML = "";
+            const users = snap.val() || {};
             let list = Object.keys(users).map(id => ({...users[id], id}))
                 .filter(u => filter === "" || u.room === filter)
                 .sort((a,b) => b.score - a.score);
+            
             list.forEach(u => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${u.name}</td><td>${u.room}</td><td>${u.score}</td>`;
+                // เพิ่ม onclick เพื่อให้กดที่ชื่อแล้วดูประวัติได้
+                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--d-green); cursor:pointer; font-weight:bold; text-decoration:underline;">${u.name}</td>
+                                <td>${u.score}</td>`;
                 tbody.appendChild(tr);
             });
+        });
+    }
+
+    // ฟังก์ชันดูรายละเอียดขยะของนักเรียน (สำหรับครู)
+    function viewDetail(id, name) {
+        document.getElementById('viewing-name').innerText = "ประวัติของ: " + name;
+        db.ref('history/' + id).once('value', (snap) => {
+            const h = [];
+            snap.forEach(item => { h.unshift(item.val()); });
+            document.getElementById('teacher-history-view').classList.remove('hidden');
+            renderHistory('teacher-history-list', h);
+            window.scrollTo(0, document.body.scrollHeight);
+        });
+    }
+
+    function renderHistory(containerId, data) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = data.length === 0 ? '<p>ยังไม่มีประวัติ</p>' : '';
+        data.forEach(i => {
+            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div style="padding:10px; text-align:left;"><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`;
         });
     }
 </script>

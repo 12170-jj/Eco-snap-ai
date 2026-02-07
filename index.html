@@ -102,7 +102,12 @@
     <div id="page-teacher-main" class="hidden">
         <button class="back-btn" onclick="showPage('page-role')">ย้อนกลับ</button>
         <div class="card">
-            <h1>Eco Points (รวมนักเรียนทั้งหมด) 🏆</h1>
+            <h1>Eco Dashboard 🏆</h1>
+            <p>เลือกห้องเรียนเพื่อดูคะแนน</p>
+            <select id="filter-room" onchange="renderLeaderboard()">
+                <option value="">ทั้งหมดทุกห้อง</option>
+                <script>rooms.forEach(r => document.write(`<option value="${r}">ห้อง ${r}</option>`));</script>
+            </select>
             <input type="text" id="search-input" placeholder="ค้นชื่อหรือรหัส..." oninput="renderLeaderboard()">
             <div id="leaderboard-container">
                 <table>
@@ -120,15 +125,15 @@
 </div>
 
 <script>
-    // *** นำ Firebase Config ของคุณมาวางทับที่นี่ ***
+    // *** นำรหัสจาก Firebase ของคุณมาใส่ตรงนี้ ***
     const firebaseConfig = {
-        apiKey: "ใส่ของคุณ",
-        authDomain: "ใส่ของคุณ",
-        databaseURL: "ใส่ของคุณ",
-        projectId: "ใส่ของคุณ",
-        storageBucket: "ใส่ของคุณ",
-        messagingSenderId: "ใส่ของคุณ",
-        appId: "ใส่ของคุณ"
+        apiKey: "AIzaSyCx...",
+        authDomain: "eco-snap-ai-...",
+        databaseURL: "https://eco-snap-ai-...",
+        projectId: "eco-snap-ai-...",
+        storageBucket: "eco-snap-ai-...",
+        messagingSenderId: "...",
+        appId: "..."
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -176,7 +181,6 @@
             document.getElementById('display-name').innerText = u.name;
             document.getElementById('display-room').innerText = "ห้อง: " + u.room;
             
-            // ดึงประวัติแบบ Realtime
             db.ref('history/' + currentId).on('value', (snap) => {
                 const h = [];
                 snap.forEach(item => { h.unshift(item.val()); });
@@ -213,7 +217,6 @@
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
-    // แก้ไข: บันทึกประวัติได้ต่อเนื่องและ Reset ข้อมูลให้พร้อมครั้งถัดไป
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
         const confStr = document.getElementById('confidence-score').innerText;
@@ -222,10 +225,8 @@
 
         if(!currentId) return;
 
-        // 1. เพิ่มคะแนน
         db.ref('users/' + currentId + '/score').transaction((s) => (s || 0) + 1);
 
-        // 2. บันทึกประวัติ (ใช้ push เพื่อสร้างรายการใหม่เสมอ)
         db.ref('history/' + currentId).push({
             img: imgData,
             type: type,
@@ -234,22 +235,17 @@
             time: now.toLocaleTimeString('th-TH')
         });
 
-        // 3. Reset UI ทันทีตามที่คุณต้องการ
+        // Reset UI ทันที
         const previewImg = document.getElementById('preview-img');
         previewImg.src = "";
         previewImg.classList.add('hidden');
         document.getElementById('placeholder-text').classList.remove('hidden');
         document.getElementById('analysis-section').classList.add('hidden');
-        document.getElementById('file-input').value = ""; // ล้างค่าไฟล์เพื่อให้เลือกรูปเดิมซ้ำได้
-
-        // เอฟเฟกต์คะแนนเด้ง
+        document.getElementById('file-input').value = "";
+        
         const b = document.getElementById('badge');
-        b.style.transform = "scale(1.2)";
         b.style.backgroundColor = '#4CAF50';
-        setTimeout(() => {
-            b.style.transform = "scale(1)";
-            b.style.backgroundColor = '#FFEB3B';
-        }, 500);
+        setTimeout(() => b.style.backgroundColor = '#FFEB3B', 500);
     }
 
     function renderHistory(id, h) {
@@ -267,12 +263,19 @@
         } else alert("รหัสผ่านไม่ถูกต้อง");
     }
 
+    // แก้ไข: กรองข้อมูลแยกห้องเรียนได้
     function renderLeaderboard() {
+        const selectedRoom = document.getElementById('filter-room').value;
+        const search = document.getElementById('search-input').value.toLowerCase();
+
         db.ref('users').on('value', (snapshot) => {
             const users = snapshot.val() || {};
-            const search = document.getElementById('search-input').value.toLowerCase();
             let list = Object.keys(users).map(k => ({...users[k], id: k}))
-                .filter(u => u.name.toLowerCase().includes(search) || u.id.includes(search))
+                .filter(u => {
+                    const matchRoom = selectedRoom === "" || u.room === selectedRoom;
+                    const matchSearch = u.name.toLowerCase().includes(search) || u.id.includes(search);
+                    return matchRoom && matchSearch;
+                })
                 .sort((a,b) => b.score - a.score);
             
             const tbody = document.getElementById('leaderboard-body');

@@ -128,13 +128,14 @@
 </div>
 
 <script>
+    // อัปเดตโมเดลล่าสุด
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/ypIN9Z3VF/";
     let model, currentId = null;
 
     async function init() {
         try {
             model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json");
-        } catch (e) { console.error("Model Error"); }
+        } catch (e) { console.error("Model load error"); }
     }
     init();
 
@@ -200,14 +201,14 @@
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
+    // แก้ไขระบบบันทึก: รองรับทุกแหล่งภาพ และ Auto-Reset ทันที
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
         const confStr = document.getElementById('confidence-score').innerText;
         const imgDisplay = document.getElementById('preview-img');
         const now = new Date();
 
-        // ดึงภาพจาก src โดยตรงไม่ว่าจะถ่ายสดหรืออัปโหลด
-        const imgData = imgDisplay.src;
+        const imgData = imgDisplay.src; // ดึง Base64 โดยตรงจากหน้าจอ
 
         let users = JSON.parse(localStorage.getItem('eco_users') || '{}');
         if(users[currentId] && imgData) {
@@ -221,12 +222,12 @@
             });
             localStorage.setItem('eco_users', JSON.stringify(users));
             
-            // เอฟเฟกต์คะแนนเด้ง
+            // คะแนนเด้ง
             const b = document.getElementById('badge');
             b.style.backgroundColor = '#4CAF50';
             setTimeout(() => b.style.backgroundColor = '#FFEB3B', 500);
 
-            // รีเซ็ตหน้าจอทันที (ไม่มี Alert ตามวิดีโอ)
+            // Auto-Reset ทันที (ไม่มี Alert ตามคลิปวิดีโอ)
             imgDisplay.classList.add('hidden');
             document.getElementById('placeholder-text').classList.remove('hidden');
             document.getElementById('analysis-section').classList.add('hidden');
@@ -247,8 +248,10 @@
     }
 
     function loginTeacher() {
-        if(document.getElementById('teacher-pwd').value === "Eco2026") { showPage('page-teacher-main'); renderLeaderboard(); }
-        else alert("รหัสผิด");
+        if(document.getElementById('teacher-pwd').value === "Eco2026") { 
+            showPage('page-teacher-main'); 
+            renderLeaderboard(); 
+        } else alert("รหัสผ่านไม่ถูกต้อง");
     }
 
     function renderLeaderboard() {
@@ -268,7 +271,8 @@
     }
 
     function viewHistory(id) {
-        const u = JSON.parse(localStorage.getItem('eco_users'))[id];
+        const users = JSON.parse(localStorage.getItem('eco_users'));
+        const u = users[id];
         document.getElementById('teacher-history-view').classList.remove('hidden');
         document.getElementById('viewing-name').innerText = "ประวัติของ " + u.name;
         renderHistory('teacher-history-list', u.history);

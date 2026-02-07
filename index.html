@@ -23,6 +23,12 @@
         button:active { transform: translateY(6px); box-shadow: 0 4px 0 #5E9D61; }
         button.teacher-btn { background: var(--o-pastel); box-shadow: 0 10px 0 #E6A440; color: #784C00; }
         button.back-btn { background: #E0E0E0; box-shadow: 0 5px 0 #BDBDBD; color: #666; font-size: 14px; width: auto; padding: 10px 20px; border-radius: 20px; margin-bottom: 20px; }
+        
+        /* ปุ่ม Tutorial */
+        .btn-how { background: #BBDEFB; color: #1976D2; box-shadow: 0 5px 0 #90CAF9; font-size: 16px; padding: 12px; margin-top: 5px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .modal-content { background: white; width: 85%; max-width: 350px; padding: 30px; border-radius: 40px; text-align: center; border: 5px solid var(--p-green); }
+
         .music-control { position: fixed; top: 20px; right: 20px; z-index: 2000; background: white; border: 3px solid var(--p-green); border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
         input, select { width: 100%; padding: 18px; margin: 12px 0; border-radius: 25px; border: 3px solid #F0F0F0; font-size: 17px; background: #fff; text-align: center; }
         .hidden { display: none !important; }
@@ -43,10 +49,25 @@
 
 <div class="container">
     <div id="page-role" class="card">
+        <div style="font-size: 70px;">☀️</div>
         <h1>Eco Snap AI</h1>
         <p>มาเปลี่ยนขยะให้เป็นรอยยิ้มกันนะ!</p>
         <button onclick="showPage('page-login-student')">👦 เข้าสู่ระบบนักเรียน</button>
         <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 เข้าสู่ระบบคุณครู</button>
+        <button onclick="toggleModal(true)" class="btn-how"><span>📖</span> วิธีใช้งานเว็บไซต์</button>
+    </div>
+
+    <div id="tutorial-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--d-green);">📖 วิธีใช้งาน</h2>
+            <div style="text-align: left; background: #f9f9f9; padding: 15px; border-radius: 20px; margin-bottom: 10px;">
+                <p>1. เลือกบทบาท 👦👩‍🏫</p>
+                <p>2. ถ่ายรูปขยะให้ชัดเจน 📸</p>
+                <p>3. ให้ AI ตรวจดูว่าคืออะไร 🔍</p>
+                <p>4. กดบันทึกเพื่อรับแต้ม! ✨</p>
+            </div>
+            <button onclick="toggleModal(false)">เข้าใจแล้วจ้า! ✨</button>
+        </div>
     </div>
 
     <div id="page-teacher-main" class="hidden">
@@ -115,7 +136,7 @@
 </div>
 
 <script>
-    // --- ระบบเพลง ---
+    // --- ระบบเสียงและ Modal ---
     const music = document.getElementById('bg-music');
     let isPlaying = false;
     function toggleMusic() {
@@ -123,8 +144,9 @@
         else { music.play(); document.getElementById('music-btn').innerText = "🎵"; }
         isPlaying = !isPlaying;
     }
+    function toggleModal(show) { document.getElementById('tutorial-modal').classList.toggle('hidden', !show); }
 
-    // --- Firebase Config ---
+    // --- Firebase & AI ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -147,7 +169,6 @@
         document.getElementById(p).classList.remove('hidden');
     }
 
-    // --- ระบบนักเรียน ---
     function validateForm() {
         const name = document.getElementById('std-name').value.trim();
         const id = document.getElementById('std-id').value.trim();
@@ -225,7 +246,6 @@
         document.getElementById('analysis-section').classList.add('hidden');
     }
 
-    // --- ระบบคุณครู (จุดที่แก้ไข) ---
     function loginTeacher() {
         if(document.getElementById('teacher-pwd').value === "Eco2026") { 
             showPage('page-teacher-main'); 
@@ -242,18 +262,14 @@
             let list = Object.keys(users).map(id => ({...users[id], id}))
                 .filter(u => filter === "" || u.room === filter)
                 .sort((a,b) => b.score - a.score);
-            
             list.forEach(u => {
                 const tr = document.createElement('tr');
-                // เพิ่ม onclick เพื่อให้กดที่ชื่อแล้วดูประวัติได้
-                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--d-green); cursor:pointer; font-weight:bold; text-decoration:underline;">${u.name}</td>
-                                <td>${u.score}</td>`;
+                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--d-green); cursor:pointer; font-weight:bold; text-decoration:underline;">${u.name}</td><td>${u.score}</td>`;
                 tbody.appendChild(tr);
             });
         });
     }
 
-    // ฟังก์ชันดูรายละเอียดขยะของนักเรียน (สำหรับครู)
     function viewDetail(id, name) {
         document.getElementById('viewing-name').innerText = "ประวัติของ: " + name;
         db.ref('history/' + id).once('value', (snap) => {

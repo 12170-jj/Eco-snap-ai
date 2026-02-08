@@ -224,16 +224,11 @@
 
 <script>
     const music = document.getElementById('bg-music');
-    let isPlaying = false;
-    let musicStarted = false;
+    let isPlaying = false, musicStarted = false;
 
     function startMusicOnce() {
-        if (!musicStarted) {
-            music.play().catch(()=>{}); isPlaying = true; musicStarted = true;
-            document.getElementById('music-btn').innerText = "🎵";
-        }
+        if (!musicStarted) { music.play().catch(()=>{}); isPlaying = true; musicStarted = true; document.getElementById('music-btn').innerText = "🎵"; }
     }
-
     function toggleMusic(e) {
         e.stopPropagation();
         if (isPlaying) { music.pause(); document.getElementById('music-btn').innerText = "🔇"; }
@@ -264,8 +259,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // *** เปลี่ยนกลับเป็นโมเดลเดิม (ypIN9Z3VF) ตามคำขอจ้า ***
-    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/ypIN9Z3VF/";
+    // *** อัปเดตโมเดลเป็นตัวล่าสุดตามสั่งจ้า ***
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
     let model, currentId = null;
 
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
@@ -278,11 +273,7 @@
         if(name==="" || id.length!==5 || room==="") { alert("กรอกข้อมูลให้ครบนะจ๊ะ"); return; }
         db.ref('users/' + id).once('value', (snap) => {
             if (snap.exists()) { alert("รหัสนี้สมัครแล้วน้า"); }
-            else {
-                db.ref('users/' + id).set({ name, room, score: 0 }, () => {
-                    currentId = id; updateStudentUI(); showPage('page-student-main');
-                });
-            }
+            else { db.ref('users/' + id).set({ name, room, score: 0 }, () => { currentId = id; updateStudentUI(); showPage('page-student-main'); }); }
         });
     }
 
@@ -298,10 +289,7 @@
     function updateStudentUI() {
         db.ref('users/' + currentId).on('value', (snap) => {
             const u = snap.val();
-            if(u) {
-                document.getElementById('display-score').innerText = u.score || 0;
-                document.getElementById('display-name').innerText = u.name;
-            }
+            if(u) { document.getElementById('display-score').innerText = u.score || 0; document.getElementById('display-name').innerText = u.name; }
         });
         db.ref('history/' + currentId).on('value', (snap) => {
             const h = []; snap.forEach(item => { h.unshift(item.val()); });
@@ -351,9 +339,8 @@
     }
 
     function loginTeacher() {
-        if(document.getElementById('teacher-pwd').value === "Eco2026") { 
-            showPage('page-teacher-main'); renderLeaderboard(); 
-        } else alert("รหัสผ่านไม่ถูกต้อง");
+        if(document.getElementById('teacher-pwd').value === "Eco2026") { showPage('page-teacher-main'); renderLeaderboard(); }
+        else alert("รหัสผ่านไม่ถูกต้อง");
     }
 
     function renderLeaderboard() {
@@ -389,9 +376,7 @@
     function renderHistory(containerId, data) {
         const container = document.getElementById(containerId);
         container.innerHTML = data.length === 0 ? '<p>ไม่มีข้อมูลจ้า</p>' : '';
-        data.forEach(i => {
-            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`;
-        });
+        data.forEach(i => { container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`; });
     }
 </script>
 </body>

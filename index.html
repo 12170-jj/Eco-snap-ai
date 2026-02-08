@@ -8,15 +8,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600;800&display=swap" rel="stylesheet">
     
     <style>
         :root { 
-            --p-green: #B2F2BB; 
-            --d-green: #2B8A3E; 
-            --soft-yellow: #FFF9DB; 
-            --soft-pink: #FFE3E3;
-            --main-btn: #69DB7C;
+            --main-green: #40C057; 
+            --dark-green: #2B8A3E; 
+            --bright-yellow: #FFD43B; 
+            --bright-orange: #FF922B;
+            --bg-light: #F8F9FA;
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -24,72 +24,88 @@
         body { 
             margin: 0; 
             background: #FAFEFB;
-            color: #495057; min-height: 100vh; display: flex; justify-content: center; align-items: center;
+            background-image: radial-gradient(#D3F9D8 1px, transparent 1px);
+            background-size: 20px 20px;
+            color: #212529; min-height: 100vh; display: flex; justify-content: center; align-items: center;
         }
-
-        /* ตกแต่งพื้นหลัง */
-        body::before { content: "✨"; position: fixed; top: 10%; left: 10%; font-size: 30px; opacity: 0.3; animation: floating 4s infinite; }
-        body::after { content: "💖"; position: fixed; bottom: 15%; right: 10%; font-size: 25px; opacity: 0.3; animation: floating 3s infinite; }
 
         .container { width: 100%; max-width: 420px; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; justify-content: center; }
 
+        /* การ์ดโฉมใหม่ สีสดใส */
         .card { 
-            background: white; padding: 40px 25px; border-radius: 50px; 
-            box-shadow: 0 30px 60px rgba(105, 219, 124, 0.15); text-align: center; border: 10px solid #fff;
-            position: relative; animation: popIn 0.5s ease-out;
+            background: white; padding: 40px 25px; border-radius: 40px; 
+            box-shadow: 0 20px 0px #E9ECEF, 0 30px 50px rgba(0,0,0,0.08); 
+            text-align: center; border: 4px solid #333;
+            position: relative; animation: bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
         }
 
-        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-
-        .floating-icon { font-size: 90px; animation: floating 3s infinite ease-in-out; display: inline-block; margin-bottom: 5px; }
-
-        h1 { color: var(--d-green); font-size: 36px; margin: 0; font-weight: 600; }
-        p { color: #868E96; font-size: 16px; margin-bottom: 30px; }
-
-        button { 
-            background: var(--main-btn); color: white; border: none; 
-            padding: 20px; border-radius: 30px; font-size: 18px; font-weight: 600; cursor: pointer; 
-            width: 100%; margin: 10px 0; transition: 0.2s;
-            box-shadow: 0 8px 0 #51CF66;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
-        }
-        button:active { transform: translateY(4px); box-shadow: 0 4px 0 #51CF66; }
-        button:disabled { background: #E9ECEF; box-shadow: 0 8px 0 #DEE2E6; color: #ADB5BD; }
+        @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
         
-        button.teacher-btn { background: #FFD43B; box-shadow: 0 8px 0 #F59F00; color: #92522D; }
+        /* ชื่อเว็บแบบสายรุ้ง */
+        h1 { 
+            background: linear-gradient(to right, #40C057, #FF922B);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-size: 42px; margin: 0; font-weight: 800;
+        }
+
+        p { color: #868E96; font-size: 17px; margin-bottom: 30px; font-weight: 400; }
+
+        /* ปุ่ม 3D สไตล์เกม */
+        button { 
+            background: var(--main-green); color: white; border: 3px solid #333; 
+            padding: 18px; border-radius: 20px; font-size: 20px; font-weight: 600; cursor: pointer; 
+            width: 100%; margin: 12px 0; transition: 0.1s;
+            box-shadow: 0 8px 0 #2B8A3E;
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+        }
+        button:active { transform: translateY(4px); box-shadow: 0 4px 0 #2B8A3E; }
+        button:disabled { background: #CED4DA; box-shadow: 0 8px 0 #ADB5BD; border-color: #ADB5BD; color: #F1F3F5; }
+        
+        button.teacher-btn { background: var(--bright-yellow); box-shadow: 0 8px 0 #F59F00; color: #333; }
         button.teacher-btn:active { box-shadow: 0 4px 0 #F59F00; }
-        button.btn-how { background: #E7F5FF; color: #1971C2; font-size: 15px; padding: 12px; box-shadow: 0 5px 0 #A5D8FF; border: none; }
-        button.back-btn { background: #F8F9FA; color: #ADB5BD; width: auto; font-size: 13px; padding: 10px 20px; border-radius: 20px; box-shadow: none; border: 2px solid #F1F3F5; margin-bottom: 20px; }
+        button.btn-how { background: #339AF0; box-shadow: 0 8px 0 #1C7ED6; color: white; font-size: 16px; border-color: #333; }
+        button.btn-how:active { box-shadow: 0 4px 0 #1C7ED6; }
+        button.back-btn { background: #333; color: white; width: auto; font-size: 14px; padding: 8px 20px; border-radius: 12px; box-shadow: none; border: none; margin-bottom: 20px; }
 
         .music-control { 
             position: fixed; top: 20px; right: 20px; z-index: 2000; 
-            background: white; border-radius: 50%; width: 50px; height: 50px; 
+            background: #FFD43B; border-radius: 15px; width: 50px; height: 50px; 
             display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05); font-size: 20px; cursor: pointer;
-            border: 4px solid var(--p-green);
+            box-shadow: 0 5px 0 #F59F00; font-size: 24px; cursor: pointer;
+            border: 3px solid #333;
         }
 
         input, select { 
-            width: 100%; padding: 18px; margin: 10px 0; border-radius: 25px; 
-            border: 3px solid #F1F3F5; font-size: 16px; background: #F8F9FA; text-align: center;
+            width: 100%; padding: 18px; margin: 10px 0; border-radius: 15px; 
+            border: 3px solid #333; font-size: 17px; background: #FFF; font-weight: 600;
         }
-        input:focus { border-color: var(--main-btn); outline: none; background: white; }
 
         .hidden { display: none !important; }
 
-        /* Modal */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 3000; }
-        .modal-content { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 40px; border: 8px solid var(--p-green); text-align: center; }
+        /* Modal สีสดใส */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .modal-content { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 30px; border: 4px solid #333; text-align: center; box-shadow: 10px 10px 0px #333; }
 
-        #webcam-container { border: 5px dashed #D3F9D8; border-radius: 40px; height: 320px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; }
+        #webcam-container { border: 4px solid #333; border-radius: 30px; height: 320px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; box-shadow: inset 0 0 20px rgba(0,0,0,0.1); }
         #preview-img { width: 100%; height: 100%; object-fit: cover; }
 
-        .score-badge { background: #FFF9DB; padding: 12px 30px; border-radius: 25px; font-weight: bold; border: 4px solid #fff; font-size: 24px; color: #F59F00; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 10px; display: inline-block; }
-        .history-item { display: flex; background: white; border-radius: 30px; margin-bottom: 15px; padding: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); align-items: center; border: 2px solid #F8F9FA; }
-        .history-item img { width: 85px; height: 85px; object-fit: cover; border-radius: 22px; margin-right: 15px; }
+        /* ป้ายแต้มสีเหลืองสด */
+        .score-badge { 
+            background: var(--bright-yellow); padding: 10px 30px; border-radius: 50px; 
+            font-weight: 800; border: 3px solid #333; font-size: 28px; color: #333; 
+            box-shadow: 5px 5px 0px #F59F00; margin-bottom: 15px; display: inline-block; 
+        }
 
-        .btn-sub { font-size: 14px; padding: 15px; background: #FFD3B6; box-shadow: 0 6px 0 #FFA07A; color: #A0522D; }
+        .history-item { 
+            display: flex; background: white; border-radius: 20px; margin-bottom: 15px; 
+            padding: 10px; border: 3px solid #333; align-items: center; 
+            box-shadow: 5px 5px 0px #E9ECEF;
+        }
+        .history-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 12px; margin-right: 15px; border: 2px solid #333; }
+        
+        .choice-icon { font-size: 60px; display: block; margin-bottom: 10px; animation: bounce 2s infinite; }
+        @keyframes bounce { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     </style>
 </head>
 <body>
@@ -99,63 +115,63 @@
 
 <div class="container">
     <div id="page-role" class="card">
-        <div class="floating-icon">🍀</div>
+        <span class="choice-icon">🌍</span>
         <h1>Eco Snap AI</h1>
-        <p>มาสนุกกับการแยกขยะกันเถอะ!</p>
-        <button onclick="showPage('page-student-choice')">👦 นักเรียน</button>
-        <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 คุณครู</button>
-        <button onclick="toggleModal(true)" class="btn-how">📖 วิธีใช้งาน</button>
+        <p>แยกขยะให้โลกยิ้มกันจ้า!</p>
+        <button onclick="showPage('page-student-choice')">👦 นักเรียนสุดเท่</button>
+        <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 คุณครูใจดี</button>
+        <button onclick="toggleModal(true)" class="btn-how">📖 คู่มือการใช้</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
-        <div style="font-size: 60px; margin-bottom: 10px;">🎒</div>
-        <h2>นักเรียนจ๋า</h2>
-        <button onclick="showPage('page-login-existing')">✅ เคยมาแล้ว (เข้าสู่ระบบ)</button>
-        <button onclick="showPage('page-register-student')" class="btn-sub">✨ เพิ่งมาครั้งแรก (ลงทะเบียน)</button>
+        <span class="choice-icon">🎒</span>
+        <h2>ยินดีต้อนรับจ้า</h2>
+        <button onclick="showPage('page-login-existing')" style="background: #FD7E14; box-shadow: 0 8px 0 #E8590C;">✅ เคยเข้าใช้งานแล้ว</button>
+        <button onclick="showPage('page-register-student')" style="background: #FCC419; box-shadow: 0 8px 0 #F59F00; color:#333;">✨ เริ่มใช้งานครั้งแรก</button>
     </div>
 
     <div id="page-login-existing" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3>ยินดีต้อนรับกลับมา!</h3>
-        <p>ระบุรหัสของคุณเพื่อใช้งานต่อ</p>
-        <input type="number" id="login-std-id" placeholder="รหัสนักเรียน 5 หลัก">
-        <button onclick="loginExistingStudent()">🔍 เข้าสู่ระบบ</button>
+        <h3 style="font-size: 26px;">เข้าสู่ระบบ</h3>
+        <p>กรอกรหัสนักเรียน 5 หลักจ้า</p>
+        <input type="number" id="login-std-id" placeholder="12345">
+        <button onclick="loginExistingStudent()">🔍 ตกลงเลย!</button>
     </div>
 
     <div id="page-register-student" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3>ลงทะเบียนใหม่</h3>
+        <h3>สมัครสมาชิกใหม่</h3>
         <input type="text" id="reg-std-name" placeholder="ชื่อ - นามสกุล">
         <input type="number" id="reg-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <select id="reg-std-room">
-            <option value="">เลือกห้องเรียน</option>
+            <option value="">เลือกชั้นเรียนของคุณ</option>
             <script>
                 const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
-                rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));
+                rooms.forEach(r => document.write(`<option value="${r}">มัธยมปีที่ ${r}</option>`));
             </script>
         </select>
-        <button onclick="registerStudent()">✅ ลงทะเบียนและเริ่มเลย</button>
+        <button onclick="registerStudent()">✅ สมัครสมาชิก!</button>
     </div>
 
     <div id="page-student-main" class="hidden">
         <div class="card">
-            <button class="back-btn" onclick="location.reload()">🚪 ออก</button><br>
-            <div class="score-badge">✨ <span id="display-score">0</span> ✨</div>
-            <h3 id="display-name" style="margin: 5px 0; color: var(--d-green);">-</h3>
+            <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button><br>
+            <div class="score-badge">⭐ <span id="display-score">0</span> ⭐</div>
+            <h3 id="display-name" style="margin: 0; color: var(--dark-green);">-</h3>
             <div id="webcam-container">
-                <div id="placeholder-text" style="color: #dee2e6;">📸 ถ่ายรูปขยะตรงนี้</div>
+                <div id="placeholder-text" style="color: #adb5bd; font-weight: bold;">📷 ถ่ายรูปขยะตรงนี้จ้า</div>
                 <img id="preview-img" class="hidden">
             </div>
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
-            <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพ</button>
+            <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพขยะ</button>
             <div id="analysis-section" class="hidden">
-                <div id="result-area" class="hidden" style="margin-bottom: 10px; padding: 15px; background: #FFF0F6; border-radius: 20px;">
-                    <div id="waste-type" style="font-size: 24px; color: #D6336C; font-weight: bold;">-</div>
-                    <div id="confidence-score" style="color: #F06595; font-size: 14px;">-</div>
+                <div id="result-area" class="hidden" style="margin-bottom: 10px; border: 3px solid #333; padding: 15px; border-radius: 15px; background: #FFF9DB;">
+                    <div id="waste-type" style="font-size: 24px; color: #E8590C; font-weight: 800;">-</div>
+                    <div id="confidence-score" style="color: #666; font-size: 14px;">-</div>
                 </div>
-                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 วิเคราะห์ขยะ</button>
-                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ บันทึกแต้ม</button>
+                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 ให้ AI วิเคราะห์</button>
+                <button id="btn-save" class="hidden" onclick="saveTrash()" style="background: #E64980; box-shadow: 0 8px 0 #A61E4D;">✅ บันทึกเก็บแต้ม!</button>
             </div>
         </div>
         <div id="student-history" style="margin-top: 25px;"></div>
@@ -163,47 +179,47 @@
 
     <div id="page-login-teacher" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
-        <h2>สำหรับคุณครู</h2>
+        <span class="choice-icon">🔐</span>
+        <h3>รหัสลับคุณครู</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่าน">
-        <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบ</button>
+        <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบครู</button>
     </div>
 
     <div id="page-teacher-main" class="hidden" style="width:100%">
         <div class="card" style="width:100%; padding: 25px 15px;">
             <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
-            <h2>สรุปคะแนนรวม 🏆</h2>
+            <h2 style="margin-bottom: 15px;">ตารางคะแนน 🏆</h2>
             <select id="filter-room" onchange="renderLeaderboard()">
-                <option value="">ทุกห้องเรียน</option>
-                <script>rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));</script>
+                <option value="">ดูทุกห้องเรียน</option>
+                <script>rooms.forEach(r => document.write(`<option value="${r}">ม. ${r}</option>`));</script>
             </select>
-            <table style="width:100%; border-collapse: collapse; margin-top:15px;">
-                <thead><tr style="color:#adb5bd; font-size:14px;"><th>นักเรียน</th><th>แต้ม</th></tr></thead>
+            <table style="width:100%; margin-top:15px; border-collapse: separate; border-spacing: 0 8px;">
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
-        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 6px solid #B2F2BB;">
+        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 4px solid #333; box-shadow: 8px 8px 0px #FF922B;">
             <h4 id="viewing-name">-</h4>
             <div id="teacher-history-list"></div>
-            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background: #dee2e6; color: #495057; box-shadow:none;">✖️ ปิด</button>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background: #333; color: white; box-shadow:none;">ปิดหน้าต่าง</button>
         </div>
     </div>
 
     <div id="tutorial-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 style="color: var(--d-green); margin-top: 0;">📖 วิธีใช้งาน</h2>
-            <div style="text-align: left; font-size: 14px; line-height: 1.8;">
-                1. เลือกบทบาท 👦👩‍🏫<br>
-                2. ถ่ายภาพขยะที่ต้องการแยก 📸<br>
-                3. ให้ AI ประมวลผล 🔍<br>
-                4. บันทึกเพื่อสะสมแต้ม! ✨
+            <h2 style="color: #333; margin-top: 0; font-weight: 800;">📖 เล่นยังไงนะ?</h2>
+            <div style="text-align: left; font-size: 15px; line-height: 2;">
+                🌟 1. เลือกเข้าสู่ระบบจ้า<br>
+                🌟 2. ถ่ายรูปขยะที่ต้องการแยก 📸<br>
+                🌟 3. กดให้ AI ช่วยวิเคราะห์ 🔍<br>
+                🌟 4. บันทึกรูปเพื่อสะสมแต้ม! ✨
             </div>
-            <button onclick="toggleModal(false)" style="margin-bottom: 0;">เข้าใจแล้วจ้า! 💖</button>
+            <button onclick="toggleModal(false)" style="margin-bottom: 0;">รับทราบจ้า! 💖</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- ระบบเดิมห้ามแตะ ---
+    // --- ระบบเดิมห้ามแตะ (Logics) ---
     const music = document.getElementById('bg-music');
     let isPlaying = false;
     function toggleMusic() {
@@ -235,21 +251,17 @@
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
 
-    // --- ระบบล็อกอินใหม่ ---
     function registerStudent() {
         const name = document.getElementById('reg-std-name').value.trim();
         const id = document.getElementById('reg-std-id').value.trim();
         const room = document.getElementById('reg-std-room').value;
-        if(name==="" || id.length!==5 || room==="") { alert("กรุณากรอกข้อมูลให้ครบ และรหัสนักเรียนต้องมี 5 หลักนะจ๊ะ"); return; }
+        if(name==="" || id.length!==5 || room==="") { alert("กรอกข้อมูลให้ครบ และรหัสต้องมี 5 หลักนะจ๊ะ"); return; }
         
-        currentId = id;
         db.ref('users/' + id).once('value', (snap) => {
-            if (snap.exists()) {
-                alert("รหัสนี้มีการลงทะเบียนแล้วจ้า ลองเข้าสู่ระบบดูนะ!");
-            } else {
+            if (snap.exists()) { alert("รหัสนี้เคยสมัครแล้วจ้า ลองเข้าสู่ระบบดูนะ"); }
+            else {
                 db.ref('users/' + id).set({ name, room, score: 0 }, () => {
-                    updateStudentUI();
-                    showPage('page-student-main');
+                    currentId = id; updateStudentUI(); showPage('page-student-main');
                 });
             }
         });
@@ -257,20 +269,14 @@
 
     function loginExistingStudent() {
         const id = document.getElementById('login-std-id').value.trim();
-        if(id.length !== 5) { alert("กรุณาใส่รหัสนักเรียนให้ครบ 5 หลักนะจ๊ะ"); return; }
-        
+        if(id.length !== 5) { alert("รหัสนักเรียนต้องมี 5 หลักจ้า"); return; }
         db.ref('users/' + id).once('value', (snap) => {
             if (snap.exists()) {
-                currentId = id;
-                updateStudentUI();
-                showPage('page-student-main');
-            } else {
-                alert("ไม่พบข้อมูลรหัสนักเรียนนี้จ้า ลองเช็กดูอีกทีหรือกดลงทะเบียนใหม่นะ!");
-            }
+                currentId = id; updateStudentUI(); showPage('page-student-main');
+            } else { alert("ไม่พบรหัสนี้จ้า ลองสมัครสมาชิกดูนะ"); }
         });
     }
 
-    // --- ส่วนที่เหลือ (Logic เดิม) ---
     function updateStudentUI() {
         db.ref('users/' + currentId).on('value', (snap) => {
             const u = snap.val();
@@ -280,8 +286,7 @@
             }
         });
         db.ref('history/' + currentId).on('value', (snap) => {
-            const h = [];
-            snap.forEach(item => { h.unshift(item.val()); });
+            const h = []; snap.forEach(item => { h.unshift(item.val()); });
             renderHistory('student-history', h);
         });
     }
@@ -291,8 +296,7 @@
         const reader = new FileReader();
         reader.onload = (ev) => {
             const img = document.getElementById('preview-img');
-            img.src = ev.target.result;
-            img.classList.remove('hidden');
+            img.src = ev.target.result; img.classList.remove('hidden');
             document.getElementById('placeholder-text').classList.add('hidden');
             document.getElementById('analysis-section').classList.remove('hidden');
             document.getElementById('btn-save').classList.add('hidden');
@@ -303,14 +307,14 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ กำลังวิเคราะห์...";
+        document.getElementById('btn-analyze').innerText = "⏳ รอแป๊บน้า...";
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
         document.getElementById('confidence-score').innerText = "AI มั่นใจ: " + (best.probability * 100).toFixed(0) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 วิเคราะห์ขยะ";
+        document.getElementById('btn-analyze').innerText = "🔍 ให้ AI วิเคราะห์";
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
@@ -330,8 +334,7 @@
 
     function loginTeacher() {
         if(document.getElementById('teacher-pwd').value === "Eco2026") { 
-            showPage('page-teacher-main'); 
-            renderLeaderboard(); 
+            showPage('page-teacher-main'); renderLeaderboard(); 
         } else alert("รหัสผ่านไม่ถูกต้อง");
     }
 
@@ -346,9 +349,10 @@
                 .sort((a,b) => b.score - a.score);
             list.forEach(u => {
                 const tr = document.createElement('tr');
-                tr.style.borderBottom = "1px solid #F1F3F5";
-                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="padding:15px; color:var(--d-green); cursor:pointer; font-weight:bold;">${u.name}</td>
-                                <td style="padding:15px; font-weight:bold;">${u.score}</td>`;
+                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="background:#FFF; border:3px solid #333; border-radius:15px; padding:15px; margin-bottom:10px; display:flex; justify-content:space-between; cursor:pointer;">
+                                    <span style="font-weight:800;">${u.name}</span>
+                                    <span style="background:var(--bright-yellow); padding:0 10px; border-radius:10px; border:2px solid #333;">${u.score} แต้ม</span>
+                                </td>`;
                 tbody.appendChild(tr);
             });
         });
@@ -357,8 +361,7 @@
     function viewDetail(id, name) {
         document.getElementById('viewing-name').innerText = "ผลงานของ " + name;
         db.ref('history/' + id).once('value', (snap) => {
-            const h = [];
-            snap.forEach(item => { h.unshift(item.val()); });
+            const h = []; snap.forEach(item => { h.unshift(item.val()); });
             document.getElementById('teacher-history-view').classList.remove('hidden');
             renderHistory('teacher-history-list', h);
             window.scrollTo(0, document.body.scrollHeight);
@@ -367,9 +370,9 @@
 
     function renderHistory(containerId, data) {
         const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p style="color:#adb5bd;">ยังไม่มีข้อมูล</p>' : '';
+        container.innerHTML = data.length === 0 ? '<p>ไม่มีข้อมูล</p>' : '';
         data.forEach(i => {
-            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small style="color:#adb5bd; font-size:11px;">${i.date}</small></div></div>`;
+            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`;
         });
     }
 </script>

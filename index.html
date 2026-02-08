@@ -12,105 +12,84 @@
     
     <style>
         :root { 
-            --p-green: #A8E6CF; 
-            --d-green: #3B7A57; 
-            --soft-yellow: #FDFFB6; 
-            --soft-pink: #FFDDE1;
-            --white-glass: rgba(255, 255, 255, 0.9);
+            --p-green: #B2F2BB; 
+            --d-green: #2B8A3E; 
+            --soft-yellow: #FFF9DB; 
+            --soft-pink: #FFE3E3;
+            --main-btn: #69DB7C;
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body { 
             margin: 0; 
-            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
-            color: #444; min-height: 100vh; display: flex; justify-content: center; align-items: center;
-            overflow-x: hidden;
+            background: #FAFEFB;
+            color: #495057; min-height: 100vh; display: flex; justify-content: center; align-items: center;
         }
 
-        /* ตกแต่งพื้นหลังด้วยวงกลมฟุ้งๆ */
-        body::before { content: ""; position: fixed; top: -10%; left: -10%; width: 50%; height: 50%; background: var(--p-green); filter: blur(100px); opacity: 0.3; z-index: -1; }
-        body::after { content: ""; position: fixed; bottom: -10%; right: -10%; width: 50%; height: 50%; background: var(--soft-pink); filter: blur(100px); opacity: 0.3; z-index: -1; }
+        /* ตกแต่งพื้นหลัง */
+        body::before { content: "✨"; position: fixed; top: 10%; left: 10%; font-size: 30px; opacity: 0.3; animation: floating 4s infinite; }
+        body::after { content: "💖"; position: fixed; bottom: 15%; right: 10%; font-size: 25px; opacity: 0.3; animation: floating 3s infinite; }
 
         .container { width: 100%; max-width: 420px; padding: 20px; display: flex; flex-direction: column; min-height: 100vh; justify-content: center; }
 
         .card { 
-            background: var(--white-glass); padding: 35px 25px; border-radius: 40px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; border: 8px solid white;
-            position: relative; animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            backdrop-filter: blur(10px);
+            background: white; padding: 40px 25px; border-radius: 50px; 
+            box-shadow: 0 30px 60px rgba(105, 219, 124, 0.15); text-align: center; border: 10px solid #fff;
+            position: relative; animation: popIn 0.5s ease-out;
         }
 
-        @keyframes popIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
-        .floating-icon { font-size: 80px; animation: floating 3s infinite ease-in-out; margin-bottom: 10px; display: inline-block; }
+        .floating-icon { font-size: 90px; animation: floating 3s infinite ease-in-out; display: inline-block; margin-bottom: 5px; }
 
-        h1 { color: var(--d-green); font-size: 34px; margin: 10px 0; font-weight: 600; text-shadow: 2px 2px 0px white; }
-        p { color: #777; font-size: 15px; line-height: 1.6; margin-bottom: 25px; }
+        h1 { color: var(--d-green); font-size: 36px; margin: 0; font-weight: 600; }
+        p { color: #868E96; font-size: 16px; margin-bottom: 30px; }
 
         button { 
-            background: linear-gradient(135deg, #81C784, #66BB6A); color: white; border: none; 
-            padding: 18px; border-radius: 25px; font-size: 18px; font-weight: 600; cursor: pointer; 
-            width: 100%; margin: 12px 0; transition: all 0.3s ease;
-            box-shadow: 0 8px 15px rgba(102, 187, 106, 0.3);
+            background: var(--main-btn); color: white; border: none; 
+            padding: 20px; border-radius: 30px; font-size: 18px; font-weight: 600; cursor: pointer; 
+            width: 100%; margin: 10px 0; transition: 0.2s;
+            box-shadow: 0 8px 0 #51CF66;
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        button:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(102, 187, 106, 0.4); }
-        button:active { transform: scale(0.95); }
-        button:disabled { background: #E0E0E0; box-shadow: none; color: #AAA; }
+        button:active { transform: translateY(4px); box-shadow: 0 4px 0 #51CF66; }
+        button:disabled { background: #E9ECEF; box-shadow: 0 8px 0 #DEE2E6; color: #ADB5BD; }
         
-        button.teacher-btn { background: linear-gradient(135deg, #FFB74D, #FFA726); box-shadow: 0 8px 15px rgba(255, 167, 38, 0.3); }
-        button.btn-how { background: #E3F2FD; color: #1E88E5; font-size: 14px; padding: 12px; box-shadow: none; border: 2px dashed #BBDEFB; }
-        button.back-btn { background: #f1f1f1; color: #888; width: auto; font-size: 13px; padding: 8px 15px; border-radius: 15px; margin-bottom: 20px; box-shadow: none; }
+        button.teacher-btn { background: #FFD43B; box-shadow: 0 8px 0 #F59F00; color: #92522D; }
+        button.teacher-btn:active { box-shadow: 0 4px 0 #F59F00; }
+        button.btn-how { background: #E7F5FF; color: #1971C2; font-size: 15px; padding: 12px; box-shadow: 0 5px 0 #A5D8FF; border: none; }
+        button.back-btn { background: #F8F9FA; color: #ADB5BD; width: auto; font-size: 13px; padding: 10px 20px; border-radius: 20px; box-shadow: none; border: 2px solid #F1F3F5; margin-bottom: 20px; }
 
         .music-control { 
             position: fixed; top: 20px; right: 20px; z-index: 2000; 
-            background: white; border-radius: 50%; width: 45px; height: 45px; 
+            background: white; border-radius: 50%; width: 50px; height: 50px; 
             display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1); font-size: 18px; cursor: pointer;
-            border: 3px solid var(--p-green);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05); font-size: 20px; cursor: pointer;
+            border: 4px solid var(--p-green);
         }
 
         input, select { 
-            width: 100%; padding: 15px; margin: 10px 0; border-radius: 20px; 
-            border: 2px solid #F0F0F0; font-size: 16px; background: #FAFAFA; text-align: center;
-            transition: 0.3s;
+            width: 100%; padding: 18px; margin: 10px 0; border-radius: 25px; 
+            border: 3px solid #F1F3F5; font-size: 16px; background: #F8F9FA; text-align: center;
         }
-        input:focus { border-color: var(--p-green); outline: none; background: white; }
+        input:focus { border-color: var(--main-btn); outline: none; background: white; }
 
         .hidden { display: none !important; }
 
-        /* Modal ดีไซน์ใหม่ */
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); display: flex; justify-content: center; align-items: center; z-index: 3000; }
-        .modal-content { background: white; width: 85%; max-width: 320px; padding: 25px; border-radius: 35px; border: 6px solid var(--p-green); text-align: center; }
+        /* Modal */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.15); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 3000; }
+        .modal-content { background: white; width: 85%; max-width: 320px; padding: 30px; border-radius: 40px; border: 8px solid var(--p-green); text-align: center; }
 
-        #webcam-container { 
-            border: 4px dashed #A8E6CF; border-radius: 35px; height: 300px; 
-            background: #fff; display: flex; align-items: center; justify-content: center; 
-            overflow: hidden; margin: 20px 0; position: relative;
-        }
-        #preview-img { width: 100%; height: 100%; object-fit: cover; border-radius: 30px; }
+        #webcam-container { border: 5px dashed #D3F9D8; border-radius: 40px; height: 320px; background: #fff; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; }
+        #preview-img { width: 100%; height: 100%; object-fit: cover; }
 
-        .score-badge { 
-            background: white; padding: 10px 25px; border-radius: 20px; 
-            font-weight: bold; border: 3px solid var(--soft-yellow); 
-            font-size: 22px; color: var(--d-green); display: inline-block; margin-bottom: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
+        .score-badge { background: #FFF9DB; padding: 12px 30px; border-radius: 25px; font-weight: bold; border: 4px solid #fff; font-size: 24px; color: #F59F00; box-shadow: 0 10px 20px rgba(0,0,0,0.05); margin-bottom: 10px; display: inline-block; }
+        .history-item { display: flex; background: white; border-radius: 30px; margin-bottom: 15px; padding: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.02); align-items: center; border: 2px solid #F8F9FA; }
+        .history-item img { width: 85px; height: 85px; object-fit: cover; border-radius: 22px; margin-right: 15px; }
 
-        .history-item { 
-            display: flex; background: white; border-radius: 25px; margin-bottom: 15px; 
-            padding: 10px; box-shadow: 0 8px 20px rgba(0,0,0,0.03); align-items: center; 
-            border: 2px solid #F9F9F9;
-        }
-        .history-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 20px; margin-right: 15px; }
-
-        table { width: 100%; border-radius: 25px; overflow: hidden; background: white; margin-top: 15px; border-collapse: separate; border-spacing: 0 8px; }
-        th { color: #999; font-weight: 300; padding: 10px; font-size: 13px; }
-        td { background: #fcfcfc; padding: 15px; font-size: 15px; border-top: 1px solid #f0f0f0; border-bottom: 1px solid #f0f0f0; }
-        td:first-child { border-left: 1px solid #f0f0f0; border-radius: 20px 0 0 20px; }
-        td:last-child { border-right: 1px solid #f0f0f0; border-radius: 0 20px 20px 0; }
+        .btn-sub { font-size: 14px; padding: 15px; background: #FFD3B6; box-shadow: 0 6px 0 #FFA07A; color: #A0522D; }
     </style>
 </head>
 <body>
@@ -120,60 +99,63 @@
 
 <div class="container">
     <div id="page-role" class="card">
-        <div class="floating-icon">🍃</div>
+        <div class="floating-icon">🍀</div>
         <h1>Eco Snap AI</h1>
-        <p>ก้าวแรกของการรักษ์โลก<br>เริ่มได้ที่ปลายนิ้วคุณ 💚</p>
-        <button onclick="showPage('page-login-student')">👦 นักเรียนตัวน้อย</button>
-        <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 สำหรับคุณครู</button>
-        <button onclick="toggleModal(true)" class="btn-how">📖 คู่มือฉบับย่อ</button>
+        <p>มาสนุกกับการแยกขยะกันเถอะ!</p>
+        <button onclick="showPage('page-student-choice')">👦 นักเรียน</button>
+        <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 คุณครู</button>
+        <button onclick="toggleModal(true)" class="btn-how">📖 วิธีใช้งาน</button>
     </div>
 
-    <div id="tutorial-modal" class="modal hidden">
-        <div class="modal-content">
-            <h2 style="color: var(--d-green); margin-top: 0;">📖 4 ขั้นตอนง่ายๆ</h2>
-            <div style="text-align: left; font-size: 14px; color: #666;">
-                <p>✅ 1. เข้าสู่ระบบตามบทบาท</p>
-                <p>✅ 2. ถ่ายรูปขยะที่ต้องการแยก</p>
-                <p>✅ 3. รอ AI ประมวลผลสักครู่</p>
-                <p>✅ 4. กดบันทึกเพื่อเก็บแต้มความดี!</p>
-            </div>
-            <button onclick="toggleModal(false)" style="margin-bottom: 0; padding: 12px;">รับทราบครับ! ✨</button>
-        </div>
+    <div id="page-student-choice" class="card hidden">
+        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
+        <div style="font-size: 60px; margin-bottom: 10px;">🎒</div>
+        <h2>นักเรียนจ๋า</h2>
+        <button onclick="showPage('page-login-existing')">✅ เคยมาแล้ว (เข้าสู่ระบบ)</button>
+        <button onclick="showPage('page-register-student')" class="btn-sub">✨ เพิ่งมาครั้งแรก (ลงทะเบียน)</button>
     </div>
 
-    <div id="page-login-student" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับหน้าแรก</button>
-        <h2 style="color: var(--d-green);">ยินดีต้อนรับจ้า</h2>
-        <input type="text" id="std-name" placeholder="ชื่อ - นามสกุล" oninput="validateForm()">
-        <input type="number" id="std-id" placeholder="รหัสประจำตัว 5 หลัก" oninput="validateForm()">
-        <select id="std-room" onchange="validateForm()">
-            <option value="">เลือกห้องเรียนของคุณ</option>
+    <div id="page-login-existing" class="card hidden">
+        <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
+        <h3>ยินดีต้อนรับกลับมา!</h3>
+        <p>ระบุรหัสของคุณเพื่อใช้งานต่อ</p>
+        <input type="number" id="login-std-id" placeholder="รหัสนักเรียน 5 หลัก">
+        <button onclick="loginExistingStudent()">🔍 เข้าสู่ระบบ</button>
+    </div>
+
+    <div id="page-register-student" class="card hidden">
+        <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
+        <h3>ลงทะเบียนใหม่</h3>
+        <input type="text" id="reg-std-name" placeholder="ชื่อ - นามสกุล">
+        <input type="number" id="reg-std-id" placeholder="รหัสนักเรียน 5 หลัก">
+        <select id="reg-std-room">
+            <option value="">เลือกห้องเรียน</option>
             <script>
                 const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
-                rooms.forEach(r => document.write(`<option value="${r}">ชั้นมัธยมศึกษาปีที่ ${r}</option>`));
+                rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));
             </script>
         </select>
-        <button id="btn-login-std" disabled onclick="loginStudent()">Let's Go! 🚀</button>
+        <button onclick="registerStudent()">✅ ลงทะเบียนและเริ่มเลย</button>
     </div>
 
     <div id="page-student-main" class="hidden">
-        <div class="card" style="padding-top: 25px;">
-            <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button><br>
-            <div class="score-badge">🏆 <span id="display-score">0</span> แต้ม</div>
+        <div class="card">
+            <button class="back-btn" onclick="location.reload()">🚪 ออก</button><br>
+            <div class="score-badge">✨ <span id="display-score">0</span> ✨</div>
             <h3 id="display-name" style="margin: 5px 0; color: var(--d-green);">-</h3>
             <div id="webcam-container">
-                <div id="placeholder-text" style="color: #ccc;">📷 ส่องขยะตรงนี้เลย</div>
+                <div id="placeholder-text" style="color: #dee2e6;">📸 ถ่ายรูปขยะตรงนี้</div>
                 <img id="preview-img" class="hidden">
             </div>
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
-            <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพขยะ</button>
+            <button onclick="document.getElementById('file-input').click()">📸 ถ่ายภาพ</button>
             <div id="analysis-section" class="hidden">
-                <div id="result-area" class="hidden" style="margin-bottom: 15px;">
-                    <div id="waste-type" style="font-size: 26px; color: var(--d-green); font-weight: bold;">-</div>
-                    <div id="confidence-score" style="color: #999; font-size: 14px;">-</div>
+                <div id="result-area" class="hidden" style="margin-bottom: 10px; padding: 15px; background: #FFF0F6; border-radius: 20px;">
+                    <div id="waste-type" style="font-size: 24px; color: #D6336C; font-weight: bold;">-</div>
+                    <div id="confidence-score" style="color: #F06595; font-size: 14px;">-</div>
                 </div>
-                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 ให้ AI ช่วยวิเคราะห์</button>
-                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ บันทึกความดี</button>
+                <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 วิเคราะห์ขยะ</button>
+                <button id="btn-save" class="hidden" onclick="saveTrash()">✅ บันทึกแต้ม</button>
             </div>
         </div>
         <div id="student-history" style="margin-top: 25px;"></div>
@@ -181,35 +163,47 @@
 
     <div id="page-login-teacher" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
-        <div style="font-size: 50px;">🗝️</div>
         <h2>สำหรับคุณครู</h2>
-        <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่านลับ">
-        <button onclick="loginTeacher()">🔓 ปลดล็อกระบบ</button>
+        <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่าน">
+        <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบ</button>
     </div>
 
     <div id="page-teacher-main" class="hidden" style="width:100%">
         <div class="card" style="width:100%; padding: 25px 15px;">
             <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
-            <h2 style="margin-bottom: 10px;">ตารางสรุปแต้ม 🏆</h2>
+            <h2>สรุปคะแนนรวม 🏆</h2>
             <select id="filter-room" onchange="renderLeaderboard()">
-                <option value="">ดูภาพรวมทุกห้อง</option>
+                <option value="">ทุกห้องเรียน</option>
                 <script>rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));</script>
             </select>
-            <table>
-                <thead><tr><th>นักเรียน</th><th>แต้ม</th></tr></thead>
+            <table style="width:100%; border-collapse: collapse; margin-top:15px;">
+                <thead><tr style="color:#adb5bd; font-size:14px;"><th>นักเรียน</th><th>แต้ม</th></tr></thead>
                 <tbody id="leaderboard-body"></tbody>
             </table>
         </div>
-        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 4px solid var(--p-green);">
+        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 6px solid #B2F2BB;">
             <h4 id="viewing-name">-</h4>
             <div id="teacher-history-list"></div>
-            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background: #999; padding: 10px; font-size: 14px;">✖️ ปิดหน้าต่าง</button>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background: #dee2e6; color: #495057; box-shadow:none;">✖️ ปิด</button>
+        </div>
+    </div>
+
+    <div id="tutorial-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2 style="color: var(--d-green); margin-top: 0;">📖 วิธีใช้งาน</h2>
+            <div style="text-align: left; font-size: 14px; line-height: 1.8;">
+                1. เลือกบทบาท 👦👩‍🏫<br>
+                2. ถ่ายภาพขยะที่ต้องการแยก 📸<br>
+                3. ให้ AI ประมวลผล 🔍<br>
+                4. บันทึกเพื่อสะสมแต้ม! ✨
+            </div>
+            <button onclick="toggleModal(false)" style="margin-bottom: 0;">เข้าใจแล้วจ้า! 💖</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- ระบบเสียงและ UI (ไม่แก้หลักการ) ---
+    // --- ระบบเดิมห้ามแตะ ---
     const music = document.getElementById('bg-music');
     let isPlaying = false;
     function toggleMusic() {
@@ -224,7 +218,6 @@
         window.scrollTo(0,0);
     }
 
-    // --- Firebase & AI (ห้ามแตะเด็ดขาด) ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -242,29 +235,42 @@
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
 
-    function validateForm() {
-        const n = document.getElementById('std-name').value.trim();
-        const i = document.getElementById('std-id').value.trim();
-        const r = document.getElementById('std-room').value;
-        document.getElementById('btn-login-std').disabled = !(n !== "" && i.length === 5 && r !== "");
-    }
-
-    function loginStudent() {
-        const id = document.getElementById('std-id').value.trim();
+    // --- ระบบล็อกอินใหม่ ---
+    function registerStudent() {
+        const name = document.getElementById('reg-std-name').value.trim();
+        const id = document.getElementById('reg-std-id').value.trim();
+        const room = document.getElementById('reg-std-room').value;
+        if(name==="" || id.length!==5 || room==="") { alert("กรุณากรอกข้อมูลให้ครบ และรหัสนักเรียนต้องมี 5 หลักนะจ๊ะ"); return; }
+        
         currentId = id;
         db.ref('users/' + id).once('value', (snap) => {
-            if (!snap.exists()) {
-                db.ref('users/' + id).set({
-                    name: document.getElementById('std-name').value.trim(),
-                    room: document.getElementById('std-room').value,
-                    score: 0
+            if (snap.exists()) {
+                alert("รหัสนี้มีการลงทะเบียนแล้วจ้า ลองเข้าสู่ระบบดูนะ!");
+            } else {
+                db.ref('users/' + id).set({ name, room, score: 0 }, () => {
+                    updateStudentUI();
+                    showPage('page-student-main');
                 });
             }
-            updateStudentUI();
-            showPage('page-student-main');
         });
     }
 
+    function loginExistingStudent() {
+        const id = document.getElementById('login-std-id').value.trim();
+        if(id.length !== 5) { alert("กรุณาใส่รหัสนักเรียนให้ครบ 5 หลักนะจ๊ะ"); return; }
+        
+        db.ref('users/' + id).once('value', (snap) => {
+            if (snap.exists()) {
+                currentId = id;
+                updateStudentUI();
+                showPage('page-student-main');
+            } else {
+                alert("ไม่พบข้อมูลรหัสนักเรียนนี้จ้า ลองเช็กดูอีกทีหรือกดลงทะเบียนใหม่นะ!");
+            }
+        });
+    }
+
+    // --- ส่วนที่เหลือ (Logic เดิม) ---
     function updateStudentUI() {
         db.ref('users/' + currentId).on('value', (snap) => {
             const u = snap.val();
@@ -297,14 +303,14 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ กำลังคิด...";
+        document.getElementById('btn-analyze').innerText = "⏳ กำลังวิเคราะห์...";
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
-        document.getElementById('confidence-score').innerText = "มั่นใจ: " + (best.probability * 100).toFixed(0) + "%";
+        document.getElementById('confidence-score').innerText = "AI มั่นใจ: " + (best.probability * 100).toFixed(0) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 ให้ AI ช่วยวิเคราะห์";
+        document.getElementById('btn-analyze').innerText = "🔍 วิเคราะห์ขยะ";
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
@@ -340,14 +346,16 @@
                 .sort((a,b) => b.score - a.score);
             list.forEach(u => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--d-green); cursor:pointer; font-weight:bold; text-decoration:underline;">${u.name}</td><td>${u.score}</td>`;
+                tr.style.borderBottom = "1px solid #F1F3F5";
+                tr.innerHTML = `<td onclick="viewDetail('${u.id}', '${u.name}')" style="padding:15px; color:var(--d-green); cursor:pointer; font-weight:bold;">${u.name}</td>
+                                <td style="padding:15px; font-weight:bold;">${u.score}</td>`;
                 tbody.appendChild(tr);
             });
         });
     }
 
     function viewDetail(id, name) {
-        document.getElementById('viewing-name').innerText = "ประวัติของ: " + name;
+        document.getElementById('viewing-name').innerText = "ผลงานของ " + name;
         db.ref('history/' + id).once('value', (snap) => {
             const h = [];
             snap.forEach(item => { h.unshift(item.val()); });
@@ -359,9 +367,9 @@
 
     function renderHistory(containerId, data) {
         const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p style="color:#ccc; font-size:12px;">ยังไม่มีข้อมูลจ้า</p>' : '';
+        container.innerHTML = data.length === 0 ? '<p style="color:#adb5bd;">ยังไม่มีข้อมูล</p>' : '';
         data.forEach(i => {
-            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small style="color:#999; font-size:11px;">${i.date}</small></div></div>`;
+            container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small style="color:#adb5bd; font-size:11px;">${i.date}</small></div></div>`;
         });
     }
 </script>

@@ -14,8 +14,8 @@
         :root { 
             --deep-forest: #2D5A27; 
             --leaf-bright: #72BF78; 
-            --pastel-lime: #C5E1A5; /* สีเขียวพาสเทลสดใสสำหรับปุ่มครู */
-            --teacher-text: #558B2F; /* สีตัวหนังสือบนปุ่มครู */
+            --pastel-lime: #C5E1A5; 
+            --teacher-text: #558B2F; 
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -52,15 +52,7 @@
         button:active { transform: scale(0.96); }
         
         button.primary-btn { background: var(--leaf-bright); color: white; border: none; box-shadow: 0 8px 20px rgba(114, 191, 120, 0.3); }
-        
-        /* ปุ่มครูแบบสดใสพาสเทลที่แก้ไขใหม่ */
-        button.teacher-btn { 
-            background: var(--pastel-lime); 
-            color: var(--teacher-text); 
-            border: none; 
-            box-shadow: 0 8px 20px rgba(197, 225, 165, 0.4); 
-        }
-
+        button.teacher-btn { background: var(--pastel-lime); color: var(--teacher-text); border: none; box-shadow: 0 8px 20px rgba(197, 225, 165, 0.4); }
         button.btn-how { background: #E8F5E9; color: var(--deep-forest); font-size: 15px; border: 1.5px solid var(--leaf-bright); }
         button.back-btn { background: white; color: #666; width: auto; font-size: 13px; margin-bottom: 10px; border: 1.5px solid #ddd; padding: 5px 15px; box-shadow: none; }
 
@@ -272,8 +264,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // *** อัปเดตโมเดลเป็นตัวใหม่ที่คุณให้มาจ้า ***
-    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
+    // *** เปลี่ยนกลับเป็นโมเดลเดิม (ypIN9Z3VF) ตามคำขอจ้า ***
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/ypIN9Z3VF/";
     let model, currentId = null;
 
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }

@@ -12,8 +12,9 @@
     
     <style>
         :root { 
-            --primary: #9ED5B3; --secondary: #E4F2E7; --accent: #FFF9C4;
-            --text: #3D5A45; --white: #FFFFFF; --bg-gradient: linear-gradient(180deg, #F0FAF3 0%, #FFFFFF 100%);
+            --mint: #A7F3D0; --peach: #FFCFD2; --lemon: #FDE68A;
+            --primary: #4ADE80; --text: #166534; --white: #FFFFFF;
+            --bg-gradient: linear-gradient(135deg, #F0FFF4 0%, #FFF5F5 100%);
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -24,75 +25,76 @@
             overflow-x: hidden; position: relative;
         }
 
-        /* ฟองสบู่พาสเทล */
+        /* Bubble พาสเทลสดใสขึ้น */
         .bubble {
             position: absolute; border-radius: 50%; 
-            background: linear-gradient(135deg, rgba(158, 213, 179, 0.3), rgba(255, 249, 196, 0.3));
-            animation: floating 12s infinite ease-in-out; z-index: 1;
+            background: linear-gradient(135deg, var(--mint), var(--peach));
+            animation: floating 8s infinite ease-in-out; z-index: 1; filter: blur(2px);
         }
         @keyframes floating {
-            0% { transform: translateY(110vh) translateX(0) scale(0.8); opacity: 0; }
-            50% { opacity: 0.6; transform: translateY(50vh) translateX(20px) scale(1.2); }
-            100% { transform: translateY(-10vh) translateX(-20px) scale(0.8); opacity: 0; }
+            0% { transform: translateY(110vh) scale(0.6); opacity: 0; }
+            50% { opacity: 0.7; transform: translateY(50vh) scale(1.1); }
+            100% { transform: translateY(-10vh) scale(0.6); opacity: 0; }
         }
 
-        .container { width: 100%; max-width: 420px; padding: 25px; z-index: 10; position: relative; }
+        .container { width: 100%; max-width: 420px; padding: 25px; z-index: 10; }
 
-        /* การ์ดทรงหยดน้ำนุ่มนิ่ม */
+        /* การ์ดแบบ Soft Glassmorphism */
         .card { 
-            background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(20px);
-            padding: 40px 30px; border-radius: 65px; 
-            box-shadow: 0 40px 100px rgba(158, 213, 179, 0.2);
-            text-align: center; border: 6px solid var(--white);
-            animation: softBreath 8s infinite ease-in-out;
+            background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px);
+            padding: 40px 25px; border-radius: 50px; 
+            box-shadow: 0 30px 60px rgba(74, 222, 128, 0.15);
+            text-align: center; border: 4px solid var(--white);
+            position: relative; overflow: hidden;
         }
-        @keyframes softBreath { 0%, 100% { border-radius: 65px; } 50% { border-radius: 80px 65px 90px 65px; } }
 
-        h1 { font-size: 42px; color: var(--text); margin: 0; letter-spacing: -2px; font-weight: 600; }
-        .subtitle { color: #6A8E74; font-size: 17px; margin: 15px 0 35px 0; display: block; line-height: 1.6; }
+        /* ตกแต่งมุมการ์ดให้ดูน่ารัก */
+        .card::before { content: '🌱'; position: absolute; top: 15px; left: 15px; font-size: 25px; opacity: 0.3; }
+        .card::after { content: '✨'; position: absolute; bottom: 15px; right: 15px; font-size: 25px; opacity: 0.3; }
+
+        h1 { font-size: 45px; color: var(--text); margin: 0; letter-spacing: -2px; font-weight: 600; text-shadow: 2px 2px 0px var(--mint); }
+        .subtitle { color: #2F6D44; font-size: 17px; margin: 10px 0 25px 0; display: block; line-height: 1.5; }
 
         button { 
             background: var(--white); color: var(--text); border: none; 
-            padding: 20px; border-radius: 40px; font-size: 18px; font-weight: 600; 
-            cursor: pointer; width: 100%; margin: 12px 0; transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 25px rgba(0,0,0,0.03);
-            display: flex; align-items: center; justify-content: center; gap: 12px;
+            padding: 18px; border-radius: 30px; font-size: 18px; font-weight: 600; 
+            cursor: pointer; width: 100%; margin: 8px 0; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 10px 15px rgba(0,0,0,0.05);
+            display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        button:hover { transform: translateY(-5px) scale(1.02); box-shadow: 0 20px 40px rgba(158, 213, 179, 0.4); }
+        button:hover { transform: translateY(-4px); box-shadow: 0 15px 25px rgba(0,0,0,0.1); }
         button:active { transform: scale(0.95); }
 
-        .primary-btn { background: linear-gradient(135deg, var(--primary), #B9E6CA); color: var(--white); text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .back-btn { width: auto; padding: 10px 30px; font-size: 14px; background: var(--secondary); margin-bottom: 25px; color: var(--text); }
+        .primary-btn { background: linear-gradient(135deg, var(--primary), var(--mint)); color: var(--text); border: 2px solid var(--white); }
+        .back-btn { width: auto; padding: 8px 25px; font-size: 14px; background: var(--peach); color: var(--text); margin-bottom: 20px; box-shadow: none; }
 
         .score-badge { 
-            background: var(--accent); padding: 15px 35px; border-radius: 50px; 
-            font-weight: 600; font-size: 30px; color: #827717; border: 5px solid var(--white);
-            box-shadow: 0 15px 35px rgba(255, 249, 196, 0.5);
+            background: var(--lemon); padding: 12px 30px; border-radius: 35px; 
+            font-weight: 600; font-size: 28px; color: #854D0E; border: 4px solid var(--white);
         }
 
         #webcam-container { 
-            border-radius: 60px; height: 320px; background: #fff; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 30px 0;
-            border: 6px dashed #D0E8D7; position: relative;
+            border-radius: 40px; height: 300px; background: #FFF; 
+            display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0;
+            border: 4px dashed var(--mint);
         }
         
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(61, 90, 69, 0.2); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .modal-content { 
-            background: var(--white); border-radius: 70px; border: 10px solid var(--primary);
-            width: 100%; max-width: 410px; padding: 40px; text-align: center; max-height: 85vh; overflow-y: auto;
-            box-shadow: 0 50px 100px rgba(0,0,0,0.1);
+            background: var(--white); border-radius: 50px; border: 8px solid var(--mint);
+            width: 100%; max-width: 400px; padding: 35px; text-align: center; max-height: 80vh; overflow-y: auto;
         }
 
-        .history-item { background: #F8FCF9; border-radius: 35px; padding: 20px; margin-bottom: 18px; border: 2px solid var(--secondary); display: flex; align-items: center; }
-        .history-item img { width: 80px; height: 80px; object-fit: cover; border-radius: 25px; margin-right: 20px; border: 4px solid var(--white); }
+        .history-item { background: #F0FFF4; border-radius: 30px; padding: 15px; margin-bottom: 15px; border: 2px solid var(--white); display: flex; align-items: center; box-shadow: 0 5px 10px rgba(0,0,0,0.02); }
+        .history-item img { width: 70px; height: 70px; object-fit: cover; border-radius: 20px; margin-right: 15px; }
 
-        .music-btn-float { position: fixed; top: 25px; right: 25px; z-index: 3000; background: var(--white); border-radius: 50%; width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border: 3px solid var(--primary); cursor: pointer; }
+        .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 3000; background: var(--white); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 3px solid var(--mint); }
         .hidden { display: none !important; }
-        input, select { width: 100%; padding: 20px; margin: 12px 0; border-radius: 35px; border: 3px solid var(--secondary); text-align: center; font-size: 18px; outline: none; background: #FAFFFB; }
-        input:focus { border-color: var(--primary); }
+        input, select { width: 100%; padding: 16px; margin: 8px 0; border-radius: 25px; border: 3px solid #F0F4F8; text-align: center; font-size: 16px; outline: none; background: #FAFBFF; transition: 0.3s; }
+        input:focus { border-color: var(--mint); background: #FFF; }
 
-        /* Loading Heart Animation */
-        .heart-loader { color: var(--primary); font-size: 40px; animation: beat 1.2s infinite; }
+        /* Loading Heart */
+        .loader { font-size: 40px; animation: beat 1s infinite; margin: 10px 0; }
         @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.3); } }
     </style>
 </head>
@@ -104,92 +106,95 @@
 
 <div class="container">
     <div id="page-role" class="card">
-        <div style="font-size: 100px; margin-bottom: 20px;">♻️</div>
+        <div style="font-size: 110px; margin-bottom: 10px;">🍃</div>
         <h1>Eco Snap AI</h1>
         <span class="subtitle">เปลี่ยนการทิ้งขยะให้เป็นเรื่องสนุก!<br>ช่วยกันรักษาโลกใบนี้ด้วยมือเรา ✨</span>
         <button onclick="changePage('page-student-choice')" class="primary-btn">🐣 นักเรียนเข้าใช้งาน</button>
         <button onclick="changePage('page-login-teacher')">👩‍🏫 สำหรับคุณครู</button>
-        <button onclick="showModal('guide-general')" style="background:var(--accent); color:#827717; font-size:15px; margin-top:15px;">📖 แนะนำการใช้งานอย่างละเอียด</button>
+        <button onclick="showModal('guide-general')" style="background:var(--lemon); color:#854D0E; font-size:15px; margin-top:10px;">📖 แนะนำการใช้งาน</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
         <button class="back-btn" onclick="changePage('page-role')">⬅️ ย้อนกลับ</button>
-        <div style="font-size: 70px; margin-bottom: 10px;">✨</div>
-        <h2 style="color:var(--text);">เข้าใช้งานนักเรียน</h2>
+        <div style="font-size: 80px; margin: 10px;">🌟</div>
+        <h2 style="color:var(--text);">นักเรียนรักษ์โลก</h2>
         <button onclick="changePage('page-login-existing')" class="primary-btn">🔑 เข้าสู่ระบบบัญชีเดิม</button>
-        <button onclick="changePage('page-register-student')" style="background:none; border: 3px solid var(--primary);">📝 สมัครบัญชีใหม่</button>
+        <button onclick="changePage('page-register-student')" style="background:var(--peach); border: 3px solid var(--white);">📝 สมัครบัญชีใหม่</button>
     </div>
 
     <div id="page-login-existing" class="card hidden">
         <button class="back-btn" onclick="changePage('page-student-choice')">⬅️ ย้อนกลับ</button>
-        <h3 style="color:var(--text);">ระบุรหัสนักเรียน</h3>
-        <input type="number" id="login-std-id" placeholder="รหัส 5 หลักของคุณ">
-        <button onclick="loginExistingStudent()" class="primary-btn">เข้าสู่ระบบ ✨</button>
+        <h3>ระบุรหัสนักเรียน & รหัสผ่าน</h3>
+        <input type="number" id="login-std-id" placeholder="รหัสนักเรียน 5 หลัก">
+        <input type="password" id="login-std-pwd" placeholder="รหัสผ่านของคุณ">
+        <button onclick="loginExistingStudent()" class="primary-btn">เข้าสู่ระบบ 🌈</button>
     </div>
 
     <div id="page-register-student" class="card hidden">
         <button class="back-btn" onclick="changePage('page-student-choice')">⬅️ ย้อนกลับ</button>
-        <h3 style="color:var(--text);">สมัครสมาชิกใหม่</h3>
+        <h3>สมัครสมาชิกใหม่ 🐣</h3>
         <input type="text" id="reg-std-name" placeholder="ชื่อ-นามสกุล">
         <input type="number" id="reg-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <select id="reg-std-room"></select>
-        <button onclick="registerStudent()" class="primary-btn">เริ่มใช้งาน 🐣</button>
+        <input type="password" id="reg-std-pwd1" placeholder="ตั้งรหัสผ่าน">
+        <input type="password" id="reg-std-pwd2" placeholder="ยืนยันรหัสผ่านอีกครั้ง">
+        <button onclick="registerStudent()" class="primary-btn">เริ่มรักษ์โลกเลย!</button>
     </div>
 
     <div id="page-student-main" class="card hidden">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:25px;">
-             <button onclick="location.reload()" style="width:auto; padding:12px 20px; margin:0; font-size:14px; background:#FFF0F0; color:#FF5252;">🚪 ออก</button>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+             <button onclick="location.reload()" style="width:auto; padding:8px 15px; margin:0; font-size:14px; background:var(--peach);">🚪 ออก</button>
              <span class="score-badge">✨ <span id="display-score">0</span></span>
         </div>
-        <h3 id="display-name" style="color:var(--text); margin-bottom:15px; font-size:24px;">-</h3>
+        <h3 id="display-name" style="color:var(--text); margin:10px 0;">-</h3>
         <div id="webcam-container">
-            <div id="placeholder-text" style="color: #9ED5B3;">📸 ถ่ายรูปขยะตรงนี้จ้า</div>
+            <div id="placeholder-text" style="color: var(--primary);">📸 ถ่ายรูปขยะกันเถอะ!</div>
             <img id="preview-img" class="hidden" style="width:100%; height:100%; object-fit:cover;">
         </div>
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
         <button onclick="document.getElementById('file-input').click()" class="primary-btn">📷 ถ่ายรูปขยะ</button>
         
         <div id="analysis-section" class="hidden">
-            <div id="result-area" class="hidden" style="background:var(--secondary); padding:20px; border-radius:40px; margin-bottom:15px; border:3px solid var(--primary);">
-                <div id="waste-type" style="font-size:24px; font-weight:600; color:var(--text);">-</div>
-                <div id="confidence-score" style="font-size:14px; color:#666;">-</div>
+            <div id="result-area" class="hidden" style="background:var(--lemon); padding:15px; border-radius:30px; margin-bottom:15px; border:2px solid var(--white);">
+                <div id="waste-type" style="font-size:22px; font-weight:600; color:#854D0E;">-</div>
+                <div id="confidence-score" style="font-size:13px; color:#A16207;">-</div>
             </div>
-            <button id="btn-analyze" onclick="analyzeImage()">🔍 วิเคราะห์ด้วย AI</button>
-            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกรับแต้ม!</button>
+            <button id="btn-analyze" onclick="analyzeImage()">🔍 AI ช่วยตรวจสอบ</button>
+            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกเก็บแต้ม!</button>
         </div>
-        <button onclick="viewMyHistory()" style="margin-top:20px; border: 3px dashed var(--primary); background: none; color:var(--text);">📜 ดูประวัติย้อนหลัง</button>
+        <button onclick="viewMyHistory()" style="margin-top:15px; border: 3.5px dashed var(--mint); background: none; color:var(--text); box-shadow:none;">📜 ประวัติของฉัน</button>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
         <button class="back-btn" onclick="changePage('page-role')">⬅️ ย้อนกลับ</button>
         <div style="font-size: 70px; margin-bottom:10px;">🔐</div>
-        <h2 style="color:var(--text);">เข้าระบบคุณครู</h2>
-        <input type="password" id="teacher-pwd" placeholder="กรอกรหัสผ่าน">
-        <button onclick="loginTeacher()" class="primary-btn">ยืนยัน</button>
-        <button onclick="showModal('guide-teacher')" style="background:#E3F2FD; color:#1E88E5; font-size:14px; margin-top:20px;">📘 คู่มือการจัดการระบบ</button>
+        <h2>เข้าระบบคุณครู</h2>
+        <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่าน">
+        <button onclick="loginTeacher()" class="primary-btn">ยืนยันรหัส</button>
+        <button onclick="showModal('guide-teacher')" style="background:var(--mint); color:var(--text); font-size:14px; margin-top:20px;">📘 คู่มือคุณครู</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:10px 20px; margin:0; font-size:14px; background:#f5f5f5;">🚪 ออก</button>
+             <button onclick="location.reload()" style="width:auto; padding:8px 15px; margin:0; font-size:14px; background:#f0f0f0;">🚪 ออก</button>
              <h3 style="margin:0; color:var(--text);">ตารางคะแนน 🏆</h3>
         </div>
         <select id="filter-room" onchange="renderLeaderboard()"></select>
         <div id="leaderboard-body" style="margin: 20px 0; max-height: 400px; overflow-y:auto; padding-right:5px;"></div>
-        <button onclick="resetAllData()" style="color:#FF5252; font-size:12px; background:none; border:none; opacity:0.5;">🧹 ล้างข้อมูลใหม่ทั้งหมด</button>
+        <button onclick="resetAllData()" style="color:#FF5252; font-size:12px; border:none; background:none; opacity:0.5;">🧹 รีเซ็ตข้อมูล</button>
     </div>
 </div>
 
 <div id="main-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title" style="color:var(--text); font-size:24px;">-</h3>
+        <h3 id="modal-title" style="color:var(--text);">-</h3>
         <div id="modal-body"></div>
-        <button onclick="closeModal()" class="primary-btn" style="margin-top:30px;">ปิดหน้าต่าง</button>
+        <button onclick="closeModal()" class="primary-btn" style="margin-top:25px;">ปิดหน้าต่าง</button>
     </div>
 </div>
 
 <script>
-    // --- Config & Firebase (ห้ามเปลี่ยนหลักการทำงาน) ---
+    // --- Config ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -212,19 +217,19 @@
     }
 
     let music = document.getElementById('bg-music');
-    function initAudioOnce() { if (!hasStartedAudio) { music.play().then(() => { hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; }); } }
+    function initAudioOnce() { if (!hasStartedAudio) { music.play(); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; } }
     function toggleMusic(e) { e.stopPropagation(); if (music.paused) { music.play(); document.getElementById('music-btn').innerText = "🎵"; } else { music.pause(); document.getElementById('music-btn').innerText = "🔇"; } }
 
     function createBubbles() {
         const container = document.getElementById('bubbles');
-        for(let i=0; i<15; i++) {
+        for(let i=0; i<10; i++) {
             const b = document.createElement('div');
             b.className = 'bubble';
-            const size = Math.random() * 60 + 20 + 'px';
+            const size = Math.random() * 80 + 20 + 'px';
             b.style.width = size; b.style.height = size;
             b.style.left = Math.random() * 100 + 'vw';
-            b.style.animationDuration = Math.random() * 8 + 6 + 's';
-            b.style.animationDelay = Math.random() * 5 + 's';
+            b.style.animationDuration = Math.random() * 5 + 6 + 's';
+            b.style.animationDelay = Math.random() * 4 + 's';
             container.appendChild(b);
         }
     }
@@ -233,19 +238,33 @@
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
 
+    // --- Student Actions ---
     function registerStudent() {
         const name = document.getElementById('reg-std-name').value.trim();
         const id = document.getElementById('reg-std-id').value.trim();
         const room = document.getElementById('reg-std-room').value;
-        if(!name || id.length!==5 || !room) return alert("กรอกข้อมูลให้ครบนะจ๊ะ ✨");
-        db.ref('users/' + id).set({ name, room, score: 0 }, () => { currentId = id; updateStudentUI(); changePage('page-student-main'); });
+        const p1 = document.getElementById('reg-std-pwd1').value;
+        const p2 = document.getElementById('reg-std-pwd2').value;
+
+        if(!name || id.length!==5 || !room || !p1) return alert("กรอกข้อมูลให้ครบนะจ๊ะ ✨");
+        if(p1 !== p2) return alert("รหัสผ่าน 2 ครั้งไม่ตรงกันจ้า ❌");
+
+        db.ref('users/' + id).set({ name, room, score: 0, pwd: p1 }, () => {
+            currentId = id; updateStudentUI(); changePage('page-student-main');
+        });
     }
 
     function loginExistingStudent() {
         const id = document.getElementById('login-std-id').value.trim();
+        const pwd = document.getElementById('login-std-pwd').value;
+        
         db.ref('users/' + id).once('value', s => {
-            if(s.exists()){ currentId = id; updateStudentUI(); changePage('page-student-main'); }
-            else alert("ไม่พบรหัสนี้จ้า 🔍");
+            if(s.exists()){
+                const userData = s.val();
+                if(userData.pwd === pwd) {
+                    currentId = id; updateStudentUI(); changePage('page-student-main');
+                } else alert("รหัสผ่านไม่ถูกต้องจ้า ❌");
+            } else alert("ไม่พบรหัสนักเรียนนี้จ้า 🔍");
         });
     }
 
@@ -263,11 +282,9 @@
             img.onload = () => {
                 const canvas = document.createElement('canvas');
                 const ctx = canvas.getContext('2d');
-                const max = 500; let w = img.width, h = img.height;
-                if(w > h){ if(w > max){ h *= max/w; w = max; } } else { if(h > max){ w *= max/h; h = max; } }
-                canvas.width = w; canvas.height = h;
-                ctx.drawImage(img, 0, 0, w, h);
-                document.getElementById('preview-img').src = canvas.toDataURL('image/jpeg', 0.85);
+                canvas.width = 400; canvas.height = 400;
+                ctx.drawImage(img, 0, 0, 400, 400);
+                document.getElementById('preview-img').src = canvas.toDataURL('image/jpeg', 0.8);
                 document.getElementById('preview-img').classList.remove('hidden');
                 document.getElementById('placeholder-text').classList.add('hidden');
                 document.getElementById('analysis-section').classList.remove('hidden');
@@ -281,15 +298,15 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ กำลังวิเคราะห์จ้า...";
+        document.getElementById('btn-analyze').innerText = "⏳ รอแป๊บน้า...";
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((a, b) => (a.probability > b.probability) ? a : b);
         document.getElementById('result-area').classList.remove('hidden');
-        document.getElementById('waste-type').innerText = "ประเภทขยะ: " + best.className;
-        document.getElementById('confidence-score').innerText = "ความมั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
+        document.getElementById('waste-type').innerText = "คือ: " + best.className;
+        document.getElementById('confidence-score').innerText = "มั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 วิเคราะห์ด้วย AI";
+        document.getElementById('btn-analyze').innerText = "🔍 AI ช่วยตรวจสอบ";
     }
 
     function saveTrash() {
@@ -300,7 +317,7 @@
         };
         db.ref('history/' + currentId).push(data).then(() => {
             db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + 1);
-            alert("บันทึกสำเร็จ! ขอบคุณที่ช่วยโลกนะจ๊ะ 💚");
+            alert("บันทึกสำเร็จ! ขอบคุณที่รักษ์โลกจ้า 💚");
             document.getElementById('preview-img').classList.add('hidden');
             document.getElementById('placeholder-text').classList.remove('hidden');
             document.getElementById('analysis-section').classList.add('hidden');
@@ -311,34 +328,33 @@
         document.getElementById('main-modal').classList.remove('hidden');
         const title = document.getElementById('modal-title');
         const body = document.getElementById('modal-body');
-        body.innerHTML = '<div class="heart-loader">❤️</div><p>กำลังเตรียมข้อมูลให้นะจ๊ะ...</p>';
+        body.innerHTML = '<div class="loader">🍭</div><p>กำลังเตรียมข้อมูลให้นะจ๊ะ...</p>';
 
         setTimeout(() => {
             body.innerHTML = "";
             if(type === 'guide-general') {
-                title.innerText = "วิธีใช้งานสำหรับนักเรียน 🐣";
-                body.innerHTML = `<div style="text-align:left; line-height:1.8;">
-                    1. <b>สมัครสมาชิก:</b> ใช้<b>รหัสนักเรียน 5 หลัก</b>ในการเข้าใช้งานครั้งแรก<br>
-                    2. <b>ถ่ายภาพ:</b> กดถ่ายภาพขยะที่คัดแยกแล้ว<br>
-                    3. <b>วิเคราะห์:</b> ให้ AI ช่วยตรวจสอบความถูกต้อง<br>
-                    4. <b>บันทึก:</b> กดปุ่มบันทึกเพื่อรับคะแนนรักษ์โลก!<br>
-                    5. <b>เช็คประวัติ:</b> ดูย้อนหลังได้ว่าเราช่วยโลกไปเท่าไหร่แล้ว
+                title.innerText = "วิธีใช้สำหรับนักเรียน 🐣";
+                body.innerHTML = `<div style="text-align:left; line-height:1.7;">
+                    1. <b>สมัครสมาชิก:</b> ใช้รหัสนักเรียน 5 หลัก และ<b>ตั้งรหัสผ่าน</b>เพื่อความปลอดภัย<br>
+                    2. <b>ถ่ายภาพ:</b> ถ่ายรูปขยะที่ต้องการทิ้ง<br>
+                    3. <b>วิเคราะห์:</b> ให้ AI ช่วยตรวจสอบ<br>
+                    4. <b>บันทึก:</b> กดเก็บแต้มได้เลย!
                 </div>`;
             } else if(type === 'guide-teacher') {
                 title.innerText = "คู่มือคุณครู 👩‍🏫";
-                body.innerHTML = `<div style="text-align:left; line-height:1.8;">
-                    - เลือกดูคะแนนตามห้องเรียนได้ที่เมนูตัวเลือก<br>
+                body.innerHTML = `<div style="text-align:left; line-height:1.7;">
+                    - ตรวจสอบคะแนนนักเรียนแยกตามห้องเรียนได้ที่เมนูเลือกห้อง<br>
                     - คลิกที่ชื่อนักเรียนเพื่อดูรูปถ่ายขยะที่บันทึกไว้<br>
-                    - ใช้รหัสผ่าน "Eco2026" เพื่อเข้าถึงข้อมูลทั้งหมด
+                    - ระบบใหม่มีรหัสผ่านสำหรับนักเรียนเพื่อป้องกันการแอบอ้าง
                 </div>`;
             } else if(type === 'history') {
                 title.innerText = extra.name;
-                if(extra.list.length === 0) body.innerHTML = "ยังไม่พบข้อมูลการบันทึกจ้า 🍃";
+                if(extra.list.length === 0) body.innerHTML = "ยังไม่พบประวัติจ้า 🍃";
                 else extra.list.forEach(i => {
                     body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`;
                 });
             }
-        }, 600);
+        }, 700);
     }
 
     function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
@@ -347,7 +363,7 @@
         db.ref('history/' + currentId).once('value', s => {
             let list = []; s.forEach(c => { list.push(c.val()); });
             list.reverse();
-            showModal('history', { name: "บันทึกรักษ์โลกของฉัน 📜", list: list });
+            showModal('history', { name: "ประวัติของฉัน 📜", list: list });
         });
     }
 
@@ -378,16 +394,18 @@
     }
 
     function resetAllData() {
-        if(confirm("ล้างข้อมูลทั้งหมดนะจ๊ะ? ข้อมูลคะแนนจะหายหมดเลยนะ!")) {
+        if(confirm("ล้างข้อมูลทั้งหมดนะจ๊ะ?")) {
             db.ref('history').remove();
-            db.ref('users').once('value', s => { s.forEach(c => c.ref.update({ score: 0 })); alert("ล้างเรียบร้อย!"); });
+            db.ref('users').remove(); // รีเซ็ตเพื่อใช้ระบบรหัสผ่านใหม่
+            alert("รีเซ็ตเรียบร้อย! เริ่มใช้งานระบบใหม่ได้เลยจ้า");
+            location.reload();
         }
     }
 
     const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
     ['reg-std-room', 'filter-room'].forEach(id => {
         const el = document.getElementById(id);
-        if(id === 'filter-room') el.innerHTML = '<option value="">กรองตามห้องเรียน</option>';
+        if(id === 'filter-room') el.innerHTML = '<option value="">เลือกห้องเรียน</option>';
         rooms.forEach(r => el.innerHTML += `<option value="${r}">ม. ${r}</option>`);
     });
 </script>

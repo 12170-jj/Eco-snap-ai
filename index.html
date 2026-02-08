@@ -12,10 +12,10 @@
     
     <style>
         :root { 
-            --deep-forest: #2D5A27; /* สีเขียวเข้มสำหรับตัวหนังสือ */
-            --leaf-bright: #72BF78; /* สีเขียวปุ่มที่ชัดขึ้น */
-            --mint-surface: #F0F9F1; /* พื้นหลังการ์ด */
-            --bg-gradient: #D4E9D7; /* สีพื้นหลังเว็บที่เข้มขึ้นนิดนึง */
+            --deep-forest: #2D5A27; 
+            --leaf-bright: #72BF78; 
+            --mint-surface: #F0F9F1; 
+            --bg-gradient: #D4E9D7; 
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -39,11 +39,8 @@
 
         .main-icon { font-size: 80px; margin-bottom: 10px; display: inline-block; filter: drop-shadow(0 5px 10px rgba(0,0,0,0.1)); }
 
-        h1 { 
-            font-size: 34px; margin: 0; font-weight: 600; color: var(--deep-forest);
-            text-shadow: 1px 1px 0px white;
-        }
-
+        h1 { font-size: 34px; margin: 0; font-weight: 600; color: var(--deep-forest); text-shadow: 1px 1px 0px white; }
+        h2, h3 { color: var(--deep-forest); }
         p { color: #4F6D4F; font-size: 17px; margin-bottom: 30px; font-weight: 400; }
 
         button { 
@@ -53,7 +50,7 @@
             box-shadow: 0 6px 12px rgba(0,0,0,0.05);
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        button:active { transform: scale(0.96); box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        button:active { transform: scale(0.96); }
         
         button.primary-btn { background: var(--leaf-bright); color: white; border: none; box-shadow: 0 8px 20px rgba(114, 191, 120, 0.3); }
         button.teacher-btn { background: #AFB42B; color: white; border: none; box-shadow: 0 8px 20px rgba(175, 180, 43, 0.2); }
@@ -83,12 +80,12 @@
 
         .modal { 
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            background: rgba(45, 90, 39, 0.3); backdrop-filter: blur(6px); 
+            background: rgba(45, 90, 39, 0.4); backdrop-filter: blur(6px); 
             display: flex; justify-content: center; align-items: center; z-index: 3000; 
         }
         .modal-content { 
             background: white; width: 88%; max-width: 340px; padding: 30px; 
-            border-radius: 40px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.15); 
+            border-radius: 40px; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.2); 
             border: 3px solid var(--leaf-bright);
         }
 
@@ -115,20 +112,29 @@
         <p>แยกขยะกู้โลกกันเถอะ 🌍</p>
         <button onclick="showPage('page-student-choice')" class="primary-btn">🌳 สำหรับนักเรียน</button>
         <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 สำหรับคุณครู</button>
-        <button onclick="toggleModal(true)" class="btn-how">📖 วิธีใช้งาน (กดเลย!)</button>
+        <button onclick="toggleModal('student', true)" class="btn-how">📖 วิธีใช้งาน (กดเลย!)</button>
+    </div>
+
+    <div id="page-login-teacher" class="card hidden">
+        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
+        <div style="font-size: 50px;">🗝️</div>
+        <h3>คุณครูเข้าสู่ระบบ</h3>
+        <input type="password" id="teacher-pwd" placeholder="รหัสผ่านลับ">
+        <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบ</button>
+        <button onclick="toggleModal('teacher', true)" class="btn-how" style="margin-top: 20px;">📘 คู่มือคุณครู (กดอ่าน)</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">🏠 กลับหน้าแรก</button>
         <div style="font-size: 50px;">🌍</div>
-        <h2 style="color: var(--deep-forest);">เข้าใช้งานนักเรียน</h2>
+        <h2>เข้าใช้งานนักเรียน</h2>
         <button onclick="showPage('page-login-existing')" class="primary-btn">✅ มีบัญชีเดิมอยู่แล้ว</button>
         <button onclick="showPage('page-register-student')" style="color: var(--deep-forest); border: 2px solid var(--leaf-bright);">✨ ลงทะเบียนครั้งแรก</button>
     </div>
 
     <div id="page-login-existing" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3 style="color: var(--deep-forest);">เข้าสู่ระบบ</h3>
+        <h3>เข้าสู่ระบบ</h3>
         <p>ใส่รหัสนักเรียน 5 หลักจ้า</p>
         <input type="number" id="login-std-id" placeholder="รหัส 5 หลัก">
         <button onclick="loginExistingStudent()" class="primary-btn">🔍 ตกลง</button>
@@ -136,7 +142,7 @@
 
     <div id="page-register-student" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3 style="color: var(--deep-forest);">สมัครสมาชิกใหม่</h3>
+        <h3>สมัครสมาชิกใหม่</h3>
         <input type="text" id="reg-std-name" placeholder="ชื่อ - นามสกุล">
         <input type="number" id="reg-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <select id="reg-std-room">
@@ -172,14 +178,6 @@
         <div id="student-history" style="margin-top: 25px;"></div>
     </div>
 
-    <div id="page-login-teacher" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
-        <div style="font-size: 50px;">🗝️</div>
-        <h3 style="color: var(--deep-forest);">คุณครูเข้าสู่ระบบ</h3>
-        <input type="password" id="teacher-pwd" placeholder="รหัสผ่านลับ">
-        <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบ</button>
-    </div>
-
     <div id="page-teacher-main" class="hidden" style="width:100%">
         <div class="card" style="width:100%; padding: 25px 15px;">
             <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
@@ -197,23 +195,36 @@
         </div>
     </div>
 
-    <div id="tutorial-modal" class="modal hidden">
+    <div id="student-modal" class="modal hidden">
         <div class="modal-content">
             <div style="font-size: 40px; margin-bottom: 10px;">🌲</div>
-            <h2 style="color: var(--deep-forest); margin-top: 0;">วิธีใช้งาน</h2>
+            <h2 style="color: var(--deep-forest); margin-top: 0;">วิธีใช้งานนักเรียน</h2>
             <div style="text-align: left; font-size: 15px; color: #444; line-height: 1.8;">
                 1. สมัครสมาชิก/เข้าสู่ระบบด้วยรหัส 5 หลัก 🗑️<br>
                 2. ถ่ายรูปขยะเพื่อให้ AI ช่วยคัดแยก 📸<br>
                 3. บันทึกข้อมูลเพื่อรับแต้มรีไซเคิล ♻️<br>
                 4. ช่วยกันแยกขยะเพื่อโลกสีเขียวนะ! 🌍
             </div>
-            <button onclick="toggleModal(false)" class="primary-btn" style="margin-top: 20px;">พร้อมแล้วจ้า! 💚</button>
+            <button onclick="toggleModal('student', false)" class="primary-btn" style="margin-top: 20px;">พร้อมแล้วจ้า! 💚</button>
+        </div>
+    </div>
+
+    <div id="teacher-modal" class="modal hidden">
+        <div class="modal-content">
+            <div style="font-size: 40px; margin-bottom: 10px;">👨‍🏫</div>
+            <h2 style="color: var(--deep-forest); margin-top: 0;">คู่มือคุณครู</h2>
+            <div style="text-align: left; font-size: 15px; color: #444; line-height: 1.8;">
+                🌟 <b>การดูคะแนน:</b> คุณครูสามารถเลือกดูคะแนนสรุปตามรายห้องเรียนได้<br>
+                🌟 <b>ตรวจสอบงาน:</b> คลิกที่ชื่อนักเรียนเพื่อดูรูปภาพขยะที่นักเรียนส่งเข้ามาตรวจสอบ<br>
+                🌟 <b>การจัดการ:</b> ข้อมูลจะอัปเดตแบบ Real-time จากฐานข้อมูล Firebase ครับ
+            </div>
+            <button onclick="toggleModal('teacher', false)" class="teacher-btn" style="margin-top: 20px;">เข้าใจแล้วครับ 📘</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- Logic เดิมเป๊ะ ห้ามแตะ ---
+    // --- ระบบเดิม ห้ามแตะ ---
     const music = document.getElementById('bg-music');
     let isPlaying = false;
     let musicStarted = false;
@@ -232,7 +243,12 @@
         isPlaying = !isPlaying; musicStarted = true;
     }
 
-    function toggleModal(show) { document.getElementById('tutorial-modal').classList.toggle('hidden', !show); }
+    // ปรับปรุงฟังก์ชัน Modal ให้รองรับ 2 หน้าต่าง
+    function toggleModal(type, show) { 
+        const id = type === 'teacher' ? 'teacher-modal' : 'student-modal';
+        document.getElementById(id).classList.toggle('hidden', !show); 
+    }
+
     function showPage(p) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(p).classList.remove('hidden');

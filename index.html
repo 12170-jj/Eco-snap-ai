@@ -12,158 +12,160 @@
     
     <style>
         :root { 
-            --soft-pink: #FFDDE1;
-            --soft-green: #E2F0CB;
-            --soft-blue: #B5EAD7;
-            --deep-green: #557C55;
-            --white-glass: rgba(255, 255, 255, 0.85);
+            --mint-bg: #F0FAF5;
+            --pastel-green: #B2D8B2;
+            --leaf-green: #77B28C;
+            --dark-green: #4A6D55;
+            --soft-white: rgba(255, 255, 255, 0.9);
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body { 
             margin: 0; 
-            background: linear-gradient(135deg, var(--soft-pink) 0%, var(--soft-blue) 100%);
+            background: linear-gradient(135deg, #E8F5E9 0%, #F1F8E9 100%);
             min-height: 100vh; display: flex; justify-content: center; align-items: center;
-            overflow-x: hidden;
         }
 
-        /* ตกแต่งพื้นหลังด้วยวงกลมฟุ้งๆ */
-        .bg-deco { position: fixed; width: 300px; height: 300px; border-radius: 50%; background: white; filter: blur(80px); opacity: 0.5; z-index: -1; }
-
-        .container { width: 100%; max-width: 420px; padding: 20px; position: relative; z-index: 10; }
+        .container { width: 100%; max-width: 420px; padding: 20px; position: relative; }
 
         .card { 
-            background: var(--white-glass); padding: 45px 25px; border-radius: 50px; 
-            box-shadow: 0 25px 50px rgba(0,0,0,0.05); text-align: center; 
-            backdrop-filter: blur(15px); border: 2px solid white;
-            animation: softAppear 0.8s ease-out;
+            background: var(--soft-white); padding: 40px 25px; border-radius: 40px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.05); text-align: center; 
+            backdrop-filter: blur(10px); border: 2px solid white;
+            animation: softSlide 0.6s ease-out;
         }
 
-        @keyframes softAppear { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        @keyframes floating { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
+        @keyframes softSlide { from { transform: translateY(15px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
 
-        .main-icon { font-size: 85px; animation: floating 3s infinite ease-in-out; display: inline-block; margin-bottom: 10px; }
+        .main-icon { font-size: 80px; margin-bottom: 10px; display: inline-block; animation: leafFloat 4s infinite ease-in-out; }
+        @keyframes leafFloat { 0%, 100% { transform: rotate(-5deg) translateY(0); } 50% { transform: rotate(5deg) translateY(-10px); } }
 
         h1 { 
-            font-size: 38px; margin: 0; font-weight: 600;
-            background: linear-gradient(45deg, #FF9AA2, #85E3FF, #B2F2BB);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            font-size: 34px; margin: 0; font-weight: 600; color: var(--dark-green);
         }
 
-        p { color: #888; font-size: 16px; margin-bottom: 30px; }
+        p { color: #88A590; font-size: 16px; margin-bottom: 30px; }
 
         button { 
-            background: white; color: var(--deep-green); border: none; 
-            padding: 20px; border-radius: 30px; font-size: 19px; font-weight: 600; cursor: pointer; 
-            width: 100%; margin: 12px 0; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.03);
+            background: white; color: var(--dark-green); border: none; 
+            padding: 18px; border-radius: 25px; font-size: 18px; font-weight: 600; cursor: pointer; 
+            width: 100%; margin: 10px 0; transition: 0.3s;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.03);
             display: flex; align-items: center; justify-content: center; gap: 10px;
         }
-        button:hover { transform: translateY(-3px); box-shadow: 0 15px 25px rgba(0,0,0,0.06); }
-        button:active { transform: scale(0.95); }
+        button:active { transform: scale(0.97); }
         
-        button.primary-btn { background: linear-gradient(135deg, #B5EAD7, #C7CEEA); color: #5B618A; }
-        button.teacher-btn { background: linear-gradient(135deg, #FFDAC1, #FF9AA2); color: #8D4B4B; }
-        button.btn-how { background: rgba(255,255,255,0.5); color: #999; font-size: 15px; box-shadow: none; border: 1px dashed #ddd; }
-        button.back-btn { background: transparent; color: #bbb; width: auto; font-size: 13px; margin-bottom: 10px; border: 1px solid #eee; padding: 5px 15px; }
+        button.primary-btn { background: var(--pastel-green); color: white; }
+        button.teacher-btn { background: #DCE775; color: #558B2F; }
+        button.btn-how { background: #E0F2F1; color: #00796B; font-size: 15px; border: 1px solid #B2DFDB; }
+        button.back-btn { background: transparent; color: #99B2A1; width: auto; font-size: 13px; margin-bottom: 10px; border: 1px solid #CFD8DC; padding: 5px 15px; }
 
         .music-control { 
             position: fixed; top: 20px; right: 20px; z-index: 2000; 
-            background: white; border-radius: 20px; width: 45px; height: 45px; 
+            background: white; border-radius: 50%; width: 45px; height: 45px; 
             display: flex; align-items: center; justify-content: center; 
-            box-shadow: 0 10px 20px rgba(0,0,0,0.05); font-size: 20px; cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); font-size: 20px; cursor: pointer;
         }
 
         input, select { 
-            width: 100%; padding: 18px; margin: 10px 0; border-radius: 25px; 
-            border: 2px solid #FDFCF0; font-size: 16px; background: rgba(255,255,255,0.6); text-align: center;
+            width: 100%; padding: 16px; margin: 10px 0; border-radius: 20px; 
+            border: 2px solid #E8F5E9; font-size: 16px; background: rgba(255,255,255,0.7); text-align: center;
         }
 
         .score-badge { 
-            background: white; padding: 12px 35px; border-radius: 35px; 
-            font-weight: 600; font-size: 26px; color: #FFB7B2; 
-            box-shadow: 0 10px 30px rgba(0,0,0,0.04); margin-bottom: 15px; display: inline-block;
+            background: #FFF9C4; padding: 10px 30px; border-radius: 30px; 
+            font-weight: 600; font-size: 24px; color: #FBC02D; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03); margin-bottom: 15px; display: inline-block;
+        }
+
+        /* Modal กลับมาเป็นหน้าต่างกลางหน้าจอแล้วจ้า */
+        .modal { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(5px); 
+            display: flex; justify-content: center; align-items: center; z-index: 3000; 
+        }
+        .modal-content { 
+            background: white; width: 85%; max-width: 320px; padding: 30px; 
+            border-radius: 35px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.1); 
+            border: 3px solid var(--pastel-green);
         }
 
         #webcam-container { 
-            border-radius: 40px; height: 320px; background: white; 
+            border-radius: 35px; height: 320px; background: #F1F8E9; 
             display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0;
-            box-shadow: inset 0 0 20px rgba(0,0,0,0.02);
+            border: 3px dashed var(--pastel-green);
         }
         #preview-img { width: 100%; height: 100%; object-fit: cover; }
         .hidden { display: none !important; }
-        .history-item { display: flex; background: white; border-radius: 30px; margin-bottom: 15px; padding: 12px; align-items: center; box-shadow: 0 5px 15px rgba(0,0,0,0.02); }
-        .history-item img { width: 85px; height: 85px; object-fit: cover; border-radius: 25px; margin-right: 15px; }
+        .history-item { display: flex; background: white; border-radius: 25px; margin-bottom: 15px; padding: 10px; align-items: center; box-shadow: 0 5px 10px rgba(0,0,0,0.02); border: 1px solid #F1F8E9; }
+        .history-item img { width: 75px; height: 75px; object-fit: cover; border-radius: 18px; margin-right: 15px; }
     </style>
 </head>
 <body onclick="startMusicOnce()">
 
-<div class="bg-deco" style="top:-50px; left:-50px; background:#FFB7B2;"></div>
-<div class="bg-deco" style="bottom:-50px; right:-50px; background:#B2F2BB;"></div>
-
 <audio id="bg-music" loop><source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg"></audio>
-<div class="music-control" onclick="toggleMusic(event)" id="music-btn">🎵</div>
+<div class="music-control" onclick="toggleMusic(event)" id="music-btn">🔇</div>
 
 <div class="container">
     <div id="page-role" class="card">
-        <div class="main-icon">🌈</div>
+        <div class="main-icon">♻️</div>
         <h1>Eco Snap AI</h1>
-        <p>สร้างโลกให้น่ารักด้วยมือเรา ✨</p>
-        <button onclick="showPage('page-student-choice')" class="primary-btn">👧 สำหรับนักเรียน</button>
+        <p>แยกขยะถูกที่ โลกนี้สดใส 🌍</p>
+        <button onclick="showPage('page-student-choice')" class="primary-btn">🌳 สำหรับนักเรียน</button>
         <button onclick="showPage('page-login-teacher')" class="teacher-btn">👩‍🏫 สำหรับคุณครู</button>
-        <button onclick="toggleModal(true)" class="btn-how">📖 คู่มือฉบับจิ๋ว</button>
+        <button onclick="toggleModal(true)" class="btn-how">📖 คู่มือรักษ์โลก</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
-        <button class="back-btn" onclick="showPage('page-role')">🏠 หน้าแรก</button>
-        <div style="font-size: 50px;">☁️</div>
-        <h2>เลือกรายการจ้า</h2>
-        <button onclick="showPage('page-login-existing')" class="primary-btn">✅ เข้าสู่ระบบ (บัญชีเดิม)</button>
-        <button onclick="showPage('page-register-student')">✨ สมัครสมาชิกใหม่</button>
+        <button class="back-btn" onclick="showPage('page-role')">🏠 กลับหน้าแรก</button>
+        <div style="font-size: 50px;">🌍</div>
+        <h2 style="color: var(--dark-green);">เข้าใช้งานนักเรียน</h2>
+        <button onclick="showPage('page-login-existing')" class="primary-btn">✅ มีบัญชีเดิมอยู่แล้ว</button>
+        <button onclick="showPage('page-register-student')" style="background: #E8F5E9; color: var(--leaf-green);">✨ ลงทะเบียนครั้งแรก</button>
     </div>
 
     <div id="page-login-existing" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3>ยินดีต้อนรับกลับนะ!</h3>
-        <p>ระบุรหัสนักเรียน 5 หลักจ้า</p>
+        <h3>ยินดีต้อนรับกลับมา!</h3>
+        <p>ใส่รหัสนักเรียน 5 หลักนะจ๊ะ</p>
         <input type="number" id="login-std-id" placeholder="รหัส 5 หลัก">
         <button onclick="loginExistingStudent()" class="primary-btn">🔍 เข้าสู่ระบบ</button>
     </div>
 
     <div id="page-register-student" class="card hidden">
         <button class="back-btn" onclick="showPage('page-student-choice')">⬅️ กลับ</button>
-        <h3>มาเริ่มกันเลย!</h3>
+        <h3>เริ่มสะสมแต้มความดี</h3>
         <input type="text" id="reg-std-name" placeholder="ชื่อ - นามสกุล">
         <input type="number" id="reg-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <select id="reg-std-room">
             <option value="">เลือกชั้นเรียน</option>
             <script>
                 const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
-                rooms.forEach(r => document.write(`<option value="${r}">ชั้น ม.${r}</option>`));
+                rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));
             </script>
         </select>
-        <button onclick="registerStudent()" class="primary-btn">✅ ตกลงจ้า</button>
+        <button onclick="registerStudent()" class="primary-btn">✅ สมัครสมาชิก</button>
     </div>
 
     <div id="page-student-main" class="hidden">
         <div class="card">
             <button class="back-btn" onclick="location.reload()">🚪 ออกจากระบบ</button><br>
-            <div class="score-badge">🍬 <span id="display-score">0</span> แต้ม</div>
-            <h3 id="display-name" style="margin: 0; color: #777;">-</h3>
+            <div class="score-badge">♻️ <span id="display-score">0</span> แต้ม</div>
+            <h3 id="display-name" style="margin: 0; color: var(--leaf-green);">-</h3>
             <div id="webcam-container">
-                <div id="placeholder-text" style="color: #ddd;">📷 ถ่ายรูปขยะตรงนี้จ้า</div>
+                <div id="placeholder-text" style="color: var(--leaf-green); opacity: 0.5;">📸 ถ่ายรูปขยะตรงนี้จ้า</div>
                 <img id="preview-img" class="hidden">
             </div>
             <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
             <button onclick="document.getElementById('file-input').click()" class="primary-btn">📸 ถ่ายภาพขยะ</button>
             <div id="analysis-section" class="hidden">
-                <div id="result-area" class="hidden" style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 25px;">
-                    <div id="waste-type" style="font-size: 24px; color: #FFB7B2; font-weight: 600;">-</div>
-                    <div id="confidence-score" style="color: #ccc; font-size: 13px;">-</div>
+                <div id="result-area" class="hidden" style="margin-bottom: 15px; padding: 15px; background: #F1F8E9; border-radius: 20px;">
+                    <div id="waste-type" style="font-size: 22px; color: var(--dark-green); font-weight: 600;">-</div>
+                    <div id="confidence-score" style="color: #88A590; font-size: 13px;">-</div>
                 </div>
                 <button id="btn-analyze" onclick="analyzeImage()" class="teacher-btn">🔍 ให้ AI วิเคราะห์</button>
-                <button id="btn-save" class="hidden" onclick="saveTrash()" style="background: #B5EAD7; color: #557C55;">✅ บันทึกเก็บแต้ม</button>
+                <button id="btn-save" class="hidden" onclick="saveTrash()" style="background: var(--leaf-green); color: white;">✅ บันทึกเก็บแต้ม</button>
             </div>
         </div>
         <div id="student-history" style="margin-top: 25px;"></div>
@@ -171,23 +173,23 @@
 
     <div id="page-login-teacher" class="card hidden">
         <button class="back-btn" onclick="showPage('page-role')">🏠 กลับ</button>
-        <div style="font-size: 50px;">🍬</div>
+        <div style="font-size: 50px;">🗝️</div>
         <h3>คุณครูเข้าสู่ระบบ</h3>
-        <input type="password" id="teacher-pwd" placeholder="รหัสผ่านลับ">
+        <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่านลับ">
         <button onclick="loginTeacher()" class="teacher-btn">🔓 เข้าสู่ระบบ</button>
     </div>
 
     <div id="page-teacher-main" class="hidden" style="width:100%">
         <div class="card" style="width:100%; padding: 25px 15px;">
             <button class="back-btn" onclick="location.reload()">🚪 ออก</button>
-            <h2>ตารางคะแนน 🏆</h2>
+            <h2 style="color: var(--dark-green);">ตารางแต้มรักษ์โลก 🏆</h2>
             <select id="filter-room" onchange="renderLeaderboard()">
                 <option value="">ทุกห้องเรียน</option>
-                <script>rooms.forEach(r => document.write(`<option value="${r}">ชั้น ม.${r}</option>`));</script>
+                <script>rooms.forEach(r => document.write(`<option value="${r}">มัธยม ${r}</option>`));</script>
             </select>
             <div id="leaderboard-body" style="margin-top: 15px;"></div>
         </div>
-        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 3px solid #FFB7B2;">
+        <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 3px solid var(--pastel-green);">
             <h4 id="viewing-name">-</h4>
             <div id="teacher-history-list"></div>
             <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#eee; color:#888;">✖️ ปิด</button>
@@ -196,40 +198,37 @@
 
     <div id="tutorial-modal" class="modal hidden">
         <div class="modal-content">
-            <h2 style="color: #FFB7B2; margin-top: 0;">🌷 เล่นยังไงจ๊ะ?</h2>
-            <div style="text-align: left; font-size: 15px; color: #888; line-height: 1.8;">
-                1. สมัครสมาชิกครั้งแรก หรือเข้าสู่ระบบจ้า<br>
-                2. ถ่ายรูปขยะแล้วให้ AI ช่วยดู 📸<br>
-                3. กดบันทึกเพื่อรับแต้มหวานๆ 🍬<br>
-                4. สะสมแต้มไปอวดคุณครูได้เลย!
+            <div style="font-size: 40px; margin-bottom: 10px;">🌲</div>
+            <h2 style="color: var(--dark-green); margin-top: 0;">วิธีใช้งาน</h2>
+            <div style="text-align: left; font-size: 14px; color: #666; line-height: 1.8;">
+                1. สมัครสมาชิก หรือเข้าสู่ระบบด้วยรหัส 5 หลัก 🗑️<br>
+                2. ถ่ายรูปขยะเพื่อให้ AI ช่วยคัดแยก 📸<br>
+                3. บันทึกข้อมูลเพื่อรับแต้มรีไซเคิล ♻️<br>
+                4. ช่วยกันแยกขยะเพื่อโลกสีเขียวนะ! 🌍
             </div>
-            <button onclick="toggleModal(false)" class="primary-btn">รับทราบจ้า! 💖</button>
+            <button onclick="toggleModal(false)" class="primary-btn" style="margin-top: 20px;">เริ่มกันเลย! 💚</button>
         </div>
     </div>
 </div>
 
 <script>
-    // --- ระบบเพลงแบบ Auto (ไม่แก้ Logic) ---
+    // --- ระบบเดิมห้ามแตะ ---
     const music = document.getElementById('bg-music');
     let isPlaying = false;
     let musicStarted = false;
 
-    // ฟังก์ชันเริ่มเพลงทันทีที่คลิกหน้าจอครั้งแรก (เนื่องจากเบราว์เซอร์มักบล็อก Auto-play)
     function startMusicOnce() {
         if (!musicStarted) {
-            music.play();
-            isPlaying = true;
-            musicStarted = true;
+            music.play(); isPlaying = true; musicStarted = true;
             document.getElementById('music-btn').innerText = "🎵";
         }
     }
 
     function toggleMusic(e) {
-        e.stopPropagation(); // ไม่ให้ไปทริกเกอร์ startMusicOnce
+        e.stopPropagation();
         if (isPlaying) { music.pause(); document.getElementById('music-btn').innerText = "🔇"; }
         else { music.play(); document.getElementById('music-btn').innerText = "🎵"; }
-        isPlaying = !isPlaying;
-        musicStarted = true;
+        isPlaying = !isPlaying; musicStarted = true;
     }
 
     function toggleModal(show) { document.getElementById('tutorial-modal').classList.toggle('hidden', !show); }
@@ -239,7 +238,6 @@
         window.scrollTo(0,0);
     }
 
-    // --- Logic ระบบเดิม 100% ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -261,9 +259,9 @@
         const name = document.getElementById('reg-std-name').value.trim();
         const id = document.getElementById('reg-std-id').value.trim();
         const room = document.getElementById('reg-std-room').value;
-        if(name==="" || id.length!==5 || room==="") { alert("กรอกข้อมูลให้ครบก่อนน้า"); return; }
+        if(name==="" || id.length!==5 || room==="") { alert("กรอกข้อมูลให้ครบนะจ๊ะ"); return; }
         db.ref('users/' + id).once('value', (snap) => {
-            if (snap.exists()) { alert("รหัสนี้สมัครแล้วนะจ๊ะ"); }
+            if (snap.exists()) { alert("รหัสนี้สมัครแล้วน้า"); }
             else {
                 db.ref('users/' + id).set({ name, room, score: 0 }, () => {
                     currentId = id; updateStudentUI(); showPage('page-student-main');
@@ -274,11 +272,10 @@
 
     function loginExistingStudent() {
         const id = document.getElementById('login-std-id').value.trim();
-        if(id.length !== 5) { alert("ใส่รหัส 5 หลักนะจ๊ะ"); return; }
+        if(id.length !== 5) { alert("รหัสต้อง 5 หลักจ้า"); return; }
         db.ref('users/' + id).once('value', (snap) => {
-            if (snap.exists()) {
-                currentId = id; updateStudentUI(); showPage('page-student-main');
-            } else { alert("ไม่พบรหัสนี้จ้า"); }
+            if (snap.exists()) { currentId = id; updateStudentUI(); showPage('page-student-main'); }
+            else { alert("ไม่พบข้อมูลรหัสนี้จ้า"); }
         });
     }
 
@@ -312,12 +309,12 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ รอ AI แป๊บน้า...";
+        document.getElementById('btn-analyze').innerText = "⏳ วิเคราะห์อยู่จ้า...";
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((prev, curr) => (prev.probability > curr.probability) ? prev : curr);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
-        document.getElementById('confidence-score').innerText = "AI มั่นใจ: " + (best.probability * 100).toFixed(0) + "%";
+        document.getElementById('confidence-score').innerText = "ความแม่นยำ: " + (best.probability * 100).toFixed(0) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
         document.getElementById('btn-analyze').innerText = "🔍 ให้ AI วิเคราะห์";
         document.getElementById('btn-save').classList.remove('hidden');
@@ -356,9 +353,8 @@
                 const div = document.createElement('div');
                 div.className = "history-item";
                 div.style.justifyContent = "space-between";
-                div.style.padding = "15px 20px";
-                div.innerHTML = `<span onclick="viewDetail('${u.id}', '${u.name}')" style="color:#888; cursor:pointer; font-weight:600;">${u.name}</span>
-                                 <span style="color:#FFB7B2; font-weight:bold;">${u.score} แต้ม</span>`;
+                div.innerHTML = `<span onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--dark-green); cursor:pointer; font-weight:600;">${u.name}</span>
+                                 <span style="color:var(--leaf-green); font-weight:bold;">${u.score} แต้ม</span>`;
                 container.appendChild(div);
             });
         });

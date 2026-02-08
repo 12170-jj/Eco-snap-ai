@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Eco Snap AI ♻️✨</title>
+    <title>Eco Snap AI ♻️🌍</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
@@ -12,96 +12,117 @@
     
     <style>
         :root { 
-            --deep-mint: #065F46; /* เขียวเข้มจัดสำหรับตัวหนังสือ */
-            --bright-mint: #10B981; /* เขียวสดสำหรับปุ่ม */
-            --bg-green: #D1FAE5; /* พื้นหลังเขียวที่เข้มขึ้นกว่าเดิม */
-            --coral-red: #E11D48; /* สีแดงสำหรับปุ่มออก */
-            --white: #FFFFFF;
+            --deep-green: #15803D;
+            --soft-mint: #DCFCE7;
+            --marshmallow: #FFFFFF;
+            --cloud-shadow: rgba(21, 128, 61, 0.15);
+            --bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
         body { 
             margin: 0; 
-            /* ปรับพื้นหลังให้เข้มขึ้นและดูมีพลัง */
-            background: linear-gradient(135deg, #A7F3D0 0%, #FDE68A 100%); 
+            /* พื้นหลังไล่สีแบบลูกกวาดสดใส */
+            background: linear-gradient(135deg, #CFFAFE 0%, #FBCFE8 50%, #D1FAE5 100%); 
             min-height: 100vh;
             display: flex; justify-content: center; align-items: center; 
             position: relative; overflow-x: hidden;
         }
 
-        .container { width: 100%; max-width: 420px; padding: 20px; z-index: 10; }
+        /* ตกแต่งพื้นหลังให้ดูนุ่มนิ่ม */
+        body::before, body::after {
+            content: ''; position: absolute; width: 300px; height: 300px; border-radius: 50%;
+            background: white; filter: blur(80px); opacity: 0.5; z-index: 1;
+        }
+        body::before { top: -100px; left: -100px; }
+        body::after { bottom: -100px; right: -100px; }
 
+        .container { width: 100%; max-width: 420px; padding: 25px; z-index: 10; }
+
+        /* การ์ดแบบก้อนเมฆนุ่มฟู */
         .card { 
-            background: rgba(255, 255, 255, 0.98); 
-            padding: 40px 25px; border-radius: 50px; 
-            box-shadow: 0 25px 50px rgba(6, 95, 70, 0.2);
-            text-align: center; border: 6px solid var(--white);
+            background: rgba(255, 255, 255, 0.9); 
+            backdrop-filter: blur(20px);
+            padding: 45px 30px; 
+            border-radius: 60px; /* มนพิเศษ */
+            box-shadow: 0 30px 60px var(--cloud-shadow);
+            text-align: center; 
+            border: 8px solid var(--marshmallow);
+            animation: float 6s infinite ease-in-out;
         }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
 
-        /* หัวข้อต้องชัด! */
-        h1 { font-size: 46px; color: var(--deep-mint); margin: 0; font-weight: 600; text-shadow: 2px 2px 0px rgba(255,255,255,0.8); }
-        h2, h3 { color: var(--deep-mint); font-weight: 600; }
-        .subtitle { color: #064E3B; font-size: 18px; margin: 10px 0 30px 0; display: block; font-weight: 400; }
+        h1 { font-size: 44px; color: var(--deep-green); margin: 0; font-weight: 600; letter-spacing: -1.5px; }
+        .subtitle { color: #166534; font-size: 17px; margin: 12px 0 30px 0; display: block; line-height: 1.4; }
 
-        /* ปุ่มต้องเด่น อ่านง่าย */
+        /* ปุ่มแบบดึ๋งๆ */
         button { 
-            background: var(--white); 
-            color: var(--deep-mint); /* เปลี่ยนเป็นเขียวเข้ม */
-            border: 3px solid var(--deep-mint); 
-            padding: 18px; border-radius: 30px; font-size: 19px; font-weight: 600; 
-            cursor: pointer; width: 100%; margin: 10px 0; transition: 0.2s;
-            display: flex; align-items: center; justify-content: center; gap: 10px;
+            background: var(--marshmallow); 
+            color: var(--deep-green); 
+            border: 4px solid var(--soft-mint); 
+            padding: 18px; border-radius: 40px; font-size: 19px; font-weight: 600; 
+            cursor: pointer; width: 100%; margin: 12px 0; 
+            transition: all 0.4s var(--bouncy);
+            display: flex; align-items: center; justify-content: center; gap: 12px;
+            box-shadow: 0 10px 0px var(--soft-mint);
         }
-        button:hover { background: var(--bg-green); transform: translateY(-3px); }
+        button:hover { transform: scale(1.05); background: var(--soft-mint); }
+        button:active { transform: translateY(8px); box-shadow: 0 2px 0px var(--soft-mint); }
 
         .primary-btn { 
-            background: var(--bright-mint); 
-            color: var(--white); 
-            border: 3px solid var(--deep-mint);
-            box-shadow: 0 6px 0px var(--deep-mint); /* ใส่เงาขอบปุ่มให้ดูการ์ตูนๆ */
+            background: #22C55E; 
+            color: white; 
+            border: 4px solid #166534;
+            box-shadow: 0 10px 0px #166534;
         }
-        .primary-btn:active { transform: translateY(3px); box-shadow: none; }
+        .primary-btn:hover { background: #16A34A; }
+        .primary-btn:active { box-shadow: 0 2px 0px #166534; }
 
-        .back-btn { width: auto; padding: 8px 25px; font-size: 15px; background: #FDA4AF; color: #9F1239; border: 2px solid #9F1239; margin-bottom: 20px; }
+        .back-btn { width: auto; padding: 10px 25px; font-size: 14px; background: #FFF1F2; color: #E11D48; border: 3px solid #FDA4AF; box-shadow: 0 6px 0px #FDA4AF; margin-bottom: 25px; }
 
-        /* หน้าคะแนนที่ครูชอบ */
         .score-badge { 
-            background: #FDE68A; padding: 12px 30px; border-radius: 40px; 
-            font-weight: 600; font-size: 32px; color: #854D0E; border: 4px solid var(--deep-mint);
+            background: #FEF3C7; padding: 12px 35px; border-radius: 50px; 
+            font-weight: 600; font-size: 34px; color: #92400E; border: 5px solid white;
+            box-shadow: 0 15px 30px rgba(251, 191, 36, 0.3);
         }
 
         #webcam-container { 
-            border-radius: 40px; height: 300px; background: #F8FAFC; 
-            display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0;
-            border: 5px dashed var(--bright-mint);
+            border-radius: 50px; height: 320px; background: white; 
+            display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 25px 0;
+            border: 6px dashed #BBF7D0; position: relative;
         }
 
-        /* ช่องกรอกข้อมูลต้องขอบชัด */
+        /* ช่องกรอกนุ่มนิ่ม */
         input, select { 
-            width: 100%; padding: 18px; margin: 10px 0; border-radius: 25px; 
-            border: 3px solid var(--deep-mint); text-align: center; 
-            font-size: 18px; font-weight: 600; color: var(--deep-mint);
-            background: #FFFFFF;
+            width: 100%; padding: 18px; margin: 12px 0; border-radius: 35px; 
+            border: 4px solid #F0FDF4; text-align: center; 
+            font-size: 18px; font-weight: 600; color: var(--deep-green);
+            background: #F8FAFC; transition: 0.3s;
         }
-        input::placeholder { color: #94A3B8; }
+        input:focus { border-color: #22C55E; background: white; outline: none; }
 
-        /* ระบบประวัติที่ครูชอบ */
-        .history-item { background: #ECFDF5; border-radius: 30px; padding: 18px; margin-bottom: 15px; border: 3px solid var(--deep-mint); display: flex; align-items: center; }
-        .history-item img { width: 75px; height: 75px; object-fit: cover; border-radius: 18px; margin-right: 15px; border: 2px solid var(--deep-mint); }
+        /* ประวัติแบบก้อนเมฆ */
+        .history-item { 
+            background: white; border-radius: 40px; padding: 20px; margin-bottom: 18px; 
+            border: 4px solid #F0FDF4; display: flex; align-items: center;
+            transition: 0.3s;
+        }
+        .history-item:hover { transform: scale(1.02); border-color: #BBF7D0; }
+        .history-item img { width: 85px; height: 85px; object-fit: cover; border-radius: 30px; margin-right: 18px; border: 3px solid #F0FDF4; }
 
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(21, 128, 61, 0.2); backdrop-filter: blur(15px); display: flex; justify-content: center; align-items: center; z-index: 2000; padding: 20px; }
         .modal-content { 
-            background: var(--white); border-radius: 50px; border: 6px solid var(--deep-mint);
-            width: 100%; max-width: 400px; padding: 35px; text-align: center;
+            background: white; border-radius: 60px; border: 8px solid #DCFCE7;
+            width: 100%; max-width: 410px; padding: 40px; text-align: center;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.1);
         }
 
-        .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 3000; background: var(--white); border-radius: 50%; width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; border: 3px solid var(--deep-mint); cursor: pointer; }
+        .music-btn-float { position: fixed; top: 25px; right: 25px; z-index: 3000; background: white; border-radius: 50%; width: 65px; height: 65px; display: flex; align-items: center; justify-content: center; border: 4px solid #DCFCE7; cursor: pointer; font-size: 24px; box-shadow: 0 10px 20px rgba(0,0,0,0.05); }
         .hidden { display: none !important; }
 
-        /* ดาวน์โหลด/โหลดข้อมูล */
-        .loader-box { color: var(--deep-mint); font-weight: 600; }
-        .spinner { width: 40px; height: 40px; border: 5px solid #E2E8F0; border-top: 5px solid var(--bright-mint); border-radius: 50%; animation: spin 1s infinite linear; margin: 10px auto; }
+        /* Loading Spinner แบบนุ่มนวล */
+        .spinner { width: 45px; height: 45px; border: 6px solid #F0FDF4; border-top: 6px solid #22C55E; border-radius: 50%; animation: spin 1s infinite var(--bouncy); margin: 15px auto; }
         @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
@@ -112,27 +133,28 @@
 
 <div class="container">
     <div id="page-role" class="card">
-        <div style="font-size: 100px; margin-bottom: 10px;">🍃</div>
+        <div style="font-size: 110px; margin-bottom: 10px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">☁️</div>
         <h1>Eco Snap AI</h1>
-        <span class="subtitle">คัดแยกขยะลุ้นรับแต้ม!<br>ชัดเจน ใช้ง่าย เพื่อโลกของเรา ✨</span>
+        <span class="subtitle">มาแยกขยะแบบนุ่มฟูกันเถอะ!<br>สะสมแต้มรักษ์โลกแบบจอยๆ ✨</span>
         <button onclick="changePage('page-student-choice')" class="primary-btn">🐣 เริ่มใช้งานนักเรียน</button>
         <button onclick="changePage('page-login-teacher')">👩‍🏫 สำหรับคุณครู</button>
-        <button onclick="showModal('guide-general')" style="background:#FEF3C7; color:#92400E; border-color:#92400E;">📖 วิธีสะสมแต้ม</button>
+        <button onclick="showModal('guide-general')" style="background:#FFFBEB; color:#92400E; border-color:#FEF3C7; box-shadow: 0 8px 0 #FEF3C7;">📖 วิธีสะสมแต้ม</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
         <button class="back-btn" onclick="changePage('page-role')">⬅️ กลับหน้าหลัก</button>
-        <h2 style="font-size: 30px;">ยินดีต้อนรับจ้า!</h2>
+        <div style="font-size: 60px; margin-bottom: 10px;">🌟</div>
+        <h2 style="color:var(--deep-green);">พร้อมหรือยังจ๊ะ?</h2>
         <button onclick="changePage('page-login-existing')" class="primary-btn">🔑 เข้าสู่ระบบ</button>
         <button onclick="changePage('page-register-student')">📝 สมัครบัญชีใหม่</button>
     </div>
 
     <div id="page-login-existing" class="card hidden">
         <button class="back-btn" onclick="changePage('page-student-choice')">⬅️ ย้อนกลับ</button>
-        <h3>ระบุรหัสนักเรียน & รหัสผ่าน</h3>
+        <h3>ล็อกอินเข้าใช้งาน 🌈</h3>
         <input type="number" id="login-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <input type="password" id="login-std-pwd" placeholder="รหัสผ่าน">
-        <button onclick="loginExistingStudent()" class="primary-btn">เข้าสู่ระบบเลย ✨</button>
+        <button onclick="loginExistingStudent()" class="primary-btn">ยืนยัน ✨</button>
     </div>
 
     <div id="page-register-student" class="card hidden">
@@ -143,18 +165,18 @@
         <select id="reg-std-room"></select>
         <input type="password" id="reg-std-pwd1" placeholder="ตั้งรหัสผ่าน">
         <input type="password" id="reg-std-pwd2" placeholder="ยืนยันรหัสผ่าน">
-        <button onclick="registerStudent()" class="primary-btn">เริ่มรักษ์โลก!</button>
+        <button onclick="registerStudent()" class="primary-btn">สมัครเลย!</button>
     </div>
 
     <div id="page-student-main" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:8px 15px; margin:0; font-size:14px; background:var(--coral-red); color:white; border-color:#9F1239;">🚪 ออก</button>
+             <button onclick="location.reload()" style="width:auto; padding:10px 20px; margin:0; font-size:14px; background:#FFE4E6; color:#E11D48; border-color:#FDA4AF; box-shadow: 0 5px 0 #FDA4AF;">🚪 ออก</button>
              <span class="score-badge">✨ <span id="display-score">0</span></span>
         </div>
-        <h3 id="display-name" style="margin:10px 0; font-size:24px;">-</h3>
+        <h3 id="display-name" style="margin:10px 0; font-size:26px; color:var(--deep-green);">-</h3>
         
         <div id="webcam-container">
-            <div id="placeholder-text" style="color: var(--deep-mint); font-weight:600;">📸 กดปุ่มด้านล่างเพื่อถ่ายรูป</div>
+            <div id="placeholder-text" style="color: #22C55E; font-weight:600;">📸 กดปุ่มสีเขียวถ่ายรูปขยะจ้า</div>
             <img id="preview-img" class="hidden" style="width:100%; height:100%; object-fit:cover;">
         </div>
 
@@ -162,44 +184,45 @@
         <button onclick="document.getElementById('file-input').click()" class="primary-btn">📷 ถ่ายรูปขยะ</button>
         
         <div id="analysis-section" class="hidden">
-            <div id="result-area" class="hidden" style="background:#FEFCE8; padding:15px; border-radius:30px; margin-bottom:15px; border:3px solid var(--deep-mint);">
-                <div id="waste-type" style="font-size:26px; font-weight:600; color:var(--deep-mint);">-</div>
-                <div id="confidence-score" style="font-size:14px; color:#475569;">-</div>
+            <div id="result-area" class="hidden" style="background:#F0FDF4; padding:20px; border-radius:40px; margin-bottom:15px; border:4px solid #22C55E;">
+                <div id="waste-type" style="font-size:28px; font-weight:600; color:var(--deep-green);">-</div>
+                <div id="confidence-score" style="font-size:14px; color:#166534;">-</div>
             </div>
-            <button id="btn-analyze" onclick="analyzeImage()">🔍 AI ช่วยตรวจสอบ</button>
-            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกรับคะแนน!</button>
+            <button id="btn-analyze" onclick="analyzeImage()">🔍 ให้ AI ช่วยดูหน่อย</button>
+            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกรับแต้มรักษ์โลก!</button>
         </div>
-        <button onclick="viewMyHistory()" style="margin-top:20px; border: 3px dashed var(--deep-mint); background: none; box-shadow:none;">📜 ดูประวัติย้อนหลัง</button>
+        <button onclick="viewMyHistory()" style="margin-top:25px; border: 4px dashed #22C55E; background: none; box-shadow:none;">📜 ประวัติของฉัน</button>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
-        <button class="back-btn" onclick="changePage('page-role')">⬅️ ย้อนกลับ</button>
-        <h3>รหัสผ่านผู้ดูแล</h3>
+        <button class="back-btn" onclick="changePage('page-role')">⬅️ กลับหน้าหลัก</button>
+        <div style="font-size: 60px;">🔐</div>
+        <h3>รหัสผ่านคุณครู</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสผ่าน">
-        <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
+        <button onclick="loginTeacher()" class="primary-btn">เข้าห้องควบคุม</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:8px 15px; margin:0; font-size:14px;">🚪 ออก</button>
-             <h3 style="margin:0;">อันดับคะแนน 🏆</h3>
+             <button onclick="location.reload()" style="width:auto; padding:10px 20px; margin:0;">🚪 ออก</button>
+             <h3 style="margin:0;">อันดับรักษ์โลก 🏆</h3>
         </div>
         <select id="filter-room" onchange="renderLeaderboard()"></select>
         <div id="leaderboard-body" style="margin: 20px 0; max-height: 400px; overflow-y:auto; padding-right:5px;"></div>
-        <button onclick="resetAllData()" style="color:var(--coral-red); font-size:12px; border:none; background:none;">🧹 ล้างข้อมูลใหม่ทั้งหมด</button>
+        <button onclick="resetAllData()" style="color:#E11D48; font-size:12px; border:none; background:none;">🧹 ล้างข้อมูลใหม่ทั้งหมด</button>
     </div>
 </div>
 
 <div id="main-modal" class="modal hidden">
     <div class="modal-content">
-        <h3 id="modal-title" style="margin-top:0;">-</h3>
+        <h3 id="modal-title" style="margin-top:0; color:var(--deep-green); font-size:28px;">-</h3>
         <div id="modal-body"></div>
-        <button onclick="closeModal()" class="primary-btn" style="margin-top:25px;">ตกลง</button>
+        <button onclick="closeModal()" class="primary-btn" style="margin-top:30px;">ตกลงจ้า ✨</button>
     </div>
 </div>
 
 <script>
-    // --- ห้ามแก้หลักการทำงานเด็ดขาด ---
+    // --- โครงสร้างการทำงาน (ห้ามแตะต้อง) ---
     const firebaseConfig = {
         apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA",
         authDomain: "eco-snap-ai.firebaseapp.com",
@@ -232,8 +255,8 @@
         const room = document.getElementById('reg-std-room').value;
         const p1 = document.getElementById('reg-std-pwd1').value;
         const p2 = document.getElementById('reg-std-pwd2').value;
-        if(!name || id.length!==5 || !room || !p1) return alert("กรอกข้อมูลให้ครบนะจ๊ะ");
-        if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกัน");
+        if(!name || id.length!==5 || !room || !p1) return alert("กรอกข้อมูลให้ครบนะจ๊ะก้อนเมฆน้อย");
+        if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกันจ้า");
         db.ref('users/' + id).set({ name, room, score: 0, pwd: p1 }, () => { currentId = id; updateStudentUI(); changePage('page-student-main'); });
     }
 
@@ -242,7 +265,7 @@
         const pwd = document.getElementById('login-std-pwd').value;
         db.ref('users/' + id).once('value', s => {
             if(s.exists() && s.val().pwd === pwd){ currentId = id; updateStudentUI(); changePage('page-student-main'); }
-            else alert("ข้อมูลไม่ถูกต้องจ้า");
+            else alert("ข้อมูลไม่ถูกต้องจ้า ลองใหม่อีกทีนะ");
         });
     }
 
@@ -281,17 +304,17 @@
         let best = p.reduce((a, b) => (a.probability > b.probability) ? a : b);
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
-        document.getElementById('confidence-score').innerText = "ความมั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
+        document.getElementById('confidence-score').innerText = "มั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
         document.getElementById('btn-analyze').classList.add('hidden');
         document.getElementById('btn-save').classList.remove('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 AI ช่วยตรวจสอบ";
+        document.getElementById('btn-analyze').innerText = "🔍 ให้ AI ช่วยดูหน่อย";
     }
 
     function saveTrash() {
         const data = { img: document.getElementById('preview-img').src, type: document.getElementById('waste-type').innerText, date: new Date().toLocaleString('th-TH') };
         db.ref('history/' + currentId).push(data).then(() => {
             db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + 1);
-            alert("บันทึกสำเร็จจ้า! 💚");
+            alert("บันทึกสำเร็จจ้า! เก่งมาก 💚");
             document.getElementById('preview-img').classList.add('hidden');
             document.getElementById('placeholder-text').classList.remove('hidden');
             document.getElementById('analysis-section').classList.add('hidden');
@@ -302,15 +325,15 @@
         document.getElementById('main-modal').classList.remove('hidden');
         const title = document.getElementById('modal-title');
         const body = document.getElementById('modal-body');
-        body.innerHTML = '<div class="loader-box"><div class="spinner"></div><p>กำลังดาวน์โหลดข้อมูล...</p></div>';
+        body.innerHTML = '<div class="spinner"></div><p style="color:#166534; font-weight:600;">กำลังดาวน์โหลดข้อมูลปุยเมฆ...</p>';
         setTimeout(() => {
             body.innerHTML = "";
             if(type === 'guide-general') {
-                title.innerText = "วิธีสะสมแต้ม 🐣";
-                body.innerHTML = "1. สมัครสมาชิก<br>2. ถ่ายรูปขยะ<br>3. กดให้ AI วิเคราะห์<br>4. กดบันทึกรับคะแนน!";
+                title.innerText = "สะสมแต้มยังไงนะ? 🐣";
+                body.innerHTML = "<div style='text-align:left; line-height:2;'>1. สมัครสมาชิก / ล็อกอิน<br>2. ถ่ายรูปขยะที่แยกแล้ว<br>3. กดปุ่มวิเคราะห์<br>4. กดปุ่มบันทึกรับแต้มรักษ์โลก!</div>";
             } else if(type === 'history') {
                 title.innerText = extra.name;
-                if(extra.list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
+                if(extra.list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้าก้อนเมฆ";
                 else extra.list.forEach(i => { body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`; });
             }
         }, 800);
@@ -326,7 +349,7 @@
         });
     }
 
-    function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิดจ้า"); }
+    function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิดจ้าคุณครู"); }
 
     function renderLeaderboard() {
         const filter = document.getElementById('filter-room').value;
@@ -352,7 +375,7 @@
         });
     }
 
-    function resetAllData() { if(confirm("ล้างข้อมูลทั้งหมด?")) { db.ref('history').remove(); db.ref('users').remove(); location.reload(); } }
+    function resetAllData() { if(confirm("ล้างข้อมูลทั้งหมดจริงไหมจ๊ะ?")) { db.ref('history').remove(); db.ref('users').remove(); location.reload(); } }
 
     const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
     ['reg-std-room', 'filter-room'].forEach(id => {

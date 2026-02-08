@@ -190,7 +190,7 @@
         <div id="teacher-history-view" class="card hidden" style="margin-top: 20px; border: 3px solid var(--leaf-bright);">
             <h4 id="viewing-name" style="color:var(--deep-forest)">-</h4>
             <div id="teacher-history-list"></div>
-            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#eee; color:#666; border:none;">✖️ ปิด</button>
+            <button onclick="document.getElementById('teacher-history-view').classList.add('hidden')" style="background:#eee; color:#666; border:none; margin-top:15px;">✖️ ปิดหน้าต่างนี้</button>
         </div>
     </div>
 
@@ -213,9 +213,9 @@
             <div style="font-size: 40px; margin-bottom: 10px;">👨‍🏫</div>
             <h2 style="color: var(--deep-forest); margin-top: 0;">คู่มือคุณครู</h2>
             <div style="text-align: left; font-size: 15px; color: #444; line-height: 1.8;">
-                🌟 <b>การดูคะแนน:</b> คุณครูสามารถเลือกดูคะแนนสรุปตามรายห้องเรียนได้<br>
-                🌟 <b>ตรวจสอบงาน:</b> คลิกที่ชื่อนักเรียนเพื่อดูรูปภาพขยะที่นักเรียนส่งเข้ามาตรวจสอบ<br>
-                🌟 <b>การจัดการ:</b> ข้อมูลจะอัปเดตแบบ Real-time จากฐานข้อมูล Firebase ครับ
+                🌟 <b>การดูคะแนน:</b> เลือกดูคะแนนสรุปตามห้องเรียนได้ที่เมนูด้านบน<br>
+                🌟 <b>ตรวจสอบงาน:</b> คลิกที่ "ชื่อนักเรียน" ในตารางเพื่อดูรูปภาพขยะทั้งหมดที่เด็กส่งมา<br>
+                🌟 <b>ข้อมูลสดใหม่:</b> ระบบจะดึงข้อมูลจริงจากฐานข้อมูลตลอดเวลาครับ
             </div>
             <button onclick="toggleModal('teacher', false)" class="teacher-btn" style="margin-top: 20px;">เข้าใจแล้วครับ 📘</button>
         </div>
@@ -259,7 +259,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // *** อัปเดตโมเดลเป็นตัวล่าสุดตามสั่งจ้า ***
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/UQwja1MPO/";
     let model, currentId = null;
 
@@ -356,7 +355,8 @@
                 const div = document.createElement('div');
                 div.className = "history-item";
                 div.style.justifyContent = "space-between";
-                div.innerHTML = `<span onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--deep-forest); cursor:pointer; font-weight:600;">${u.name}</span>
+                // แก้ไขจุดนี้: ใส่เครื่องหมาย ' ครอบ ID เพื่อให้ส่งค่าเป็น String ได้ถูกต้อง
+                div.innerHTML = `<span onclick="viewDetail('${u.id}', '${u.name}')" style="color:var(--deep-forest); cursor:pointer; font-weight:600; text-decoration: underline;">${u.name}</span>
                                  <span style="color:var(--leaf-bright); font-weight:bold;">${u.score} แต้ม</span>`;
                 container.appendChild(div);
             });
@@ -365,18 +365,36 @@
 
     function viewDetail(id, name) {
         document.getElementById('viewing-name').innerText = "ผลงานของ " + name;
+        const listContainer = document.getElementById('teacher-history-list');
+        listContainer.innerHTML = "⌛ กำลังโหลดประวัติ...";
+        
         db.ref('history/' + id).once('value', (snap) => {
-            const h = []; snap.forEach(item => { h.unshift(item.val()); });
+            const h = [];
+            snap.forEach(item => { h.unshift(item.val()); });
+            
             document.getElementById('teacher-history-view').classList.remove('hidden');
             renderHistory('teacher-history-list', h);
-            window.scrollTo(0, document.body.scrollHeight);
+            // เลื่อนจอไปที่ส่วนแสดงผลประวัติ
+            document.getElementById('teacher-history-view').scrollIntoView({behavior: "smooth"});
         });
     }
 
     function renderHistory(containerId, data) {
         const container = document.getElementById(containerId);
-        container.innerHTML = data.length === 0 ? '<p>ไม่มีข้อมูลจ้า</p>' : '';
-        data.forEach(i => { container.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong><br><small>${i.date}</small></div></div>`; });
+        if (data.length === 0) {
+            container.innerHTML = '<p style="padding:20px; color:#999;">ยังไม่มีประวัติการส่งขยะจ้า</p>';
+            return;
+        }
+        container.innerHTML = "";
+        data.forEach(i => {
+            container.innerHTML += `<div class="history-item">
+                <img src="${i.img}">
+                <div style="text-align:left;">
+                    <strong>${i.type}</strong><br>
+                    <small style="color:#888;">${i.date}</small>
+                </div>
+            </div>`;
+        });
     }
 </script>
 </body>

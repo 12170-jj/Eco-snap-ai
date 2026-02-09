@@ -95,7 +95,7 @@
         .score-badge { background: #FEF3C7; padding: 10px 25px; border-radius: 20px; font-weight: 600; font-size: 28px; color: #92400E; border: 3px solid #FDE68A; }
         #webcam-container { border-radius: 35px; height: 260px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; border: 3px dashed #10B981; }
         
-        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; }
+        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; transition: 0.3s; }
         .history-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 15px; margin-right: 15px; }
         
         .winner-highlight { background: var(--gold-light) !important; border: 3px solid #FDE68A !important; transform: scale(1.02); }
@@ -105,11 +105,6 @@
     </style>
 </head>
 <body onclick="initAudioOnce()">
-
-<div class="deco" style="top:10%; left:5%; font-size:40px;">🌱</div>
-<div class="deco" style="top:70%; left:10%; font-size:50px;">🌍</div>
-<div class="deco" style="top:20%; right:5%; font-size:35px;">🌸</div>
-<div class="deco" style="top:80%; right:10%; font-size:45px;">🍃</div>
 
 <audio id="bg-music" loop preload="auto"><source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg"></audio>
 <div class="music-btn-float" onclick="toggleMusic(event)" id="music-btn">🔇</div>
@@ -213,7 +208,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // โมเดลตัวล่าสุดที่คุณครูจดจำภาพไว้
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/"; 
     let model, currentId = null, hasStartedAudio = false;
 
@@ -224,7 +218,7 @@
     }
 
     let music = document.getElementById('bg-music');
-    function initAudioOnce() { if (!hasStartedAudio) { music.play(); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; } }
+    function initAudioOnce() { if (!hasStartedAudio) { try{music.play(); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵";}catch(e){} } }
     function toggleMusic(e) { e.stopPropagation(); if (music.paused) { music.play(); document.getElementById('music-btn').innerText = "🎵"; } else { music.pause(); document.getElementById('music-btn').innerText = "🔇"; } }
 
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
@@ -299,6 +293,7 @@
         });
     }
 
+    // --- จุดที่แก้ไข: ปรับ Logic Modal ให้แสดงประวัติครบถ้วนและแต้มถูกต้อง ---
     function showModal(type, extra = null) {
         document.getElementById('main-modal').classList.remove('hidden');
         const title = document.getElementById('modal-title'), body = document.getElementById('modal-body');
@@ -313,14 +308,30 @@
                 body.innerHTML = "<div style='text-align:left;'><b>การจัดการระบบ:</b><br>• ตรวจสอบคะแนนสะสมแยกตามรายบุคคล<br>• ดูประวัติขยะที่เด็กๆ ถ่ายรูปส่งมา<br>• ระบบจะไฮไลท์สีเหลืองทองให้เด็กที่ได้อันดับ 1 ในแต่ละห้องอัตโนมัติ</div>";
             } else if(type === 'history') {
                 title.innerText = extra.name;
-                if(extra.list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
-                else extra.list.forEach(i => { body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${i.point})</span><br><small>${i.date}</small></div></div>`; });
+                if(!extra.list || extra.list.length === 0) {
+                    body.innerHTML = "ยังไม่มีประวัติจ้า";
+                } else {
+                    // วนลูปแสดงผลรายการทั้งหมดที่มีในลิสต์
+                    extra.list.forEach(i => { 
+                        let pDisplay = i.point ? `(+${i.point})` : ""; // ป้องกัน undefined
+                        body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">${pDisplay}</span><br><small>${i.date}</small></div></div>`; 
+                    });
+                }
             }
         }, 400);
     }
 
     function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
-    function viewMyHistory() { db.ref('history/' + currentId).once('value', s => { let list = []; s.forEach(c => { list.push(c.val()); }); list.reverse(); showModal('history', { name: "ผลงานของฉัน 📜", list: list }); }); }
+    
+    function viewMyHistory() { 
+        db.ref('history/' + currentId).once('value', s => { 
+            let list = []; 
+            s.forEach(c => { list.push(c.val()); }); 
+            list.reverse(); 
+            showModal('history', { name: "ผลงานของฉัน 📜", list: list }); 
+        }); 
+    }
+
     function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิดจ้า"); }
 
     function renderLeaderboard() {
@@ -340,7 +351,16 @@
                 if (u.score === topScore && u.score > 0) div.classList.add('winner-highlight');
                 div.style.cursor = "pointer";
                 div.innerHTML = `<div style="flex:1"><strong>${index + 1}. ${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
-                div.onclick = () => { db.ref('history/' + u.id).once('value', s => { let l = []; s.forEach(c => l.push(c.val())); l.reverse(); showModal('history', { name: "ผลงานของ " + u.name, list: l }); }); };
+                
+                // แก้จุดนี้: ดึงประวัติทั้งหมดของนักเรียนคนนั้นส่งไปแสดงใน Modal ครู
+                div.onclick = () => { 
+                    db.ref('history/' + u.id).once('value', s => { 
+                        let l = []; 
+                        s.forEach(c => l.push(c.val())); 
+                        l.reverse(); 
+                        showModal('history', { name: "ผลงานของ " + u.name, list: l }); 
+                    }); 
+                };
                 container.appendChild(div);
             });
         });

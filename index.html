@@ -31,8 +31,6 @@
         .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; }
         .history-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 15px; margin-right: 15px; }
         .winner-highlight { background: var(--gold-light) !important; border: 3px solid #FDE68A !important; }
-        
-        /* จุดที่ 1: คืนค่าปุ่มเพลง */
         .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 10000; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #DCFCE7; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 20px; }
         .hidden { display: none !important; }
     </style>
@@ -46,10 +44,10 @@
     <div id="page-role" class="card">
         <div style="font-size: 80px; margin-bottom: 10px;">🌍✨</div>
         <h1>Eco Snap AI</h1>
-        <span class="subtitle">คัดแยกขยะเพื่อโลกของเรา 🌱</span>
+        <span class="subtitle">พลังเล็กๆ ของเรา เปลี่ยนโลกให้ดีขึ้นได้<br>ร่วมกันคัดแยกขยะ เพื่ออนาคตที่ยั่งยืน 🌱</span>
         <button onclick="changePage('page-student-choice')" class="primary-btn">🐣 เข้าสู่ระบบนักเรียน</button>
         <button onclick="changePage('page-login-teacher')" style="background: #ECFDF5;">👩‍🏫 เข้าสู่ระบบคุณครู</button>
-        <button onclick="showModal('guide-general')" style="background: #FFFBEB; color: #92400E;">📚 คู่มือนักเรียน</button>
+        <button onclick="showModal('guide-general')" style="background: #FFFBEB; color: #92400E; border-color: #FEF3C7;">📚 คู่มือนักเรียน</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
@@ -64,7 +62,7 @@
         <h3>ยืนยันตัวตน 🌈</h3>
         <input type="number" id="login-std-id" placeholder="รหัสนักเรียน 5 หลัก">
         <input type="password" id="login-std-pwd" placeholder="รหัสผ่าน">
-        <button onclick="loginExistingStudent()" class="primary-btn">เข้าสู่ระบบ</button>
+        <button onclick="loginExistingStudent()" class="primary-btn">เข้าสู่ระบบ ✨</button>
     </div>
 
     <div id="page-register-student" class="card hidden">
@@ -80,12 +78,12 @@
 
     <div id="page-student-main" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#FEE2E2;">🚪 ออก</button>
+             <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#FEE2E2; color:#B91C1C; border:none;">🚪 ออก</button>
              <span class="score-badge">✨ <span id="display-score">0</span></span>
         </div>
         <h3 id="display-name">-</h3>
         <div id="webcam-container">
-            <div id="placeholder-text">📸 ถ่ายภาพขยะของคุณ</div>
+            <div id="placeholder-text" style="color: #059669;">📸 ถ่ายภาพขยะของคุณ</div>
             <img id="preview-img" class="hidden" style="width:100%; height:100%; object-fit:cover;">
         </div>
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
@@ -93,12 +91,12 @@
         <div id="analysis-section" class="hidden">
             <div id="result-area" class="hidden" style="background:#F0FDF4; padding:20px; border-radius:25px; border:3px solid #4ADE80;">
                 <div id="waste-type" style="font-size:26px; font-weight:600;">-</div>
-                <div id="confidence-score">-</div>
+                <div id="confidence-score">มั่นใจ: 0%</div>
             </div>
             <button id="btn-analyze" onclick="analyzeImage()">🔍 เริ่มการวิเคราะห์</button>
-            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึก!</button>
+            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกเพื่อช่วยโลก!</button>
         </div>
-        <button onclick="viewMyHistory()" style="margin-top:20px; border: 2px dashed #CBD5E1;">📜 ประวัติการคัดแยก</button>
+        <button onclick="viewMyHistory()" style="margin-top:20px; border: 2px dashed #CBD5E1; background:none;">📜 ประวัติการคัดแยก</button>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
@@ -106,8 +104,8 @@
         <h3>เข้าสู่ระบบคุณครู 👩‍🏫</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสควบคุม">
         <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
-        <hr style="border: 0; border-top: 1px solid #E5E7EB; margin: 20px 0;">
-        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; border-color: #FCE7F3; font-size: 15px;">📖 อ่านคู่มือการจัดการระบบ</button>
+        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
+        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; font-size: 15px;">📖 อ่านคู่มือครู</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
@@ -116,7 +114,7 @@
              <h3 style="margin:0;">คะแนนรวม 🏆</h3>
         </div>
         <select id="filter-room" onchange="renderLeaderboard()"></select>
-        <div id="leaderboard-body" style="max-height: 400px; overflow-y:auto;"></div>
+        <div id="leaderboard-body" style="max-height: 400px; overflow-y:auto; margin-top:15px;"></div>
     </div>
 </div>
 
@@ -147,8 +145,6 @@
     initAI();
 
     function changePage(p) { document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden')); document.getElementById(p).classList.remove('hidden'); }
-    
-    // ระบบเพลง
     let music = document.getElementById('bg-music');
     function initAudioOnce() { if (!hasStartedAudio) { music.play().catch(()=>{}); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; } }
     function toggleMusic(e) { e.stopPropagation(); if (music.paused) { music.play(); document.getElementById('music-btn').innerText = "🎵"; } else { music.pause(); document.getElementById('music-btn').innerText = "🔇"; } }
@@ -194,20 +190,16 @@
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
-    // จุดที่ 3: แก้ไขให้บันทึกแล้วไม่เด้งออกหน้าแรก
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
-        let pts = type.includes("อันตราย") ? 2 : (type.includes("รีไซเคิล") ? 3 : 1);
+        let pts = type.includes("รีไซเคิล") ? 3 : (type.includes("อันตราย") ? 2 : 1);
         const data = { img: document.getElementById('preview-img').src, type: type, point: pts, date: new Date().toLocaleString('th-TH') };
         db.ref('history/' + currentId).push(data).then(() => {
             db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + pts);
             alert(`บันทึกสำเร็จ +${pts} แต้ม!`);
-            
-            // รีเซ็ตเฉพาะส่วนวิเคราะห์ ไม่เด้งออกหน้าแรก
             document.getElementById('preview-img').classList.add('hidden');
             document.getElementById('placeholder-text').classList.remove('hidden');
             document.getElementById('analysis-section').classList.add('hidden');
-            document.getElementById('file-input').value = "";
         });
     }
 
@@ -215,6 +207,7 @@
         document.getElementById('main-modal').classList.remove('hidden');
         const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
         body.innerHTML = "⏳ โหลดข้อมูล...";
+
         if(type === 'history') {
             title.innerText = extra.name;
             db.ref('history/' + extra.uid).once('value', s => {
@@ -222,15 +215,27 @@
                 let list = []; s.forEach(c => list.push(c.val()));
                 if(list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
                 list.reverse().forEach(i => {
-                    body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green);">(+${i.point})</span><br><small>${i.date}</small></div></div>`;
+                    // แก้ไขตรงนี้: ดึงค่า i.point มาแสดงผลให้ถูกต้อง (ป้องกัน undefined)
+                    let pDisplay = i.point ? `(+${i.point})` : "(+1)";
+                    body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green);">${pDisplay}</span><br><small>${i.date}</small></div></div>`;
                 });
             });
+        } else if(type === 'guide-general') {
+            title.innerText = "คู่มือนักเรียน 🐣";
+            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'>
+                <b>เกณฑ์การให้คะแนน:</b><br>
+                ♻️ ขยะรีไซเคิล: +3 แต้ม (แก้ว, พลาสติก, กระดาษ, โลหะ)<br>
+                ⚠️ ขยะอันตราย: +2 แต้ม (ถ่านไฟฉาย, หลอดไฟ, ยาหมดอายุ)<br>
+                🍎 ขยะเปียก/ทั่วไป: +1 แต้ม (เศษอาหาร, เปลือกผลไม้, ทิชชู่)<br><br>
+                <b>ขั้นตอนการเล่น:</b><br>
+                1. ถ่ายรูปขยะผ่านปุ่ม 'ถ่ายรูปขยะ'<br>
+                2. รอ AI วิเคราะห์ผลสักครู่<br>
+                3. ตรวจสอบประเภทขยะแล้วกด 'บันทึก' เพื่อรับแต้ม<br>
+                4. คะแนนจะสะสมในหน้าโปรไฟล์และอันดับรวมของห้องเรียนจ้า
+            </div>`;
         } else if(type === 'guide-teacher') {
             title.innerText = "คู่มือคุณครู 👩‍🏫";
             body.innerHTML = "<div style='text-align:left;'>• ตรวจสอบคะแนนสะสมแยกตามบุคคล<br>• ดูภาพถ่ายขยะย้อนหลังที่เด็กๆ ส่งมา<br>• ระบบไฮไลท์สีทองให้อันดับ 1 อัตโนมัติ</div>";
-        } else {
-            title.innerText = "คู่มือนักเรียน 🐣";
-            body.innerHTML = "<div style='text-align:left;'>1. ถ่ายรูปขยะ<br>2. รอ AI วิเคราะห์<br>3. กดบันทึกเพื่อรับแต้ม (รีไซเคิล +3, อันตราย +2, ทั่วไป +1)</div>";
         }
     }
 

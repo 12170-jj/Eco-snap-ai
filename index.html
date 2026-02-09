@@ -44,10 +44,10 @@
     <div id="page-role" class="card">
         <div style="font-size: 80px; margin-bottom: 10px;">🌍✨</div>
         <h1>Eco Snap AI</h1>
-        <span class="subtitle">พลังเล็กๆ ของเรา เปลี่ยนโลกให้ดีขึ้นได้<br>ร่วมกันคัดแยกขยะ เพื่ออนาคตที่ยั่งยืน 🌱</span>
+        <span class="subtitle">คัดแยกขยะเพื่อโลกของเรา 🌱</span>
         <button onclick="changePage('page-student-choice')" class="primary-btn">🐣 เข้าสู่ระบบนักเรียน</button>
         <button onclick="changePage('page-login-teacher')" style="background: #ECFDF5;">👩‍🏫 เข้าสู่ระบบคุณครู</button>
-        <button onclick="showModal('guide-general')" style="background: #FFFBEB; color: #92400E; border-color: #FEF3C7;">📚 คู่มือนักเรียน</button>
+        <button onclick="showModal('guide-general')" style="background: #FFFBEB; color: #92400E;">📚 คู่มือนักเรียน</button>
     </div>
 
     <div id="page-student-choice" class="card hidden">
@@ -78,12 +78,12 @@
 
     <div id="page-student-main" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#FEE2E2; color:#B91C1C; border:none;">🚪 ออก</button>
+             <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#FEE2E2;">🚪 ออก</button>
              <span class="score-badge">✨ <span id="display-score">0</span></span>
         </div>
         <h3 id="display-name">-</h3>
         <div id="webcam-container">
-            <div id="placeholder-text" style="color: #059669;">📸 ถ่ายภาพขยะของคุณ</div>
+            <div id="placeholder-text">📸 ถ่ายภาพขยะของคุณ</div>
             <img id="preview-img" class="hidden" style="width:100%; height:100%; object-fit:cover;">
         </div>
         <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleImage(event)">
@@ -91,21 +91,20 @@
         <div id="analysis-section" class="hidden">
             <div id="result-area" class="hidden" style="background:#F0FDF4; padding:20px; border-radius:25px; border:3px solid #4ADE80;">
                 <div id="waste-type" style="font-size:26px; font-weight:600;">-</div>
-                <div id="confidence-score">มั่นใจ: 0%</div>
+                <div id="confidence-score">-</div>
             </div>
             <button id="btn-analyze" onclick="analyzeImage()">🔍 เริ่มการวิเคราะห์</button>
-            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึกเพื่อช่วยโลก!</button>
+            <button id="btn-save" class="hidden primary-btn" onclick="saveTrash()">✅ บันทึก!</button>
         </div>
-        <button onclick="viewMyHistory()" style="margin-top:20px; border: 2px dashed #CBD5E1; background:none;">📜 ประวัติการคัดแยก</button>
+        <button onclick="viewMyHistory()" style="margin-top:20px; border: 2px dashed #CBD5E1;">📜 ประวัติการคัดแยก</button>
     </div>
 
     <div id="page-login-teacher" class="card hidden">
         <button onclick="changePage('page-role')" style="width:auto; padding:8px 20px;">⬅️ ย้อนกลับ</button>
         <h3>เข้าสู่ระบบคุณครู 👩‍🏫</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสควบคุม">
-        <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
-        <hr style="border:0; border-top:1px solid #eee; margin:20px 0;">
-        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; font-size: 15px;">📖 อ่านคู่มือครู</button>
+        <button onclick="loginTeacher()" class="primary-btn">ยืนยัน</button>
+        <button onclick="showModal('guide-teacher')" style="font-size:14px; background:#FDF2F8;">📖 คู่มือครู</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
@@ -203,39 +202,41 @@
         });
     }
 
+    // --- แก้ไขเฉพาะจุดประวัติ (Logic ดึงข้อมูลคืนทั้งหมด) ---
     function showModal(type, extra = null) {
         document.getElementById('main-modal').classList.remove('hidden');
         const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
-        body.innerHTML = "⏳ โหลดข้อมูล...";
+        body.innerHTML = "⏳ กำลังกู้คืนประวัติ...";
 
         if(type === 'history') {
             title.innerText = extra.name;
+            // ดึงข้อมูลจากกิ่ง history/[ID] ทั้งหมด
             db.ref('history/' + extra.uid).once('value', s => {
                 body.innerHTML = "";
-                let list = []; s.forEach(c => list.push(c.val()));
-                if(list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
-                list.reverse().forEach(i => {
-                    // แก้ไขตรงนี้: ดึงค่า i.point มาแสดงผลให้ถูกต้อง (ป้องกัน undefined)
-                    let pDisplay = i.point ? `(+${i.point})` : "(+1)";
-                    body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green);">${pDisplay}</span><br><small>${i.date}</small></div></div>`;
-                });
+                let list = [];
+                s.forEach(child => { list.push(child.val()); }); // วนลูปเก็บข้อมูลทุกชิ้นลง Array
+                
+                if(list.length === 0) {
+                    body.innerHTML = "ไม่พบประวัติการบันทึกจ้า";
+                } else {
+                    list.reverse().forEach(i => { // แสดงจากล่าสุดไปหาเก่า
+                        let pDisplay = i.point ? `(+${i.point})` : "(+1)";
+                        body.innerHTML += `<div class="history-item">
+                            <img src="${i.img}">
+                            <div>
+                                <strong>${i.type}</strong> <span style="color:var(--eco-green);">${pDisplay}</span><br>
+                                <small>${i.date}</small>
+                            </div>
+                        </div>`;
+                    });
+                }
             });
         } else if(type === 'guide-general') {
             title.innerText = "คู่มือนักเรียน 🐣";
-            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'>
-                <b>เกณฑ์การให้คะแนน:</b><br>
-                ♻️ ขยะรีไซเคิล: +3 แต้ม (แก้ว, พลาสติก, กระดาษ, โลหะ)<br>
-                ⚠️ ขยะอันตราย: +2 แต้ม (ถ่านไฟฉาย, หลอดไฟ, ยาหมดอายุ)<br>
-                🍎 ขยะเปียก/ทั่วไป: +1 แต้ม (เศษอาหาร, เปลือกผลไม้, ทิชชู่)<br><br>
-                <b>ขั้นตอนการเล่น:</b><br>
-                1. ถ่ายรูปขยะผ่านปุ่ม 'ถ่ายรูปขยะ'<br>
-                2. รอ AI วิเคราะห์ผลสักครู่<br>
-                3. ตรวจสอบประเภทขยะแล้วกด 'บันทึก' เพื่อรับแต้ม<br>
-                4. คะแนนจะสะสมในหน้าโปรไฟล์และอันดับรวมของห้องเรียนจ้า
-            </div>`;
+            body.innerHTML = "<div style='text-align:left;'><b>เกณฑ์คะแนน:</b><br>♻️ รีไซเคิล +3<br>⚠️ อันตราย +2<br>🍎 ทั่วไป/เปียก +1<br><br><b>วิธีเล่น:</b> ถ่ายรูป -> วิเคราะห์ -> บันทึก</div>";
         } else if(type === 'guide-teacher') {
             title.innerText = "คู่มือคุณครู 👩‍🏫";
-            body.innerHTML = "<div style='text-align:left;'>• ตรวจสอบคะแนนสะสมแยกตามบุคคล<br>• ดูภาพถ่ายขยะย้อนหลังที่เด็กๆ ส่งมา<br>• ระบบไฮไลท์สีทองให้อันดับ 1 อัตโนมัติ</div>";
+            body.innerHTML = "<div style='text-align:left;'>• ตรวจสอบคะแนนนักเรียนรายบุคคล<br>• คลิกที่ชื่อนักเรียนเพื่อดูประวัติการแยกขยะทั้งหมด</div>";
         }
     }
 

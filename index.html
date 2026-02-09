@@ -57,7 +57,6 @@
         .guide-text { text-align: left; font-size: 14px; line-height: 1.6; color: #374151; }
         .guide-header { color: var(--deep-forest); font-weight: 600; margin-top: 10px; display: block; }
         
-        /* สไตล์เพิ่มเติมสำหรับกราฟ */
         .chart-container { background: white; border-radius: 25px; padding: 15px; margin: 15px 0; border: 2px solid #F0FDF4; }
         .chart-title { font-size: 14px; color: var(--deep-forest); margin-bottom: 10px; font-weight: 600; }
     </style>
@@ -132,16 +131,22 @@
         <h3>เข้าสู่ระบบคุณครู 👩‍🏫</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสควบคุม">
         <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
-        <hr style="border: 0; border-top: 1.5px solid #F9A8D4; margin: 25px 0;">
-        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; border: 2px solid #FCE7F3; font-size: 15px;">📖 อ่านคู่มือการจัดการระบบ</button>
     </div>
 
-    <div id="page-teacher-main" class="card hidden" style="max-width: 500px;">
+    <div id="page-teacher-menu" class="card hidden">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-             <button onclick="location.reload()" style="width:auto; padding:8px 15px;">🚪 ออก</button>
-             <h3 style="margin:0;">สถิติภาพรวม 📊</h3>
+             <button onclick="location.reload()" style="width:auto; padding:8px 15px; background:#FEE2E2; border:none;">🚪 ออก</button>
+             <h3 style="margin:0;">เมนูคุณครู 👩‍🏫</h3>
         </div>
-        
+        <button onclick="changePage('page-teacher-stats'); updateCharts();" class="primary-btn">📊 สถิติภาพรวม</button>
+        <button onclick="changePage('page-teacher-leaderboard'); renderLeaderboard();" style="background:#ECFDF5;">🏆 คะแนนรายบุคคล</button>
+        <hr style="border:0; border-top:1.5px solid #F0FDF4; margin:20px 0;">
+        <button onclick="showModal('guide-teacher')" style="background:none; border:2px dashed #CBD5E1; font-size:14px;">📖 คู่มือการจัดการ</button>
+    </div>
+
+    <div id="page-teacher-stats" class="card hidden">
+        <button onclick="changePage('page-teacher-menu')" style="width:auto; padding:8px 20px;">⬅️ กลับเมนู</button>
+        <h3 style="margin-top:15px;">สถิติภาพรวม 📊</h3>
         <div class="chart-container">
             <div class="chart-title">🏆 คะแนนรวมแยกตามระดับชั้น</div>
             <canvas id="levelChart"></canvas>
@@ -150,11 +155,13 @@
             <div class="chart-title">📍 คะแนนรวมแยกตามห้องเรียน</div>
             <canvas id="roomChart"></canvas>
         </div>
+    </div>
 
-        <hr style="margin: 20px 0; border: 1px dashed #DDD;">
-        <h4 style="margin: 10px 0;">ทำเนียบสายกรีน 🏆</h4>
+    <div id="page-teacher-leaderboard" class="card hidden">
+        <button onclick="changePage('page-teacher-menu')" style="width:auto; padding:8px 20px;">⬅️ กลับเมนู</button>
+        <h3 style="margin-top:15px;">คะแนนรายบุคคล 🏆</h3>
         <select id="filter-room" onchange="renderLeaderboard()"></select>
-        <div id="leaderboard-body" style="max-height: 300px; overflow-y:auto; margin-top:15px;"></div>
+        <div id="leaderboard-body" style="max-height: 400px; overflow-y:auto; margin-top:10px;"></div>
     </div>
 </div>
 
@@ -172,7 +179,7 @@
     const db = firebase.database();
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/"; 
     let model, currentId = null, hasStartedAudio = false;
-    let levelChart = null, roomChart = null; // ตัวแปรเก็บกราฟ
+    let levelChart = null, roomChart = null;
 
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
@@ -221,6 +228,7 @@
                 document.getElementById('analysis-section').classList.remove('hidden');
                 document.getElementById('btn-analyze').classList.remove('hidden');
                 document.getElementById('btn-save').classList.add('hidden');
+                document.getElementById('result-area').classList.add('hidden');
             };
             img.src = e.target.result;
         };
@@ -253,58 +261,34 @@
 
     function loginTeacher() { 
         if(document.getElementById('teacher-pwd').value === "Eco2026") {
-            changePage('page-teacher-main');
-            renderLeaderboard();
-            updateCharts(); // เรียกกราฟเมื่อเข้าหน้าครู
+            changePage('page-teacher-menu');
         } else alert("รหัสผิด"); 
     }
 
-    // --- 📊 ฟังก์ชันจัดการกราฟ ---
     function updateCharts() {
         db.ref('users').on('value', snap => {
             const data = snap.val() || {};
             const levelScores = { "ม.1": 0, "ม.2": 0, "ม.3": 0, "ม.4": 0, "ม.5": 0, "ม.6": 0 };
             const roomScores = {};
-
             Object.values(data).forEach(u => {
                 const level = "ม." + u.room.split('/')[0];
                 if(levelScores[level] !== undefined) levelScores[level] += (u.score || 0);
                 roomScores[u.room] = (roomScores[u.room] || 0) + (u.score || 0);
             });
-
-            // วาดกราฟระดับชั้น (Pie Chart)
             const ctxL = document.getElementById('levelChart').getContext('2d');
             if(levelChart) levelChart.destroy();
             levelChart = new Chart(ctxL, {
                 type: 'pie',
-                data: {
-                    labels: Object.keys(levelScores),
-                    datasets: [{
-                        data: Object.values(levelScores),
-                        backgroundColor: ['#4ADE80', '#60A5FA', '#FBBF24', '#F87171', '#A78BFA', '#F472B6']
-                    }]
-                },
+                data: { labels: Object.keys(levelScores), datasets: [{ data: Object.values(levelScores), backgroundColor: ['#4ADE80', '#60A5FA', '#FBBF24', '#F87171', '#A78BFA', '#F472B6'] }] },
                 options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
             });
-
-            // วาดกราฟรายห้อง (Bar Chart)
             const ctxR = document.getElementById('roomChart').getContext('2d');
             if(roomChart) roomChart.destroy();
             const sortedRooms = Object.keys(roomScores).sort();
             roomChart = new Chart(ctxR, {
                 type: 'bar',
-                data: {
-                    labels: sortedRooms,
-                    datasets: [{
-                        label: 'คะแนนรวม',
-                        data: sortedRooms.map(r => roomScores[r]),
-                        backgroundColor: '#22C55E'
-                    }]
-                },
-                options: { 
-                    scales: { y: { beginAtZero: true } },
-                    plugins: { legend: { display: false } }
-                }
+                data: { labels: sortedRooms, datasets: [{ label: 'คะแนนรวม', data: sortedRooms.map(r => roomScores[r]), backgroundColor: '#22C55E' }] },
+                options: { scales: { y: { beginAtZero: true } }, plugins: { legend: { display: false } } }
             });
         });
     }
@@ -341,7 +325,7 @@
             body.innerHTML = `<div class="guide-text">ถ่ายภาพขยะ -> วิเคราะห์ -> บันทึกแต้ม<br>♻️ รีไซเคิล +3 | ⚠️ อันตราย +2 | 🍎 ทั่วไป +1</div>`;
         } else if(type === 'guide-teacher') {
             title.innerText = "คู่มือครู 👩‍🏫";
-            body.innerHTML = `<div class="guide-text">• ดูสถิติจากกราฟแบบ Real-time<br>• ตรวจสอบรูปภาพขยะในประวัติเด็ก<br>• รหัสครูคือ Eco2026</div>`;
+            body.innerHTML = `<div class="guide-text">• เลือก "สถิติภาพรวม" เพื่อดูผลการดำเนินงานแบบกราฟ<br>• เลือก "คะแนนรายบุคคล" เพื่อตรวจสอบการทิ้งขยะของนักเรียน<br>• คลิกที่ชื่อนักเรียนเพื่อดูรูปภาพขยะย้อนหลัง</div>`;
         }
     }
 

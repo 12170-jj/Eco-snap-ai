@@ -16,7 +16,7 @@
             --deep-forest: #14532D;
             --mint-cream: #F0FDF4;
             --bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            --gold-light: #FEF9C3; /* สีเหลืองอ่อนสำหรับอันดับ 1 */
+            --gold-light: #FEF9C3; 
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -95,10 +95,9 @@
         .score-badge { background: #FEF3C7; padding: 10px 25px; border-radius: 20px; font-weight: 600; font-size: 28px; color: #92400E; border: 3px solid #FDE68A; }
         #webcam-container { border-radius: 35px; height: 260px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; border: 3px dashed #10B981; }
         
-        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; transition: 0.3s; }
+        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; }
         .history-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 15px; margin-right: 15px; }
         
-        /* สไตล์พิเศษสำหรับอันดับ 1 */
         .winner-highlight { background: var(--gold-light) !important; border: 3px solid #FDE68A !important; transform: scale(1.02); }
 
         .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 10000; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #DCFCE7; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 20px; }
@@ -179,6 +178,8 @@
         <h3>เข้าสู่ระบบคุณครู 👩‍🏫</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสควบคุม">
         <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
+        <hr style="border: 0; border-top: 1px solid #E5E7EB; margin: 20px 0;">
+        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; border-color: #FCE7F3; font-size: 15px;">📖 อ่านคู่มือการจัดการระบบ</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
@@ -212,7 +213,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/";
+    // โมเดลตัวล่าสุดที่คุณครูจดจำภาพไว้
+    const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/"; 
     let model, currentId = null, hasStartedAudio = false;
 
     function changePage(p) {
@@ -306,6 +308,9 @@
             if(type === 'guide-general') {
                 title.innerText = "คู่มือนักเรียน 🐣";
                 body.innerHTML = "<div style='text-align:left;'>1. สมัครสมาชิกด้วยรหัส 5 หลัก<br>2. ถ่ายภาพขยะที่คัดแยกแล้ว<br>3. ใช้ AI วิเคราะห์ประเภทขยะ<br>4. บันทึกผลเพื่อรับแต้ม!</div>";
+            } else if(type === 'guide-teacher') {
+                title.innerText = "คู่มือคุณครู 👩‍🏫";
+                body.innerHTML = "<div style='text-align:left;'><b>การจัดการระบบ:</b><br>• ตรวจสอบคะแนนสะสมแยกตามรายบุคคล<br>• ดูประวัติขยะที่เด็กๆ ถ่ายรูปส่งมา<br>• ระบบจะไฮไลท์สีเหลืองทองให้เด็กที่ได้อันดับ 1 ในแต่ละห้องอัตโนมัติ</div>";
             } else if(type === 'history') {
                 title.innerText = extra.name;
                 if(extra.list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
@@ -318,7 +323,6 @@
     function viewMyHistory() { db.ref('history/' + currentId).once('value', s => { let list = []; s.forEach(c => { list.push(c.val()); }); list.reverse(); showModal('history', { name: "ผลงานของฉัน 📜", list: list }); }); }
     function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิดจ้า"); }
 
-    // --- จุดที่ปรับปรุง: ระบบเช็กอันดับ 1 เพื่อใส่พื้นหลังสีเหลืองอ่อน ---
     function renderLeaderboard() {
         const filter = document.getElementById('filter-room').value;
         db.ref('users').on('value', snap => {
@@ -328,18 +332,12 @@
                 .filter(u => !filter || u.room === filter)
                 .sort((a,b) => b.score - a.score);
 
-            // หาคะแนนสูงสุดในกลุ่มที่เลือก
             const topScore = list.length > 0 ? list[0].score : -1;
 
             list.forEach((u, index) => {
                 const div = document.createElement('div');
                 div.className = "history-item";
-                
-                // ถ้าเป็นอันดับ 1 และมีคะแนนมากกว่า 0 ให้ใส่สีพื้นหลังพิเศษ
-                if (u.score === topScore && u.score > 0) {
-                    div.classList.add('winner-highlight');
-                }
-
+                if (u.score === topScore && u.score > 0) div.classList.add('winner-highlight');
                 div.style.cursor = "pointer";
                 div.innerHTML = `<div style="flex:1"><strong>${index + 1}. ${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
                 div.onclick = () => { db.ref('history/' + u.id).once('value', s => { let l = []; s.forEach(c => l.push(c.val())); l.reverse(); showModal('history', { name: "ผลงานของ " + u.name, list: l }); }); };

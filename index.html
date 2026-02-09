@@ -14,18 +14,18 @@
         :root { --eco-green: #22C55E; --deep-forest: #14532D; --mint-cream: #F0FDF4; --gold-light: #FEF9C3; }
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* ✨ พื้นหลังคิ้วท์ๆ มีอิโมจิลอย */
         body { 
             margin: 0; background: linear-gradient(135deg, #DCFCE7 0%, #E0F2FE 50%, #FEF9C3 100%); 
             min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; 
             overflow-y: auto; position: relative; padding: 20px 0; 
         }
+        /* ✨ Background Emoji Decorations */
         body::before { content: "🌸"; position: fixed; top: 8%; left: 6%; font-size: 32px; opacity: 0.7; z-index: 1; }
         body::after { content: "☀️"; position: fixed; top: 12%; right: 10%; font-size: 38px; opacity: 0.7; z-index: 1; }
         .bg-deco-extra::before { content: "🍀"; position: fixed; bottom: 8%; left: 8%; font-size: 28px; opacity: 0.6; z-index: 1; }
         .bg-deco-extra::after { content: "🌈"; position: fixed; bottom: 12%; right: 12%; font-size: 34px; opacity: 0.6; z-index: 1; }
 
-        /* ✨ เด้งนุ่มนวลแบบในคลิป (Ease-out Back) */
+        /* ✨ Smooth Pop Animation (ตามคลิป) */
         @keyframes softPop {
             0% { transform: scale(0.88) translateY(25px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
@@ -45,7 +45,7 @@
         
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-content { 
-            background: white; border-radius: 45px; border: 5px solid #DCFCE7; width: 88%; max-width: 500px; padding: 35px; text-align: center;
+            background: white; border-radius: 45px; border: 5px solid #DCFCE7; width: 90%; max-width: 500px; padding: 30px; text-align: center;
             animation: softPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards; 
         }
         
@@ -53,9 +53,10 @@
         #webcam-container { border-radius: 35px; height: 260px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; border: 3px dashed #10B981; }
         .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; }
         .history-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 15px; margin-right: 15px; }
-        .winner-highlight { background: var(--gold-light) !important; border: 3px solid #FDE68A !important; }
         .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 10000; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #DCFCE7; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 20px; }
         .hidden { display: none !important; }
+        .guide-text { text-align: left; font-size: 14px; line-height: 1.6; color: #374151; }
+        .guide-header { color: var(--deep-forest); font-weight: 600; margin-top: 10px; display: block; }
     </style>
 </head>
 <body onclick="initAudioOnce()">
@@ -145,13 +146,13 @@
 <div id="main-modal" class="modal hidden">
     <div class="modal-content">
         <h3 id="modal-title">-</h3>
-        <div id="modal-body" style="max-height: 350px; overflow-y:auto; padding:5px;"></div>
+        <div id="modal-body" style="max-height: 400px; overflow-y:auto; padding:5px;"></div>
         <button onclick="closeModal()" class="primary-btn" style="margin-top:20px;">ตกลงจ้า ✨</button>
     </div>
 </div>
 
 <script>
-    const firebaseConfig = { apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA", authDomain: "eco-snap-ai.firebaseapp.com", databaseURL: "https://eco-snap-ai-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "eco-snap-ai", storageBucket: "eco-snap-ai.firebasestorage.app", messagingSenderId: "700051453001", appId: "1:700051453001:web:0ad07a5fe34fcaf3523b98" };
+    const firebaseConfig = { apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA", authDomain: "eco-snap-ai.firebaseapp.com", databaseURL: "https://eco-snap-ai-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "eco-snap-ai", storageBucket: "eco-snap-ai.firebasestorage.app", messagingSenderId: "700051453001", appId: "1:700051453001:web:0ad07a5fe34feaf3523b98" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/"; 
@@ -219,48 +220,57 @@
         });
     }
 
-    // --- 🛠️ จุดกู้คืนประวัติแบบถาวร (ห้ามลบ!) ---
     function showModal(type, extra = null) {
         document.getElementById('main-modal').classList.remove('hidden');
         const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
         
         if(type === 'history') {
             title.innerText = extra.name;
-            body.innerHTML = "⏳ กำลังดึงประวัติ...";
-            
-            // ดึงข้อมูลจาก Database Path: history/UID
-            db.ref('history/' + extra.uid).once('value').then(s => {
+            body.innerHTML = "⏳ กำลังโหลดประวัติอันยอดเยี่ยม...";
+            db.ref('history/' + extra.uid).once('value').then(snap => {
                 body.innerHTML = "";
-                let hasData = false;
+                const data = snap.val();
+                if(!data) { body.innerHTML = "ยังไม่พบประวัติการช่วยโลกจ้า 🌱"; return; }
                 
-                // วนลูปดึงข้อมูลออกมาแสดงผล
-                const data = s.val();
-                if(data) {
-                    Object.keys(data).reverse().forEach(key => {
-                        const i = data[key];
-                        hasData = true;
-                        // ดึงคะแนน (ถ้าไม่มีให้คำนวณจากประเภท)
-                        let displayP = i.point ? i.point : (i.type.includes("รีไซเคิล") ? 3 : (i.type.includes("อันตราย") ? 2 : 1));
-                        
-                        body.innerHTML += `
-                        <div class="history-item">
-                            <img src="${i.img}">
-                            <div>
-                                <strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${displayP})</span><br>
-                                <small>${i.date}</small>
-                            </div>
-                        </div>`;
-                    });
-                }
-                if(!hasData) body.innerHTML = "ไม่พบประวัติการส่งขยะจ้า 🌱";
-            }).catch(e => { body.innerHTML = "เกิดข้อผิดพลาดในการดึงข้อมูล"; console.error(e); });
-
+                Object.entries(data).reverse().forEach(([key, val]) => {
+                    let pts = val.point ? val.point : (val.type.includes("รีไซเคิล") ? 3 : (val.type.includes("อันตราย") ? 2 : 1));
+                    body.innerHTML += `
+                    <div class="history-item">
+                        <img src="${val.img}">
+                        <div>
+                            <strong>${val.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${pts})</span><br>
+                            <small>${val.date}</small>
+                        </div>
+                    </div>`;
+                });
+            });
         } else if(type === 'guide-general') {
             title.innerText = "คู่มือสายกรีน 🐣";
-            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'><b>💰 เกณฑ์การรับแต้ม:</b><br>♻️ <b>ขยะรีไซเคิล (+3 แต้ม):</b> ขวดน้ำ, ปลอกแก้ว, กระดาษ<br>⚠️ <b>ขยะอันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, อุปกรณ์ไฟฟ้า<br>🍎 <b>ขยะทั่วไป (+1 แต้ม):</b> เศษอาหาร, ทิชชู่</div>`;
+            body.innerHTML = `
+                <div class="guide-text">
+                    <span class="guide-header">🌟 ขั้นตอนการร่วมสนุก:</span>
+                    1. ถ่ายภาพขยะของคุณผ่านแอป <br>
+                    2. AI จะวิเคราะห์ประเภทขยะโดยอัตโนมัติ <br>
+                    3. ตรวจสอบความถูกต้องและกด "บันทึก" เพื่อรับแต้ม <br>
+                    <span class="guide-header">💰 เกณฑ์คะแนนพิเศษ:</span>
+                    ♻️ <b>รีไซเคิล (+3 แต้ม):</b> ขวดพลาสติก, แก้ว, กระดาษ, กระป๋อง <br>
+                    ⚠️ <b>อันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, หลอดไฟ, ขวดสารเคมี <br>
+                    🍎 <b>ทั่วไป (+1 แต้ม):</b> เศษอาหาร, ทิชชู่, ซองขนม <br>
+                    <span class="guide-header">💡 เคล็ดลับ:</span>
+                    ภาพที่ชัดเจนจะช่วยให้ AI แม่นยำขึ้นนะจ๊ะ!
+                </div>`;
         } else if(type === 'guide-teacher') {
             title.innerText = "ระบบจัดการคุณครู 👩‍🏫";
-            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'><b>📊 การจัดการ:</b><br>• ดูคะแนนรวมแยกห้อง<br>• ตรวจสอบรูปภาพย้อนหลังนักเรียนรายคน</div>`;
+            body.innerHTML = `
+                <div class="guide-text">
+                    <span class="guide-header">📊 การควบคุมระบบ:</span>
+                    • <b>แดชบอร์ด:</b> ตรวจสอบคะแนนรวมของนักเรียนแบบ Real-time <br>
+                    • <b>คัดกรองห้อง:</b> สามารถเลือกดูคะแนนแยกตามระดับชั้นและห้องได้ <br>
+                    • <b>ตรวจสอบย้อนหลัง:</b> กดที่ชื่อนักเรียนเพื่อดูรูปภาพขยะที่เขาส่ง เพื่อตรวจสอบความถูกต้อง <br>
+                    • <b>เกณฑ์ตัดสิน:</b> นักเรียนที่มีคะแนนสูงสุดจะได้รับแถบสีทอง (Winner Highlight) อัตโนมัติ <br>
+                    <span class="guide-header">🔒 ความปลอดภัย:</span>
+                    รหัสผ่านระบบคุณครูเป็นความลับสูงสุด ห้ามให้นักเรียนทราบเด็ดขาด!
+                </div>`;
         }
     }
 
@@ -277,7 +287,7 @@
             const top = list.length > 0 ? list[0].score : -1;
             list.forEach((u, index) => {
                 const div = document.createElement('div'); div.className = "history-item";
-                if (u.score === top && u.score > 0) div.classList.add('winner-highlight');
+                if (u.score === top && u.score > 0) div.style.border = "3px solid #FDE68A", div.style.background = "#FEF9C3";
                 div.innerHTML = `<div style="flex:1"><strong>${index+1}. ${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
                 div.onclick = () => showModal('history', { name: "ผลงานของ " + u.name, uid: u.id });
                 container.appendChild(div);

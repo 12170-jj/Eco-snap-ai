@@ -14,39 +14,39 @@
         :root { --eco-green: #22C55E; --deep-forest: #14532D; --mint-cream: #F0FDF4; --gold-light: #FEF9C3; }
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* ✨ พื้นหลังและอิโมจิน่ารักๆ */
+        /* ✨ พื้นหลังคิ้วท์ๆ มีอิโมจิลอย */
         body { 
             margin: 0; background: linear-gradient(135deg, #DCFCE7 0%, #E0F2FE 50%, #FEF9C3 100%); 
             min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; 
             overflow-y: auto; position: relative; padding: 20px 0; 
         }
-        body::before { content: "🌸"; position: fixed; top: 10%; left: 5%; font-size: 30px; opacity: 0.6; z-index: 1; }
-        body::after { content: "☀️"; position: fixed; top: 15%; right: 8%; font-size: 35px; opacity: 0.6; z-index: 1; }
-        .bg-deco::before { content: "🍀"; position: fixed; bottom: 10%; left: 10%; font-size: 25px; opacity: 0.5; z-index: 1; }
-        .bg-deco::after { content: "🌈"; position: fixed; bottom: 15%; right: 10%; font-size: 30px; opacity: 0.5; z-index: 1; }
+        body::before { content: "🌸"; position: fixed; top: 8%; left: 6%; font-size: 32px; opacity: 0.7; z-index: 1; }
+        body::after { content: "☀️"; position: fixed; top: 12%; right: 10%; font-size: 38px; opacity: 0.7; z-index: 1; }
+        .bg-deco-extra::before { content: "🍀"; position: fixed; bottom: 8%; left: 8%; font-size: 28px; opacity: 0.6; z-index: 1; }
+        .bg-deco-extra::after { content: "🌈"; position: fixed; bottom: 12%; right: 12%; font-size: 34px; opacity: 0.6; z-index: 1; }
 
-        /* ✨ Animation เด้งนุ่มๆ ตามคลิป */
-        @keyframes popIn {
-            0% { transform: scale(0.9) translateY(10px); opacity: 0; }
+        /* ✨ เด้งนุ่มนวลแบบในคลิป (Ease-out Back) */
+        @keyframes softPop {
+            0% { transform: scale(0.88) translateY(25px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
         }
         
         .container { width: 90%; max-width: 420px; z-index: 10; position: relative; margin: auto; }
-        .card:not(.hidden) { animation: popIn 0.6s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
+        .card:not(.hidden) { animation: softPop 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.15) forwards; }
 
-        .card { background: rgba(255, 255, 255, 0.94); backdrop-filter: blur(15px); padding: 40px 30px; border-radius: 50px; box-shadow: 0 30px 60px rgba(20, 83, 45, 0.12); text-align: center; border: 5px solid #FFFFFF; position: relative; }
+        .card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(15px); padding: 40px 30px; border-radius: 50px; box-shadow: 0 30px 60px rgba(20, 83, 45, 0.12); text-align: center; border: 5px solid #FFFFFF; position: relative; }
         h1 { font-size: 38px; color: var(--deep-forest); margin: 0; font-weight: 600; }
         .subtitle { color: #166534; font-size: 16px; margin: 15px 0 25px 0; display: block; line-height: 1.4; }
-        button { background: #FFFFFF; color: var(--deep-forest); border: 2.5px solid #BBF7D0; padding: 16px; border-radius: 25px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: all 0.3s; }
-        button:active { transform: scale(0.95); }
+        button { background: #FFFFFF; color: var(--deep-forest); border: 2.5px solid #BBF7D0; padding: 16px; border-radius: 25px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin: 10px 0; display: flex; align-items: center; justify-content: center; gap: 10px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        button:active { transform: scale(0.94); }
         
         .primary-btn { background: linear-gradient(135deg, #22C55E 0%, #16A34A 100%); color: white; border: none; }
         input, select { width: 100%; padding: 15px; margin: 10px 0; border-radius: 20px; border: 2.5px solid #86EFAC; text-align: center; font-size: 16px; background: #F9FAFB; }
         
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.35); backdrop-filter: blur(10px); display: flex; justify-content: center; align-items: center; z-index: 9999; }
         .modal-content { 
             background: white; border-radius: 45px; border: 5px solid #DCFCE7; width: 88%; max-width: 500px; padding: 35px; text-align: center;
-            animation: popIn 0.5s cubic-bezier(0.23, 1, 0.32, 1) forwards; 
+            animation: softPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.1) forwards; 
         }
         
         .score-badge { background: #FEF3C7; padding: 10px 25px; border-radius: 20px; font-weight: 600; font-size: 28px; color: #92400E; border: 3px solid #FDE68A; }
@@ -59,7 +59,7 @@
     </style>
 </head>
 <body onclick="initAudioOnce()">
-<div class="bg-deco"></div>
+<div class="bg-deco-extra"></div>
 
 <audio id="bg-music" loop><source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg"></audio>
 <div class="music-btn-float" onclick="toggleMusic(event)" id="music-btn">🔇</div>
@@ -151,7 +151,6 @@
 </div>
 
 <script>
-    // --- ห้ามเปลี่ยนระบบ Firebase และ AI ---
     const firebaseConfig = { apiKey: "AIzaSyB4ih04yTumTPqUlkGcomvJu3yskmgYngA", authDomain: "eco-snap-ai.firebaseapp.com", databaseURL: "https://eco-snap-ai-default-rtdb.asia-southeast1.firebasedatabase.app", projectId: "eco-snap-ai", storageBucket: "eco-snap-ai.firebasestorage.app", messagingSenderId: "700051453001", appId: "1:700051453001:web:0ad07a5fe34fcaf3523b98" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
@@ -220,30 +219,48 @@
         });
     }
 
-    // --- กู้คืนประวัติแบบ 100% ---
+    // --- 🛠️ จุดกู้คืนประวัติแบบถาวร (ห้ามลบ!) ---
     function showModal(type, extra = null) {
         document.getElementById('main-modal').classList.remove('hidden');
         const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
         
         if(type === 'history') {
             title.innerText = extra.name;
-            body.innerHTML = "⏳ โหลดข้อมูล...";
-            db.ref('history/' + extra.uid).once('value', s => {
-                body.innerHTML = ""; let list = []; 
-                s.forEach(c => list.push(c.val()));
-                if(list.length === 0) body.innerHTML = "ยังไม่พบประวัติจ้า";
-                list.reverse().forEach(i => {
-                    // Logic เดิมที่เคยแสดงแต้มได้ถูกต้อง
-                    let p = i.point ? i.point : (i.type.includes("รีไซเคิล") ? 3 : (i.type.includes("อันตราย") ? 2 : 1));
-                    body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green);">(+${p})</span><br><small>${i.date}</small></div></div>`;
-                });
-            });
+            body.innerHTML = "⏳ กำลังดึงประวัติ...";
+            
+            // ดึงข้อมูลจาก Database Path: history/UID
+            db.ref('history/' + extra.uid).once('value').then(s => {
+                body.innerHTML = "";
+                let hasData = false;
+                
+                // วนลูปดึงข้อมูลออกมาแสดงผล
+                const data = s.val();
+                if(data) {
+                    Object.keys(data).reverse().forEach(key => {
+                        const i = data[key];
+                        hasData = true;
+                        // ดึงคะแนน (ถ้าไม่มีให้คำนวณจากประเภท)
+                        let displayP = i.point ? i.point : (i.type.includes("รีไซเคิล") ? 3 : (i.type.includes("อันตราย") ? 2 : 1));
+                        
+                        body.innerHTML += `
+                        <div class="history-item">
+                            <img src="${i.img}">
+                            <div>
+                                <strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${displayP})</span><br>
+                                <small>${i.date}</small>
+                            </div>
+                        </div>`;
+                    });
+                }
+                if(!hasData) body.innerHTML = "ไม่พบประวัติการส่งขยะจ้า 🌱";
+            }).catch(e => { body.innerHTML = "เกิดข้อผิดพลาดในการดึงข้อมูล"; console.error(e); });
+
         } else if(type === 'guide-general') {
             title.innerText = "คู่มือสายกรีน 🐣";
             body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'><b>💰 เกณฑ์การรับแต้ม:</b><br>♻️ <b>ขยะรีไซเคิล (+3 แต้ม):</b> ขวดน้ำ, ปลอกแก้ว, กระดาษ<br>⚠️ <b>ขยะอันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, อุปกรณ์ไฟฟ้า<br>🍎 <b>ขยะทั่วไป (+1 แต้ม):</b> เศษอาหาร, ทิชชู่</div>`;
         } else if(type === 'guide-teacher') {
             title.innerText = "ระบบจัดการคุณครู 👩‍🏫";
-            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'><b>📊 การจัดการ:</b><br>• ดูคะแนนรวมแยกห้อง<br>• ตรวจสอบรูปภาพย้อนหลัง</div>`;
+            body.innerHTML = `<div style='text-align:left; font-size:15px; line-height:1.6;'><b>📊 การจัดการ:</b><br>• ดูคะแนนรวมแยกห้อง<br>• ตรวจสอบรูปภาพย้อนหลังนักเรียนรายคน</div>`;
         }
     }
 

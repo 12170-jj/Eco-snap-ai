@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image@latest/dist/teachablemachine-image.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@400;600&display=swap" rel="stylesheet">
     
     <style>
@@ -55,6 +56,10 @@
         .hidden { display: none !important; }
         .guide-text { text-align: left; font-size: 14px; line-height: 1.6; color: #374151; }
         .guide-header { color: var(--deep-forest); font-weight: 600; margin-top: 10px; display: block; }
+        
+        /* สไตล์เพิ่มเติมสำหรับกราฟ */
+        .chart-container { background: white; border-radius: 25px; padding: 15px; margin: 15px 0; border: 2px solid #F0FDF4; }
+        .chart-title { font-size: 14px; color: var(--deep-forest); margin-bottom: 10px; font-weight: 600; }
     </style>
 </head>
 <body onclick="initAudioOnce()">
@@ -131,13 +136,25 @@
         <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; border: 2px solid #FCE7F3; font-size: 15px;">📖 อ่านคู่มือการจัดการระบบ</button>
     </div>
 
-    <div id="page-teacher-main" class="card hidden">
+    <div id="page-teacher-main" class="card hidden" style="max-width: 500px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
              <button onclick="location.reload()" style="width:auto; padding:8px 15px;">🚪 ออก</button>
-             <h3 style="margin:0;">คะแนนรวม 🏆</h3>
+             <h3 style="margin:0;">สถิติภาพรวม 📊</h3>
         </div>
+        
+        <div class="chart-container">
+            <div class="chart-title">🏆 คะแนนรวมแยกตามระดับชั้น</div>
+            <canvas id="levelChart"></canvas>
+        </div>
+        <div class="chart-container">
+            <div class="chart-title">📍 คะแนนรวมแยกตามห้องเรียน</div>
+            <canvas id="roomChart"></canvas>
+        </div>
+
+        <hr style="margin: 20px 0; border: 1px dashed #DDD;">
+        <h4 style="margin: 10px 0;">ทำเนียบสายกรีน 🏆</h4>
         <select id="filter-room" onchange="renderLeaderboard()"></select>
-        <div id="leaderboard-body" style="max-height: 400px; overflow-y:auto; margin-top:15px;"></div>
+        <div id="leaderboard-body" style="max-height: 300px; overflow-y:auto; margin-top:15px;"></div>
     </div>
 </div>
 
@@ -155,6 +172,7 @@
     const db = firebase.database();
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/"; 
     let model, currentId = null, hasStartedAudio = false;
+    let levelChart = null, roomChart = null; // ตัวแปรเก็บกราฟ
 
     async function initAI() { model = await tmImage.load(MODEL_URL + "model.json", MODEL_URL + "metadata.json"); }
     initAI();
@@ -164,22 +182,18 @@
     function initAudioOnce() { if (!hasStartedAudio) { music.play().catch(()=>{}); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; } }
     function toggleMusic(e) { e.stopPropagation(); if (music.paused) { music.play(); document.getElementById('music-btn').innerText = "🎵"; } else { music.pause(); document.getElementById('music-btn').innerText = "🔇"; } }
 
-    // --- 🛠️ ฟังก์ชันลงทะเบียนที่หายไป (ใส่กลับมาให้แล้วครับ!) ---
     function registerStudent() {
         const name = document.getElementById('reg-std-name').value.trim();
         const id = document.getElementById('reg-std-id').value.trim();
         const room = document.getElementById('reg-std-room').value;
         const p1 = document.getElementById('reg-std-pwd1').value;
         const p2 = document.getElementById('reg-std-pwd2').value;
-
-        if(!name || id.length !== 5 || !p1) return alert("กรุณากรอกข้อมูลให้ครบถ้วน (รหัสนักเรียน 5 หลัก)");
-        if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกันจ้า");
-
+        if(!name || id.length !== 5 || !p1) return alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+        if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกัน");
         db.ref('users/' + id).once('value', s => {
-            if(s.exists()) return alert("รหัสนักเรียนนี้ถูกใช้ไปแล้ว");
+            if(s.exists()) return alert("รหัสนี้มีในระบบแล้ว");
             db.ref('users/' + id).set({ name: name, room: room, pwd: p1, score: 0 }).then(() => {
-                alert("ลงทะเบียนสำเร็จ! เข้าสู่ระบบได้เลยจ้า");
-                changePage('page-login-existing');
+                alert("สมัครสำเร็จ!"); changePage('page-login-existing');
             });
         });
     }
@@ -188,7 +202,7 @@
         const id = document.getElementById('login-std-id').value.trim(), pwd = document.getElementById('login-std-pwd').value;
         db.ref('users/' + id).once('value', s => {
             if(s.exists() && s.val().pwd === pwd){ currentId = id; updateStudentUI(); changePage('page-student-main'); }
-            else alert("รหัสนักเรียนหรือรหัสผ่านไม่ถูกต้อง");
+            else alert("รหัสไม่ถูกต้อง");
         });
     }
 
@@ -207,7 +221,6 @@
                 document.getElementById('analysis-section').classList.remove('hidden');
                 document.getElementById('btn-analyze').classList.remove('hidden');
                 document.getElementById('btn-save').classList.add('hidden');
-                document.getElementById('result-area').classList.add('hidden');
             };
             img.src = e.target.result;
         };
@@ -238,34 +251,63 @@
         });
     }
 
-    function showModal(type, extra = null) {
-        document.getElementById('main-modal').classList.remove('hidden');
-        const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
-        
-        if(type === 'history') {
-            title.innerText = extra.name;
-            body.innerHTML = "⏳ กำลังดึงประวัติ...";
-            db.ref('history/' + extra.uid).once('value').then(snap => {
-                body.innerHTML = "";
-                const data = snap.val();
-                if(!data) { body.innerHTML = "ยังไม่พบประวัติจ้า 🌱"; return; }
-                Object.entries(data).reverse().forEach(([key, val]) => {
-                    let pts = val.point ? val.point : (val.type.includes("รีไซเคิล") ? 3 : (val.type.includes("อันตราย") ? 2 : 1));
-                    body.innerHTML += `<div class="history-item"><img src="${val.img}"><div><strong>${val.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${pts})</span><br><small>${val.date}</small></div></div>`;
-                });
-            });
-        } else if(type === 'guide-general') {
-            title.innerText = "คู่มือสายกรีน 🐣";
-            body.innerHTML = `<div class="guide-text"><span class="guide-header">🌟 ขั้นตอนการร่วมสนุก:</span>1. ถ่ายภาพขยะผ่านแอป <br>2. AI วิเคราะห์ประเภท <br>3. ตรวจสอบและกด "บันทึก" รับแต้ม <br><span class="guide-header">💰 เกณฑ์คะแนนพิเศษ:</span>♻️ <b>รีไซเคิล (+3 แต้ม):</b> ขวดน้ำ, แก้ว, กระดาษ <br>⚠️ <b>อันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, หลอดไฟ <br>🍎 <b>ทั่วไป (+1 แต้ม):</b> เศษอาหาร, ซองขนม</div>`;
-        } else if(type === 'guide-teacher') {
-            title.innerText = "ระบบจัดการคุณครู 👩‍🏫";
-            body.innerHTML = `<div class="guide-text"><span class="guide-header">📊 การควบคุมระบบ:</span>• <b>แดชบอร์ด:</b> ตรวจสอบคะแนน Real-time <br>• <b>คัดกรองห้อง:</b> ดูแยกตามระดับชั้น <br>• <b>ตรวจสอบย้อนหลัง:</b> ดูรูปขยะที่นักเรียนส่ง <br><span class="guide-header">🔒 ความปลอดภัย:</span>ห้ามให้นักเรียนทราบรหัสผ่านคุณครูเด็ดขาด!</div>`;
-        }
+    function loginTeacher() { 
+        if(document.getElementById('teacher-pwd').value === "Eco2026") {
+            changePage('page-teacher-main');
+            renderLeaderboard();
+            updateCharts(); // เรียกกราฟเมื่อเข้าหน้าครู
+        } else alert("รหัสผิด"); 
     }
 
-    function viewMyHistory() { showModal('history', { name: "ผลงานของฉัน 📜", uid: currentId }); }
-    function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
-    function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิด"); }
+    // --- 📊 ฟังก์ชันจัดการกราฟ ---
+    function updateCharts() {
+        db.ref('users').on('value', snap => {
+            const data = snap.val() || {};
+            const levelScores = { "ม.1": 0, "ม.2": 0, "ม.3": 0, "ม.4": 0, "ม.5": 0, "ม.6": 0 };
+            const roomScores = {};
+
+            Object.values(data).forEach(u => {
+                const level = "ม." + u.room.split('/')[0];
+                if(levelScores[level] !== undefined) levelScores[level] += (u.score || 0);
+                roomScores[u.room] = (roomScores[u.room] || 0) + (u.score || 0);
+            });
+
+            // วาดกราฟระดับชั้น (Pie Chart)
+            const ctxL = document.getElementById('levelChart').getContext('2d');
+            if(levelChart) levelChart.destroy();
+            levelChart = new Chart(ctxL, {
+                type: 'pie',
+                data: {
+                    labels: Object.keys(levelScores),
+                    datasets: [{
+                        data: Object.values(levelScores),
+                        backgroundColor: ['#4ADE80', '#60A5FA', '#FBBF24', '#F87171', '#A78BFA', '#F472B6']
+                    }]
+                },
+                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
+            });
+
+            // วาดกราฟรายห้อง (Bar Chart)
+            const ctxR = document.getElementById('roomChart').getContext('2d');
+            if(roomChart) roomChart.destroy();
+            const sortedRooms = Object.keys(roomScores).sort();
+            roomChart = new Chart(ctxR, {
+                type: 'bar',
+                data: {
+                    labels: sortedRooms,
+                    datasets: [{
+                        label: 'คะแนนรวม',
+                        data: sortedRooms.map(r => roomScores[r]),
+                        backgroundColor: '#22C55E'
+                    }]
+                },
+                options: { 
+                    scales: { y: { beginAtZero: true } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        });
+    }
 
     function renderLeaderboard() {
         const filter = document.getElementById('filter-room').value;
@@ -273,10 +315,8 @@
             const container = document.getElementById('leaderboard-body'); container.innerHTML = "";
             let list = Object.keys(snap.val() || {}).map(id => ({...snap.val()[id], id}))
                 .filter(u => !filter || u.room === filter).sort((a,b) => b.score - a.score);
-            const top = list.length > 0 ? list[0].score : -1;
             list.forEach((u, index) => {
                 const div = document.createElement('div'); div.className = "history-item";
-                if (u.score === top && u.score > 0) div.style.border = "3px solid #FDE68A", div.style.background = "#FEF9C3";
                 div.innerHTML = `<div style="flex:1"><strong>${index+1}. ${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
                 div.onclick = () => showModal('history', { name: "ผลงานของ " + u.name, uid: u.id });
                 container.appendChild(div);
@@ -284,10 +324,34 @@
         });
     }
 
+    function showModal(type, extra = null) {
+        document.getElementById('main-modal').classList.remove('hidden');
+        const body = document.getElementById('modal-body'), title = document.getElementById('modal-title');
+        if(type === 'history') {
+            title.innerText = extra.name; body.innerHTML = "⏳ โหลด...";
+            db.ref('history/' + extra.uid).once('value').then(snap => {
+                body.innerHTML = ""; const data = snap.val();
+                if(!data) return body.innerHTML = "ไม่มีข้อมูล";
+                Object.values(data).reverse().forEach(val => {
+                    body.innerHTML += `<div class="history-item"><img src="${val.img}"><div><strong>${val.type}</strong> (+${val.point})<br><small>${val.date}</small></div></div>`;
+                });
+            });
+        } else if(type === 'guide-general') {
+            title.innerText = "คู่มือ 🐣";
+            body.innerHTML = `<div class="guide-text">ถ่ายภาพขยะ -> วิเคราะห์ -> บันทึกแต้ม<br>♻️ รีไซเคิล +3 | ⚠️ อันตราย +2 | 🍎 ทั่วไป +1</div>`;
+        } else if(type === 'guide-teacher') {
+            title.innerText = "คู่มือครู 👩‍🏫";
+            body.innerHTML = `<div class="guide-text">• ดูสถิติจากกราฟแบบ Real-time<br>• ตรวจสอบรูปภาพขยะในประวัติเด็ก<br>• รหัสครูคือ Eco2026</div>`;
+        }
+    }
+
+    function viewMyHistory() { showModal('history', { name: "ประวัติของฉัน", uid: currentId }); }
+    function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
+
     const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
     ['reg-std-room', 'filter-room'].forEach(id => {
         const el = document.getElementById(id);
-        if(id === 'filter-room') el.innerHTML = '<option value="">คะแนนรวมทุกห้อง</option>';
+        if(id === 'filter-room') el.innerHTML = '<option value="">ทุกห้อง</option>';
         rooms.forEach(r => el.innerHTML += `<option value="${r}">ม. ${r}</option>`);
     });
 </script>

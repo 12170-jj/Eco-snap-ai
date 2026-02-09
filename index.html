@@ -16,6 +16,7 @@
             --deep-forest: #14532D;
             --mint-cream: #F0FDF4;
             --bouncy: cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            --gold-light: #FEF9C3; /* สีเหลืองอ่อนสำหรับอันดับ 1 */
         }
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
@@ -35,14 +36,7 @@
         .deco { position: fixed; z-index: 1; opacity: 0.4; pointer-events: none; animation: float 6s infinite ease-in-out; }
         @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(10deg); } }
 
-        .container { 
-            width: 90%; 
-            max-width: 420px; 
-            z-index: 10; 
-            position: relative; 
-            transition: all 0.3s ease;
-            margin: auto;
-        }
+        .container { width: 90%; max-width: 420px; z-index: 10; position: relative; transition: all 0.3s ease; margin: auto; }
 
         @media (min-width: 768px) {
             .container { max-width: 700px; }
@@ -84,9 +78,6 @@
             color: white; border: none; box-shadow: 0 10px 25px rgba(34, 197, 94, 0.3);
         }
 
-        button:active { transform: scale(0.92); }
-        button:hover { transform: translateY(-3px); box-shadow: 0 12px 20px rgba(0,0,0,0.1); }
-
         input, select { 
             width: 100%; padding: 15px; margin: 10px 0; border-radius: 20px; 
             border: 2.5px solid #86EFAC; text-align: center; 
@@ -103,8 +94,13 @@
 
         .score-badge { background: #FEF3C7; padding: 10px 25px; border-radius: 20px; font-weight: 600; font-size: 28px; color: #92400E; border: 3px solid #FDE68A; }
         #webcam-container { border-radius: 35px; height: 260px; background: #F3F4F6; display: flex; align-items: center; justify-content: center; overflow: hidden; margin: 20px 0; border: 3px dashed #10B981; }
-        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; }
+        
+        .history-item { background: #FFFFFF; border-radius: 25px; padding: 15px; margin-bottom: 12px; border: 2px solid #F0FDF4; display: flex; align-items: center; text-align: left; transition: 0.3s; }
         .history-item img { width: 65px; height: 65px; object-fit: cover; border-radius: 15px; margin-right: 15px; }
+        
+        /* สไตล์พิเศษสำหรับอันดับ 1 */
+        .winner-highlight { background: var(--gold-light) !important; border: 3px solid #FDE68A !important; transform: scale(1.02); }
+
         .music-btn-float { position: fixed; top: 20px; right: 20px; z-index: 10000; background: white; border-radius: 50%; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border: 2.5px solid #DCFCE7; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-size: 20px; }
         .hidden { display: none !important; }
     </style>
@@ -115,14 +111,13 @@
 <div class="deco" style="top:70%; left:10%; font-size:50px;">🌍</div>
 <div class="deco" style="top:20%; right:5%; font-size:35px;">🌸</div>
 <div class="deco" style="top:80%; right:10%; font-size:45px;">🍃</div>
-<div class="deco" style="top:45%; left:2%; font-size:30px;">☀️</div>
 
 <audio id="bg-music" loop preload="auto"><source src="https://www.bensound.com/bensound-music/bensound-cute.mp3" type="audio/mpeg"></audio>
 <div class="music-btn-float" onclick="toggleMusic(event)" id="music-btn">🔇</div>
 
 <div class="container">
     <div id="page-role" class="card">
-        <div style="font-size: 80px; margin-bottom: 10px; filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));">🌍✨</div>
+        <div style="font-size: 80px; margin-bottom: 10px;">🌍✨</div>
         <h1>Eco Snap AI</h1>
         <span class="subtitle">พลังเล็กๆ ของเรา เปลี่ยนโลกให้ดีขึ้นได้<br>ร่วมกันคัดแยกขยะ เพื่ออนาคตที่ยั่งยืน 🌱</span>
         <button onclick="changePage('page-student-choice')" class="primary-btn">🐣 เข้าสู่ระบบนักเรียน</button>
@@ -184,8 +179,6 @@
         <h3>เข้าสู่ระบบคุณครู 👩‍🏫</h3>
         <input type="password" id="teacher-pwd" placeholder="ระบุรหัสควบคุม">
         <button onclick="loginTeacher()" class="primary-btn">ยืนยันตัวตน</button>
-        <hr style="border: 0; border-top: 1px solid #E5E7EB; margin: 20px 0;">
-        <button onclick="showModal('guide-teacher')" style="background: #FDF2F8; color: #9D174D; border-color: #FCE7F3; font-size: 15px;">📖 อ่านคู่มือการจัดการระบบ</button>
     </div>
 
     <div id="page-teacher-main" class="card hidden">
@@ -219,9 +212,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    /* โมเดลตัวใหม่ล่าสุด */
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/";
-
     let model, currentId = null, hasStartedAudio = false;
 
     function changePage(p) {
@@ -238,19 +229,14 @@
     initAI();
 
     function registerStudent() {
-        const name = document.getElementById('reg-std-name').value.trim();
-        const id = document.getElementById('reg-std-id').value.trim();
-        const room = document.getElementById('reg-std-room').value;
-        const p1 = document.getElementById('reg-std-pwd1').value;
-        const p2 = document.getElementById('reg-std-pwd2').value;
+        const name = document.getElementById('reg-std-name').value.trim(), id = document.getElementById('reg-std-id').value.trim(), room = document.getElementById('reg-std-room').value, p1 = document.getElementById('reg-std-pwd1').value, p2 = document.getElementById('reg-std-pwd2').value;
         if(!name || id.length!==5 || !room || !p1) return alert("กรอกข้อมูลให้ครบนะจ๊ะ");
         if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกันจ้า");
         db.ref('users/' + id).set({ name, room, score: 0, pwd: p1 }, () => { currentId = id; updateStudentUI(); changePage('page-student-main'); });
     }
 
     function loginExistingStudent() {
-        const id = document.getElementById('login-std-id').value.trim();
-        const pwd = document.getElementById('login-std-pwd').value;
+        const id = document.getElementById('login-std-id').value.trim(), pwd = document.getElementById('login-std-pwd').value;
         db.ref('users/' + id).once('value', s => {
             if(s.exists() && s.val().pwd === pwd){ currentId = id; updateStudentUI(); changePage('page-student-main'); }
             else alert("ข้อมูลไม่ถูกต้องจ้า");
@@ -287,34 +273,24 @@
     }
 
     async function analyzeImage() {
-        // --- จุดที่อัปเดต: เปลี่ยนข้อความปุ่มเพื่อแจ้งสถานะ ---
         const btn = document.getElementById('btn-analyze');
-        btn.innerText = "⏳ กำลังวิเคราะห์...";
-        btn.disabled = true;
-
+        btn.innerText = "⏳ กำลังวิเคราะห์..."; btn.disabled = true;
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((a, b) => (a.probability > b.probability) ? a : b);
-        
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
         document.getElementById('confidence-score').innerText = "มั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
-        
-        btn.classList.add('hidden');
-        btn.innerText = "🔍 เริ่มการวิเคราะห์";
-        btn.disabled = false;
+        btn.classList.add('hidden'); btn.innerText = "🔍 เริ่มการวิเคราะห์"; btn.disabled = false;
         document.getElementById('btn-save').classList.remove('hidden');
     }
 
     function saveTrash() {
         const type = document.getElementById('waste-type').innerText;
-        let pointsToAdd = 1;
-        if (type.includes("อันตราย")) pointsToAdd = 2;
-        else if (type.includes("รีไซเคิล")) pointsToAdd = 3;
-
-        const data = { img: document.getElementById('preview-img').src, type: type, point: pointsToAdd, date: new Date().toLocaleString('th-TH') };
+        let pts = type.includes("อันตราย") ? 2 : (type.includes("รีไซเคิล") ? 3 : 1);
+        const data = { img: document.getElementById('preview-img').src, type: type, point: pts, date: new Date().toLocaleString('th-TH') };
         db.ref('history/' + currentId).push(data).then(() => {
-            db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + pointsToAdd);
-            alert(`เย้! บันทึกสำเร็จ ได้รับ ${pointsToAdd} คะแนน 🌍💚`);
+            db.ref('users/' + currentId + '/score').transaction(s => (s || 0) + pts);
+            alert(`เย้! บันทึกสำเร็จ ได้รับ ${pts} คะแนน 🌍💚`);
             document.getElementById('preview-img').classList.add('hidden');
             document.getElementById('placeholder-text').classList.remove('hidden');
             document.getElementById('analysis-section').classList.add('hidden');
@@ -323,56 +299,59 @@
 
     function showModal(type, extra = null) {
         document.getElementById('main-modal').classList.remove('hidden');
-        const title = document.getElementById('modal-title');
-        const body = document.getElementById('modal-body');
-        
-        // --- จุดที่อัปเดต: ข้อความแจ้งเตือนระหว่างรอโหลดข้อมูลประวัติ ---
-        body.innerHTML = '<p style="color:var(--eco-green); font-weight:bold; font-size:18px;">⏳ กำลังดึงข้อมูล...</p>';
-        
+        const title = document.getElementById('modal-title'), body = document.getElementById('modal-body');
+        body.innerHTML = '<p style="color:var(--eco-green); font-weight:bold; font-size:18px;">⏳ กำลังโหลด...</p>';
         setTimeout(() => {
             body.innerHTML = "";
             if(type === 'guide-general') {
                 title.innerText = "คู่มือนักเรียน 🐣";
-                body.innerHTML = "<div style='text-align:left;'>1. สมัครสมาชิกด้วยรหัส 5 หลัก<br>2. ถ่ายภาพขยะที่คัดแยกแล้ว<br>3. ใช้ AI วิเคราะห์ประเภทขยะ<br>4. บันทึกผลเพื่อรับแต้ม!<br><br><b>แต้มที่ได้รับ:</b><br>• ทั่วไป/เปียก = 1 แต้ม<br>• อันตราย = 2 แต้ม<br>• รีไซเคิล = 3 แต้ม</div>";
-            } else if(type === 'guide-teacher') {
-                title.innerText = "คู่มือคุณครู 👩‍🏫";
-                body.innerHTML = "<div style='text-align:left;'><b>ระบบหลังบ้าน:</b><br>• ตรวจสอบคะแนนสะสมแยกตามประเภทขยะ<br>• ดูประวัติพร้อมคะแนนที่ได้ในแต่ละชิ้น<br>• มอบรางวัลนักเรียนรักษ์โลกที่คัดแยกขยะรีไซเคิลได้มากที่สุด</div>";
+                body.innerHTML = "<div style='text-align:left;'>1. สมัครสมาชิกด้วยรหัส 5 หลัก<br>2. ถ่ายภาพขยะที่คัดแยกแล้ว<br>3. ใช้ AI วิเคราะห์ประเภทขยะ<br>4. บันทึกผลเพื่อรับแต้ม!</div>";
             } else if(type === 'history') {
                 title.innerText = extra.name;
                 if(extra.list.length === 0) body.innerHTML = "ยังไม่มีประวัติจ้า";
-                else extra.list.forEach(i => { 
-                    body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${i.point || 1})</span><br><small>${i.date}</small></div></div>`; 
-                });
+                else extra.list.forEach(i => { body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${i.point})</span><br><small>${i.date}</small></div></div>`; });
             }
-        }, 500); // ดีเลย์เล็กน้อยเพื่อให้เด็กๆ เห็นข้อความแจ้งเตือน
+        }, 400);
     }
 
     function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
     function viewMyHistory() { db.ref('history/' + currentId).once('value', s => { let list = []; s.forEach(c => { list.push(c.val()); }); list.reverse(); showModal('history', { name: "ผลงานของฉัน 📜", list: list }); }); }
     function loginTeacher() { if(document.getElementById('teacher-pwd').value === "Eco2026") changePage('page-teacher-main'), renderLeaderboard(); else alert("รหัสผิดจ้า"); }
 
+    // --- จุดที่ปรับปรุง: ระบบเช็กอันดับ 1 เพื่อใส่พื้นหลังสีเหลืองอ่อน ---
     function renderLeaderboard() {
         const filter = document.getElementById('filter-room').value;
         db.ref('users').on('value', snap => {
             const container = document.getElementById('leaderboard-body'); container.innerHTML = "";
             const users = snap.val() || {};
-            Object.keys(users).map(id => ({...users[id], id}))
+            let list = Object.keys(users).map(id => ({...users[id], id}))
                 .filter(u => !filter || u.room === filter)
-                .sort((a,b) => b.score - a.score)
-                .forEach(u => {
-                    const div = document.createElement('div');
-                    div.className = "history-item"; div.style.cursor = "pointer";
-                    div.innerHTML = `<div style="flex:1"><strong>${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
-                    div.onclick = () => { db.ref('history/' + u.id).once('value', s => { let list = []; s.forEach(c => { list.push(c.val()); }); list.reverse(); showModal('history', { name: "ผลงานของ " + u.name, list: list }); }); };
-                    container.appendChild(div);
-                });
+                .sort((a,b) => b.score - a.score);
+
+            // หาคะแนนสูงสุดในกลุ่มที่เลือก
+            const topScore = list.length > 0 ? list[0].score : -1;
+
+            list.forEach((u, index) => {
+                const div = document.createElement('div');
+                div.className = "history-item";
+                
+                // ถ้าเป็นอันดับ 1 และมีคะแนนมากกว่า 0 ให้ใส่สีพื้นหลังพิเศษ
+                if (u.score === topScore && u.score > 0) {
+                    div.classList.add('winner-highlight');
+                }
+
+                div.style.cursor = "pointer";
+                div.innerHTML = `<div style="flex:1"><strong>${index + 1}. ${u.name}</strong><br><small>ม.${u.room}</small></div> <strong>✨ ${u.score}</strong>`;
+                div.onclick = () => { db.ref('history/' + u.id).once('value', s => { let l = []; s.forEach(c => l.push(c.val())); l.reverse(); showModal('history', { name: "ผลงานของ " + u.name, list: l }); }); };
+                container.appendChild(div);
+            });
         });
     }
 
     const rooms = ['1/1','1/2','1/3','1/4','1/5','2/1','2/2','2/3','2/4','2/5','3/1','3/2','3/3','3/4','4/1','4/2','4/3','5/1','5/2','5/3','5/4','6/1','6/2','6/3'];
     ['reg-std-room', 'filter-room'].forEach(id => {
         const el = document.getElementById(id);
-        if(id === 'filter-room') el.innerHTML = '<option value="">เลือกห้องเรียน</option>';
+        if(id === 'filter-room') el.innerHTML = '<option value="">คะแนนรวมทุกห้อง</option>';
         rooms.forEach(r => el.innerHTML += `<option value="${r}">ม. ${r}</option>`);
     });
 </script>

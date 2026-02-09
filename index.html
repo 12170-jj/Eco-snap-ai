@@ -19,13 +19,11 @@
             min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; 
             overflow-y: auto; position: relative; padding: 20px 0; 
         }
-        /* ✨ Background Emoji Decorations */
         body::before { content: "🌸"; position: fixed; top: 8%; left: 6%; font-size: 32px; opacity: 0.7; z-index: 1; }
         body::after { content: "☀️"; position: fixed; top: 12%; right: 10%; font-size: 38px; opacity: 0.7; z-index: 1; }
         .bg-deco-extra::before { content: "🍀"; position: fixed; bottom: 8%; left: 8%; font-size: 28px; opacity: 0.6; z-index: 1; }
         .bg-deco-extra::after { content: "🌈"; position: fixed; bottom: 12%; right: 12%; font-size: 34px; opacity: 0.6; z-index: 1; }
 
-        /* ✨ Smooth Pop Animation (ตามคลิป) */
         @keyframes softPop {
             0% { transform: scale(0.88) translateY(25px); opacity: 0; }
             100% { transform: scale(1) translateY(0); opacity: 1; }
@@ -166,11 +164,31 @@
     function initAudioOnce() { if (!hasStartedAudio) { music.play().catch(()=>{}); hasStartedAudio = true; document.getElementById('music-btn').innerText = "🎵"; } }
     function toggleMusic(e) { e.stopPropagation(); if (music.paused) { music.play(); document.getElementById('music-btn').innerText = "🎵"; } else { music.pause(); document.getElementById('music-btn').innerText = "🔇"; } }
 
+    // --- 🛠️ ฟังก์ชันลงทะเบียนที่หายไป (ใส่กลับมาให้แล้วครับ!) ---
+    function registerStudent() {
+        const name = document.getElementById('reg-std-name').value.trim();
+        const id = document.getElementById('reg-std-id').value.trim();
+        const room = document.getElementById('reg-std-room').value;
+        const p1 = document.getElementById('reg-std-pwd1').value;
+        const p2 = document.getElementById('reg-std-pwd2').value;
+
+        if(!name || id.length !== 5 || !p1) return alert("กรุณากรอกข้อมูลให้ครบถ้วน (รหัสนักเรียน 5 หลัก)");
+        if(p1 !== p2) return alert("รหัสผ่านไม่ตรงกันจ้า");
+
+        db.ref('users/' + id).once('value', s => {
+            if(s.exists()) return alert("รหัสนักเรียนนี้ถูกใช้ไปแล้ว");
+            db.ref('users/' + id).set({ name: name, room: room, pwd: p1, score: 0 }).then(() => {
+                alert("ลงทะเบียนสำเร็จ! เข้าสู่ระบบได้เลยจ้า");
+                changePage('page-login-existing');
+            });
+        });
+    }
+
     function loginExistingStudent() {
         const id = document.getElementById('login-std-id').value.trim(), pwd = document.getElementById('login-std-pwd').value;
         db.ref('users/' + id).once('value', s => {
             if(s.exists() && s.val().pwd === pwd){ currentId = id; updateStudentUI(); changePage('page-student-main'); }
-            else alert("รหัสผ่านไม่ถูกต้อง");
+            else alert("รหัสนักเรียนหรือรหัสผ่านไม่ถูกต้อง");
         });
     }
 
@@ -226,51 +244,22 @@
         
         if(type === 'history') {
             title.innerText = extra.name;
-            body.innerHTML = "⏳ กำลังโหลดประวัติอันยอดเยี่ยม...";
+            body.innerHTML = "⏳ กำลังดึงประวัติ...";
             db.ref('history/' + extra.uid).once('value').then(snap => {
                 body.innerHTML = "";
                 const data = snap.val();
-                if(!data) { body.innerHTML = "ยังไม่พบประวัติการช่วยโลกจ้า 🌱"; return; }
-                
+                if(!data) { body.innerHTML = "ยังไม่พบประวัติจ้า 🌱"; return; }
                 Object.entries(data).reverse().forEach(([key, val]) => {
                     let pts = val.point ? val.point : (val.type.includes("รีไซเคิล") ? 3 : (val.type.includes("อันตราย") ? 2 : 1));
-                    body.innerHTML += `
-                    <div class="history-item">
-                        <img src="${val.img}">
-                        <div>
-                            <strong>${val.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${pts})</span><br>
-                            <small>${val.date}</small>
-                        </div>
-                    </div>`;
+                    body.innerHTML += `<div class="history-item"><img src="${val.img}"><div><strong>${val.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${pts})</span><br><small>${val.date}</small></div></div>`;
                 });
             });
         } else if(type === 'guide-general') {
             title.innerText = "คู่มือสายกรีน 🐣";
-            body.innerHTML = `
-                <div class="guide-text">
-                    <span class="guide-header">🌟 ขั้นตอนการร่วมสนุก:</span>
-                    1. ถ่ายภาพขยะของคุณผ่านแอป <br>
-                    2. AI จะวิเคราะห์ประเภทขยะโดยอัตโนมัติ <br>
-                    3. ตรวจสอบความถูกต้องและกด "บันทึก" เพื่อรับแต้ม <br>
-                    <span class="guide-header">💰 เกณฑ์คะแนนพิเศษ:</span>
-                    ♻️ <b>รีไซเคิล (+3 แต้ม):</b> ขวดพลาสติก, แก้ว, กระดาษ, กระป๋อง <br>
-                    ⚠️ <b>อันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, หลอดไฟ, ขวดสารเคมี <br>
-                    🍎 <b>ทั่วไป (+1 แต้ม):</b> เศษอาหาร, ทิชชู่, ซองขนม <br>
-                    <span class="guide-header">💡 เคล็ดลับ:</span>
-                    ภาพที่ชัดเจนจะช่วยให้ AI แม่นยำขึ้นนะจ๊ะ!
-                </div>`;
+            body.innerHTML = `<div class="guide-text"><span class="guide-header">🌟 ขั้นตอนการร่วมสนุก:</span>1. ถ่ายภาพขยะผ่านแอป <br>2. AI วิเคราะห์ประเภท <br>3. ตรวจสอบและกด "บันทึก" รับแต้ม <br><span class="guide-header">💰 เกณฑ์คะแนนพิเศษ:</span>♻️ <b>รีไซเคิล (+3 แต้ม):</b> ขวดน้ำ, แก้ว, กระดาษ <br>⚠️ <b>อันตราย (+2 แต้ม):</b> ถ่านไฟฉาย, หลอดไฟ <br>🍎 <b>ทั่วไป (+1 แต้ม):</b> เศษอาหาร, ซองขนม</div>`;
         } else if(type === 'guide-teacher') {
             title.innerText = "ระบบจัดการคุณครู 👩‍🏫";
-            body.innerHTML = `
-                <div class="guide-text">
-                    <span class="guide-header">📊 การควบคุมระบบ:</span>
-                    • <b>แดชบอร์ด:</b> ตรวจสอบคะแนนรวมของนักเรียนแบบ Real-time <br>
-                    • <b>คัดกรองห้อง:</b> สามารถเลือกดูคะแนนแยกตามระดับชั้นและห้องได้ <br>
-                    • <b>ตรวจสอบย้อนหลัง:</b> กดที่ชื่อนักเรียนเพื่อดูรูปภาพขยะที่เขาส่ง เพื่อตรวจสอบความถูกต้อง <br>
-                    • <b>เกณฑ์ตัดสิน:</b> นักเรียนที่มีคะแนนสูงสุดจะได้รับแถบสีทอง (Winner Highlight) อัตโนมัติ <br>
-                    <span class="guide-header">🔒 ความปลอดภัย:</span>
-                    รหัสผ่านระบบคุณครูเป็นความลับสูงสุด ห้ามให้นักเรียนทราบเด็ดขาด!
-                </div>`;
+            body.innerHTML = `<div class="guide-text"><span class="guide-header">📊 การควบคุมระบบ:</span>• <b>แดชบอร์ด:</b> ตรวจสอบคะแนน Real-time <br>• <b>คัดกรองห้อง:</b> ดูแยกตามระดับชั้น <br>• <b>ตรวจสอบย้อนหลัง:</b> ดูรูปขยะที่นักเรียนส่ง <br><span class="guide-header">🔒 ความปลอดภัย:</span>ห้ามให้นักเรียนทราบรหัสผ่านคุณครูเด็ดขาด!</div>`;
         }
     }
 

@@ -20,25 +20,29 @@
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
+        /* --- จุดที่แก้ไข: เปิดให้เลื่อนหน้าจอได้เมื่อเนื้อหายาวเกินไป --- */
         body { 
             margin: 0; 
             background: linear-gradient(135deg, #DCFCE7 0%, #E0F2FE 50%, #FEF9C3 100%); 
             min-height: 100vh;
-            display: flex; justify-content: center; align-items: center; 
-            overflow: hidden; 
+            display: flex; 
+            justify-content: center; 
+            align-items: flex-start; /* เปลี่ยนจาก center เป็น flex-start เพื่อให้เริ่มจากด้านบน */
+            overflow-y: auto; /* เปลี่ยนจาก hidden เป็น auto เพื่อให้เลื่อนได้ */
             position: relative;
+            padding: 20px 0; /* เพิ่มช่องว่างบน-ล่าง */
         }
 
-        .deco { position: absolute; z-index: 1; opacity: 0.4; pointer-events: none; animation: float 6s infinite ease-in-out; }
+        .deco { position: fixed; z-index: 1; opacity: 0.4; pointer-events: none; animation: float 6s infinite ease-in-out; }
         @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(10deg); } }
 
         .container { 
             width: 90%; 
             max-width: 420px; 
-            padding: 20px; 
             z-index: 10; 
             position: relative; 
             transition: all 0.3s ease;
+            margin: auto; /* ให้อยู่กลางในแนวราบ */
         }
 
         @media (min-width: 768px) {
@@ -216,15 +220,15 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // --- จุดที่อัปเดต: เปลี่ยนลิงก์โมเดลเป็นตัวใหม่ตามคำสั่ง ---
+    /* --- ใช้โมเดลตัวใหม่ล่าสุดตามคำสั่ง --- */
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/";
-    // -----------------------------------------------------
 
     let model, currentId = null, hasStartedAudio = false;
 
     function changePage(p) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(p).classList.remove('hidden');
+        window.scrollTo(0,0); /* เลื่อนไปบนสุดทุกครั้งที่เปลี่ยนหน้า */
     }
 
     let music = document.getElementById('bg-music');

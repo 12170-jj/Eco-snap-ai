@@ -20,17 +20,16 @@
 
         * { box-sizing: border-box; font-family: 'Kanit', sans-serif; -webkit-tap-highlight-color: transparent; }
 
-        /* --- จุดที่แก้ไข: เปิดให้เลื่อนหน้าจอได้เมื่อเนื้อหายาวเกินไป --- */
         body { 
             margin: 0; 
             background: linear-gradient(135deg, #DCFCE7 0%, #E0F2FE 50%, #FEF9C3 100%); 
             min-height: 100vh;
             display: flex; 
             justify-content: center; 
-            align-items: flex-start; /* เปลี่ยนจาก center เป็น flex-start เพื่อให้เริ่มจากด้านบน */
-            overflow-y: auto; /* เปลี่ยนจาก hidden เป็น auto เพื่อให้เลื่อนได้ */
+            align-items: flex-start; 
+            overflow-y: auto; 
             position: relative;
-            padding: 20px 0; /* เพิ่มช่องว่างบน-ล่าง */
+            padding: 20px 0; 
         }
 
         .deco { position: fixed; z-index: 1; opacity: 0.4; pointer-events: none; animation: float 6s infinite ease-in-out; }
@@ -42,7 +41,7 @@
             z-index: 10; 
             position: relative; 
             transition: all 0.3s ease;
-            margin: auto; /* ให้อยู่กลางในแนวราบ */
+            margin: auto;
         }
 
         @media (min-width: 768px) {
@@ -220,7 +219,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    /* --- ใช้โมเดลตัวใหม่ล่าสุดตามคำสั่ง --- */
+    /* โมเดลตัวใหม่ล่าสุด */
     const MODEL_URL = "https://teachablemachine.withgoogle.com/models/PRhXT9Rtf/";
 
     let model, currentId = null, hasStartedAudio = false;
@@ -228,7 +227,7 @@
     function changePage(p) {
         document.querySelectorAll('.container > div').forEach(d => d.classList.add('hidden'));
         document.getElementById(p).classList.remove('hidden');
-        window.scrollTo(0,0); /* เลื่อนไปบนสุดทุกครั้งที่เปลี่ยนหน้า */
+        window.scrollTo(0,0);
     }
 
     let music = document.getElementById('bg-music');
@@ -288,15 +287,22 @@
     }
 
     async function analyzeImage() {
-        document.getElementById('btn-analyze').innerText = "⏳ กำลังวิเคราะห์...";
+        // --- จุดที่อัปเดต: เปลี่ยนข้อความปุ่มเพื่อแจ้งสถานะ ---
+        const btn = document.getElementById('btn-analyze');
+        btn.innerText = "⏳ กำลังวิเคราะห์...";
+        btn.disabled = true;
+
         const p = await model.predict(document.getElementById('preview-img'));
         let best = p.reduce((a, b) => (a.probability > b.probability) ? a : b);
+        
         document.getElementById('result-area').classList.remove('hidden');
         document.getElementById('waste-type').innerText = best.className;
         document.getElementById('confidence-score').innerText = "มั่นใจ: " + (best.probability * 100).toFixed(1) + "%";
-        document.getElementById('btn-analyze').classList.add('hidden');
+        
+        btn.classList.add('hidden');
+        btn.innerText = "🔍 เริ่มการวิเคราะห์";
+        btn.disabled = false;
         document.getElementById('btn-save').classList.remove('hidden');
-        document.getElementById('btn-analyze').innerText = "🔍 เริ่มการวิเคราะห์";
     }
 
     function saveTrash() {
@@ -319,7 +325,10 @@
         document.getElementById('main-modal').classList.remove('hidden');
         const title = document.getElementById('modal-title');
         const body = document.getElementById('modal-body');
-        body.innerHTML = '<p>กำลังโหลด...</p>';
+        
+        // --- จุดที่อัปเดต: ข้อความแจ้งเตือนระหว่างรอโหลดข้อมูลประวัติ ---
+        body.innerHTML = '<p style="color:var(--eco-green); font-weight:bold; font-size:18px;">⏳ กำลังดึงข้อมูล...</p>';
+        
         setTimeout(() => {
             body.innerHTML = "";
             if(type === 'guide-general') {
@@ -335,7 +344,7 @@
                     body.innerHTML += `<div class="history-item"><img src="${i.img}"><div><strong>${i.type}</strong> <span style="color:var(--eco-green); font-weight:bold;">(+${i.point || 1})</span><br><small>${i.date}</small></div></div>`; 
                 });
             }
-        }, 300);
+        }, 500); // ดีเลย์เล็กน้อยเพื่อให้เด็กๆ เห็นข้อความแจ้งเตือน
     }
 
     function closeModal() { document.getElementById('main-modal').classList.add('hidden'); }
